@@ -233,11 +233,18 @@ const App: React.FC = () => {
   if (showSplash) {
     return (
       <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[2800ms]">
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-6xl font-black tracking-[-0.15em] text-white animate-in zoom-in-95 duration-1000 delay-300">CUSTOS</h1>
-          <p className="text-[11px] tracking-[0.6em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-700">{t.theKeeper}</p>
+        <div className="flex flex-col items-center gap-6">
+          <img 
+            src="https://img.icons8.com/fluency/240/security-shield.png" 
+            className="w-32 h-32 animate-in zoom-in-50 duration-1000 delay-200 drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+            alt="Custos Sovereign"
+          />
+          <div className="flex flex-col items-center gap-1">
+            <h1 className="text-4xl font-black tracking-[-0.1em] text-white animate-in slide-in-from-bottom-4 duration-1000 delay-500">CUSTOS</h1>
+            <p className="text-[10px] tracking-[0.6em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-800">{t.theKeeper}</p>
+          </div>
         </div>
-        <div className="absolute top-1/2 mt-32 flex flex-col items-center gap-3">
+        <div className="absolute top-1/2 mt-40 flex flex-col items-center gap-3">
             <div className="w-1.5 h-1.5 bg-white/20 rounded-full overflow-hidden">
                <div className="h-full bg-indigo-500 w-full animate-progress-fast"></div>
             </div>
