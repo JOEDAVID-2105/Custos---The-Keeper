@@ -105,15 +105,15 @@ export const Profile: React.FC<ProfileProps> = ({
   return (
     <div className="animate-in w-full space-y-16 pb-20">
       <div className="text-center">
-        <h2 className="text-5xl font-black tracking-tighter uppercase text-slate-900 dark:text-white font-noto">{t.identity}</h2>
-        <p className="text-slate-400 dark:text-white/30 tracking-[0.5em] text-[10px] mt-3 uppercase font-noto">{t.guardianConfig}</p>
+        <h2 className="text-5xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">{t.identity}</h2>
+        <p className="text-slate-400 dark:text-white/30 tracking-[0.5em] text-[10px] mt-3 uppercase">{t.guardianConfig}</p>
       </div>
 
       {/* Mobile Installation & Settings Hub */}
       <div className="md:hidden space-y-4">
         <div className="p-8 border border-indigo-500/30 bg-indigo-500/5 space-y-6">
           <div className="flex justify-between items-center">
-            <p className="text-[10px] font-black tracking-[0.4em] text-indigo-600 uppercase font-noto">{t.install.title}</p>
+            <p className="text-[10px] font-black tracking-[0.4em] text-indigo-600 uppercase">{t.install.title}</p>
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isStandalone ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 animate-pulse'}`}></div>
               <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20">
@@ -127,16 +127,16 @@ export const Profile: React.FC<ProfileProps> = ({
               {deferredPrompt ? (
                 <button 
                   onClick={onInstall}
-                  className="w-full py-5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.4em] shadow-lg hover:bg-indigo-700 transition-all active:scale-[0.98] font-noto"
+                  className="w-full py-5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.4em] shadow-lg hover:bg-indigo-700 transition-all active:scale-[0.98]"
                 >
                   {t.install.button}
                 </button>
               ) : isIOS ? (
-                <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed border border-dashed border-white/10 p-4 font-noto">
+                <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed border border-dashed border-white/10 p-4">
                   {t.install.iosNote}
                 </p>
               ) : (
-                <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed p-2 font-noto">
+                <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed p-2">
                   Verifying Mobile Protocol Readiness...
                 </p>
               )}
@@ -148,14 +148,14 @@ export const Profile: React.FC<ProfileProps> = ({
           {!auth.currentUser && (
             <button 
               onClick={onGoCloud}
-              className="w-full py-5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 text-[10px] font-black uppercase tracking-[0.4em] shadow-lg font-noto"
+              className="w-full py-5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
             >
               {t.authAction}
             </button>
           )}
           <button 
             onClick={onToggleLanguage}
-            className="w-full py-5 border border-indigo-600/20 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600 font-noto"
+            className="w-full py-5 border border-indigo-600/20 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600"
           >
             {language === 'en' ? 'SWITCH TO தமிழ்' : 'SWITCH TO ENGLISH'}
           </button>
@@ -187,7 +187,7 @@ export const Profile: React.FC<ProfileProps> = ({
             {profile.photoURL && (
               <button 
                 onClick={removePhoto}
-                className="absolute -right-16 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-colors bg-white dark:bg-slate-950 p-2 border border-rose-500/20 shadow-xl font-noto"
+                className="absolute -right-16 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-colors bg-white dark:bg-slate-950 p-2 border border-rose-500/20 shadow-xl"
               >
                 {t.purge}
               </button>
@@ -207,16 +207,16 @@ export const Profile: React.FC<ProfileProps> = ({
         <div className="flex flex-col items-center">
           <button 
             onClick={onToggleTheme}
-            className="group relative px-12 py-5 border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase tracking-[0.5em] hover:bg-slate-900 dark:hover:bg-white dark:hover:text-slate-950 transition-all rounded-sm overflow-hidden text-slate-900 dark:text-white font-noto"
+            className="group relative px-12 py-5 border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase tracking-[0.5em] hover:bg-slate-900 dark:hover:bg-white dark:hover:text-slate-950 transition-all rounded-sm overflow-hidden text-slate-900 dark:text-white"
           >
-            <span className="relative z-10">{profile.theme === 'dark' ? t.profile.transitionLight : t.profile.transitionDark}</span>
+            <span className="relative z-10 font-noto">{profile.theme === 'dark' ? t.profile.transitionLight : t.profile.transitionDark}</span>
             <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0"></div>
           </button>
         </div>
 
         <div className="pt-16 border-t border-slate-200 dark:border-white/5 space-y-10">
           <div className="flex flex-col gap-2">
-            <p className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.householdSovereignty}</p>
+            <p className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.householdSovereignty}</p>
             {familyMetadata ? (
               <p className="text-3xl font-black tracking-tighter text-indigo-600 uppercase transition-all font-noto">{familyMetadata.name}</p>
             ) : (
@@ -228,7 +228,7 @@ export const Profile: React.FC<ProfileProps> = ({
             <div className="space-y-8 animate-in">
               {isFamilyCreator && (
                 <div className="space-y-4 max-w-lg">
-                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.renameHousehold}</label>
+                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.renameHousehold}</label>
                   <div className="relative">
                     <input 
                       type="text"
@@ -237,14 +237,14 @@ export const Profile: React.FC<ProfileProps> = ({
                       className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-sm font-black uppercase tracking-widest placeholder:text-slate-400/10 text-slate-900 dark:text-white font-noto"
                       placeholder="..."
                     />
-                    <div className="absolute right-0 bottom-3 text-[8px] font-black text-indigo-500/40 uppercase tracking-widest font-noto">{t.profile.creatorControls}</div>
+                    <div className="absolute right-0 bottom-3 text-[8px] font-black text-indigo-500/40 uppercase tracking-widest">{t.profile.creatorControls}</div>
                   </div>
                 </div>
               )}
               
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.uniqueSignature}</label>
+                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.uniqueSignature}</label>
                   {showCopied && (
                     <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest animate-in font-noto">{t.profile.sigCopied}</span>
                   )}
@@ -334,7 +334,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 border-t border-slate-200 dark:border-white/5 pt-16">
           <div className="space-y-4">
-            <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.alias}</label>
+            <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.alias}</label>
             <input 
               type="text"
               value={profile.displayName}
@@ -344,18 +344,18 @@ export const Profile: React.FC<ProfileProps> = ({
             />
           </div>
           <div className="space-y-4">
-            <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.denomination}</label>
+            <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.denomination}</label>
             <select 
               value={profile.currency}
               onChange={(e) => onUpdate({ ...profile, currency: e.target.value })}
-              className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 outline-none focus:border-indigo-600 transition-all text-sm font-bold uppercase tracking-[0.2em] cursor-pointer appearance-none text-slate-900 dark:text-white font-noto"
+              className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 outline-none focus:border-indigo-600 transition-all text-sm font-bold uppercase tracking-[0.2em] cursor-pointer appearance-none text-slate-900 dark:text-white"
             >
               {CURRENCIES.map(c => <option key={c.code} value={c.code} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{c.code} — {c.symbol}</option>)}
             </select>
           </div>
           
           <div className="space-y-4">
-            <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.jurisdiction}</label>
+            <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.jurisdiction}</label>
             <input 
               type="text"
               value={profile.country || ''}
@@ -367,7 +367,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
           <div className="grid grid-cols-2 gap-6">
              <div className="space-y-4">
-                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.state}</label>
+                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.state}</label>
                 <input 
                   type="text"
                   value={profile.state || ''}
@@ -377,7 +377,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 />
              </div>
              <div className="space-y-4">
-                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.profile.city}</label>
+                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.profile.city}</label>
                 <input 
                   type="text"
                   value={profile.city || ''}
@@ -392,39 +392,39 @@ export const Profile: React.FC<ProfileProps> = ({
         <div className="pt-20 border-t border-slate-200 dark:border-white/5 grid grid-cols-1 md:grid-cols-2 gap-16">
            <div className="space-y-16">
               <div className="space-y-4">
-                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.about.title}</label>
+                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.title}</label>
                 <div className="grid grid-cols-2 gap-8">
                    <div>
-                      <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1 font-noto">{t.about.proprietor}</p>
-                      <p className="text-sm font-black uppercase text-slate-900 dark:text-white font-noto">David's Codes</p>
+                      <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1">{t.about.proprietor}</p>
+                      <p className="text-sm font-black uppercase text-slate-900 dark:text-white">David's Codes</p>
                    </div>
                    <div>
-                      <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1 font-noto">{t.about.version}</p>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white font-noto">v3.0 "Prime Sovereign"</p>
+                      <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1">{t.about.version}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">v1.2.2 "Full Mobile Protocol"</p>
                    </div>
                 </div>
               </div>
               <div className="space-y-4">
-                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.about.missionTitle}</label>
+                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.missionTitle}</label>
                 <p className="text-xl font-black text-slate-900 dark:text-white/90 uppercase tracking-tight font-noto leading-tight">
                    {t.about.missionBody}
                 </p>
               </div>
            </div>
            <div className="space-y-4">
-              <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase font-noto">{t.about.updatesTitle}</label>
+              <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.updatesTitle}</label>
               <div className="space-y-6">
                  <div className="flex items-start gap-4 group">
                     <div className="w-1.5 h-1.5 bg-indigo-600 mt-1.5 flex-shrink-0"></div>
                     <div>
-                       <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest font-noto">{t.about.update1}</p>
-                       <p className="text-[8px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest mt-1 font-noto">Status: Operational</p>
+                       <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">{t.about.update1}</p>
+                       <p className="text-[8px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest mt-1">Status: Operational</p>
                     </div>
                  </div>
                  <div className="flex items-start gap-4">
                     <div className="w-1.5 h-1.5 bg-slate-300 dark:bg-white/10 mt-1.5 flex-shrink-0"></div>
                     <div>
-                       <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest font-noto">{t.about.update2}</p>
+                       <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest">{t.about.update2}</p>
                     </div>
                  </div>
               </div>

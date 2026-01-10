@@ -6,7 +6,7 @@ export const translations = {
     advisor: "ADVISOR",
     prefs: "PROFILE",
     authAction: "LOGIN / SIGNUP",
-    theKeeper: "CUSTOS SOVERIGN PROTOCOL",
+    theKeeper: "SOVEREIGN PROTOCOL",
     inflow: "INFLOW",
     outflow: "OUTFLOW",
     balance: "BALANCE",
@@ -48,13 +48,13 @@ export const translations = {
       missionTitle: "THE MISSION",
       missionBody: "PRECISION ARCHIVING FOR THE SOVEREIGN ELITE.",
       updatesTitle: "PROTOCOL UPDATES",
-      update1: "v3.0: CUSTOS SOVERIGN PRIME",
-      update2: "v2.0: ROYAL CORE INTEGRATION",
-      update3: "v1.2: CLOUD GUARDIAN SYNC"
+      update1: "v2.0: SOVEREIGN ENGINE DEPLOYED",
+      update2: "v1.2: CLOUD GUARDIAN SYNC ENABLED",
+      update3: "v1.1: AI FINANCIAL ADVISOR INTEGRATED"
     },
     install: {
       title: "MOBILE PROTOCOL",
-      button: "INSTALL CUSTOS",
+      button: "INSTALL CUSTOS APP",
       iosNote: "Tap Share > Add to Home Screen",
       success: "Protocol installed successfully."
     },
@@ -154,7 +154,7 @@ export const translations = {
     advisor: "ஆலோசகர்",
     prefs: "சுயவிவரம்",
     authAction: "உள்நுழை / பதிவு செய்",
-    theKeeper: "CUSTOS SOVERIGN நெறிமுறை",
+    theKeeper: "இறையாண்மை நெறிமுறை",
     inflow: "வரவு",
     outflow: "செலவு",
     balance: "மீதம்",
@@ -196,13 +196,13 @@ export const translations = {
       missionTitle: "நோக்கம்",
       missionBody: "இறையாண்மை மிக்க உயர்தர நிதி காப்பகம்.",
       updatesTitle: "புதிய மாற்றங்கள்",
-      update1: "v3.0: CUSTOS SOVERIGN பிரைம்",
-      update2: "v2.0: அரச இயந்திரம்",
-      update3: "v1.2: கிளவுட் சிங்க்"
+      update1: "v2.0: இறையாண்மை இயந்திரம் பயன்படுத்தப்பட்டது",
+      update2: "v1.2: கிளவுட் சிங்க் இணைக்கப்பட்டுள்ளது",
+      update3: "v1.1: AI நிதி ஆலோசகர் சேர்க்கப்பட்டுள்ளது"
     },
     install: {
       title: "மொபைல் செயலி",
-      button: "நிறுவவும்",
+      button: "செயலியை நிறுவு",
       iosNote: "Share > Add to Home Screen கிளிக் செய்யவும்",
       success: "செயலி வெற்றிகரமாக நிறுவப்பட்டது."
     },
@@ -242,7 +242,7 @@ export const translations = {
       title: "கிளவுட் பாதுகாவலர்",
       subtitle: "உங்கள் நிதி சுதந்திரத்தை மேம்படுத்துங்கள்",
       fullName: "முழு பெயர்",
-      email: "முழு பெயர்",
+      email: "மின்னஞ்சல் முகவரி",
       password: "பாதுகாப்பு குறியீடு",
       authenticate: "அடையாளம் காணவும்",
       establish: "பாதுகாப்பை உறுதி செய்",

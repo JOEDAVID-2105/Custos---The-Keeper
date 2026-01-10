@@ -1,6 +1,6 @@
 {
-  "name": "Custos",
-  "description": "Premium v3.0 financial protocol for sovereign asset management and household synchronization.",
+  "name": "Custos Sovereign",
+  "description": "A luxury fintech application for high-end family and personal finance management, featuring AI-powered analysis and household synchronization.",
   "requestFramePermissions": [
     "geolocation"
   ]
