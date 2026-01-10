@@ -10,9 +10,11 @@ interface ProfileProps {
   profile: UserProfile;
   onUpdate: (p: UserProfile) => void;
   onToggleTheme: () => void;
+  onToggleLanguage: () => void;
+  onGoCloud: () => void;
 }
 
-export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleTheme }) => {
+export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleTheme, onToggleLanguage, onGoCloud }) => {
   const [joinId, setJoinId] = useState('');
   const [familyMetadata, setFamilyMetadata] = useState<{ name: string; creatorId: string } | null>(null);
   const [isNamingFamily, setIsNamingFamily] = useState(false);
@@ -92,6 +94,24 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
       <div className="text-center">
         <h2 className="text-5xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">{t.identity}</h2>
         <p className="text-slate-400 dark:text-white/30 tracking-[0.5em] text-[10px] mt-3 uppercase">{t.guardianConfig}</p>
+      </div>
+
+      {/* Mobile-Only Quick Settings Hub */}
+      <div className="md:hidden grid grid-cols-1 gap-4 pt-4">
+        {!auth.currentUser && (
+          <button 
+            onClick={onGoCloud}
+            className="w-full py-5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
+          >
+            {t.goCloud}
+          </button>
+        )}
+        <button 
+          onClick={onToggleLanguage}
+          className="w-full py-5 border border-indigo-600/20 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600"
+        >
+          {language === 'en' ? 'SWITCH TO தமிழ்' : 'SWITCH TO ENGLISH'}
+        </button>
       </div>
 
       <div className="space-y-12">
@@ -321,10 +341,8 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
           </div>
         </div>
 
-        {/* Refined About App Section: 2 Columns, First column has stacked About and Mission */}
         <div className="pt-20 border-t border-slate-200 dark:border-white/5 grid grid-cols-1 md:grid-cols-2 gap-16">
            <div className="space-y-16">
-              {/* Row 1: About Protocol */}
               <div className="space-y-4">
                 <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.title}</label>
                 <div className="grid grid-cols-2 gap-8">
@@ -334,12 +352,10 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
                    </div>
                    <div>
                       <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1">{t.about.version}</p>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white">v1.2.0 "Sovereign"</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">v1.2.1 "Sovereign PWA"</p>
                    </div>
                 </div>
               </div>
-
-              {/* Row 2: The Mission (Catchy line) */}
               <div className="space-y-4">
                 <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.missionTitle}</label>
                 <p className="text-xl font-black text-slate-900 dark:text-white/90 uppercase tracking-tight font-noto leading-tight">
@@ -347,8 +363,6 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
                 </p>
               </div>
            </div>
-
-           {/* Column 2: Updates */}
            <div className="space-y-4">
               <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.updatesTitle}</label>
               <div className="space-y-6">
@@ -363,12 +377,6 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
                     <div className="w-1.5 h-1.5 bg-slate-300 dark:bg-white/10 mt-1.5 flex-shrink-0"></div>
                     <div>
                        <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest">{t.about.update2}</p>
-                    </div>
-                 </div>
-                 <div className="flex items-start gap-4">
-                    <div className="w-1.5 h-1.5 bg-slate-300 dark:bg-white/10 mt-1.5 flex-shrink-0"></div>
-                    <div>
-                       <p className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">{t.about.update3}</p>
                     </div>
                  </div>
               </div>

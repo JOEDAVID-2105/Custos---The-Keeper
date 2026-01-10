@@ -110,15 +110,6 @@ const App: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (auth.currentUser && !loading) {
-       const unsub = StorageService.subscribeToTransactions(auth.currentUser.uid, profile.familyId, (txs) => {
-         setTransactions(txs);
-       });
-       return unsub;
-    }
-  }, [profile.familyId, loading]);
-
   const addTransaction = async (tx: Transaction) => {
     const enrichedT = { ...tx, familyId: profile.familyId, userId: profile.uid };
     setTransactions(prev => [...prev, enrichedT]);
@@ -154,7 +145,7 @@ const App: React.FC = () => {
   }, [profile.currency]);
 
   const renderContent = () => {
-    if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => setActiveTab('vault')} />;
+    if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => setActiveTab('profile')} />;
     
     switch (activeTab) {
       case 'vault': return <Vault onAdd={addTransaction} currencySymbol={currencySymbol} transactions={transactions} language={profile.language} />;
@@ -174,7 +165,13 @@ const App: React.FC = () => {
       case 'ai': return <div className="max-w-3xl mx-auto"><AIAdvisor transactions={transactions} currency={profile.currency} language={profile.language} /></div>;
       case 'profile': return (
         <div className="space-y-12 max-w-3xl mx-auto">
-          <Profile profile={profile} onUpdate={updateProfile} onToggleTheme={() => updateProfile({...profile, theme: profile.theme === 'dark' ? 'light' : 'dark'})} />
+          <Profile 
+            profile={profile} 
+            onUpdate={updateProfile} 
+            onToggleTheme={() => updateProfile({...profile, theme: profile.theme === 'dark' ? 'light' : 'dark'})} 
+            onToggleLanguage={toggleLanguage}
+            onGoCloud={() => setActiveTab('auth')}
+          />
           {auth.currentUser && (
             <div className="pt-12 border-t border-slate-200 dark:border-white/5 flex justify-center">
               <button 
@@ -194,7 +191,7 @@ const App: React.FC = () => {
     { id: 'vault', label: t.vault },
     { id: 'history', label: t.ledger },
     { id: 'ai', label: t.advisor },
-    { id: 'profile', label: t.prefs },
+    { id: 'profile', label: t.prefs }, // Changed label to PROFILE via t.prefs
   ];
 
   const displayedUserName = useMemo(() => {
@@ -205,21 +202,16 @@ const App: React.FC = () => {
   if (showSplash) {
     return (
       <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[2800ms]">
-        {/* Main Branding (Center) */}
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-6xl font-black tracking-[-0.15em] text-white animate-in zoom-in-95 duration-1000 delay-300">CUSTOS</h1>
           <p className="text-[11px] tracking-[0.6em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-700">{t.theKeeper}</p>
         </div>
-
-        {/* Status Indicator */}
         <div className="absolute top-1/2 mt-32 flex flex-col items-center gap-3">
             <div className="w-1.5 h-1.5 bg-white/20 rounded-full overflow-hidden">
                <div className="h-full bg-indigo-500 w-full animate-progress-fast"></div>
             </div>
             <p className="text-[7px] tracking-[0.5em] text-white/10 uppercase font-black">{t.common.initializing}</p>
         </div>
-
-        {/* Proprietor Branding (Bottom) */}
         <div className="absolute bottom-12 flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
           <span className="text-[9px] tracking-[0.8em] text-white/30 uppercase font-black">DAVID'S CODES</span>
           <div className="w-8 h-px bg-indigo-600/30"></div>
