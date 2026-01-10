@@ -5,7 +5,7 @@ export const translations = {
     ledger: "LEDGER",
     advisor: "ADVISOR",
     prefs: "PROFILE",
-    goCloud: "GO CLOUD",
+    authAction: "LOGIN / SIGNUP",
     theKeeper: "THE KEEPER",
     inflow: "INFLOW",
     outflow: "OUTFLOW",
@@ -106,7 +106,8 @@ export const translations = {
       resetTitle: "RESET CIPHER",
       resetSubtitle: "RESTORE ACCESS VIA EMAIL",
       sendReset: "Send Reset Link",
-      resetSent: "A reset link has been dispatched to your email."
+      resetSent: "A reset link has been dispatched to your email.",
+      googleSignIn: "Continue with Google"
     },
     profile: {
       securePortrait: "SECURE PORTRAIT",
@@ -152,7 +153,7 @@ export const translations = {
     ledger: "கணக்கு",
     advisor: "ஆலோசகர்",
     prefs: "சுயவிவரம்",
-    goCloud: "கிளவுட் இணைப்பு",
+    authAction: "உள்நுழை / பதிவு செய்",
     theKeeper: "காவலன்",
     inflow: "வரவு",
     outflow: "செலவு",
@@ -253,7 +254,8 @@ export const translations = {
       resetTitle: "கடவுச்சொல் மீட்பு",
       resetSubtitle: "மின்னஞ்சல் மூலம் அணுகலை மீட்டெடுக்கவும்",
       sendReset: "மீட்பு இணைப்பை அனுப்பு",
-      resetSent: "கடவுச்சொல் மீட்பு இணைப்பு உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டது."
+      resetSent: "கடவுச்சொல் மீட்பு இணைப்பு உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டது.",
+      googleSignIn: "கூகிள் மூலம் தொடரவும்"
     },
     profile: {
       securePortrait: "அடையாள படம்",

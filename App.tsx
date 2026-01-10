@@ -280,7 +280,7 @@ const App: React.FC = () => {
               onClick={() => setActiveTab('auth')}
               className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all pt-8 mt-8 border-t border-slate-200 dark:border-white/5 font-noto ${activeTab === 'auth' ? 'text-indigo-600' : 'text-slate-400 dark:text-white/20 hover:text-indigo-600'}`}
             >
-              {t.goCloud}
+              {t.authAction}
             </button>
           )}
         </nav>

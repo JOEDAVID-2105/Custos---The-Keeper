@@ -1,13 +1,16 @@
 
 {
+  "id": "com.custos.keeper.protocol.v1",
   "name": "Custos - The Keeper",
   "short_name": "Custos",
   "description": "High-end luxury fintech archiving protocol for family and personal finance management.",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#020617",
   "orientation": "portrait",
+  "scope": "/",
   "categories": ["finance", "productivity"],
   "icons": [
     {
@@ -19,12 +22,13 @@
       "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -42,5 +46,6 @@
       "url": "/?tab=history",
       "icons": [{ "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }

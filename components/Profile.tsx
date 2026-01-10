@@ -111,31 +111,46 @@ export const Profile: React.FC<ProfileProps> = ({
 
       {/* Mobile Installation & Settings Hub */}
       <div className="md:hidden space-y-4">
-        {!isStandalone && (
-          <div className="p-8 border border-indigo-500/30 bg-indigo-500/5 space-y-6">
-            <p className="text-[10px] font-black tracking-[0.4em] text-indigo-600 uppercase text-center">{t.install.title}</p>
-            {deferredPrompt ? (
-              <button 
-                onClick={onInstall}
-                className="w-full py-5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
-              >
-                {t.install.button}
-              </button>
-            ) : isIOS ? (
-              <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed">
-                {t.install.iosNote}
-              </p>
-            ) : null}
+        <div className="p-8 border border-indigo-500/30 bg-indigo-500/5 space-y-6">
+          <div className="flex justify-between items-center">
+            <p className="text-[10px] font-black tracking-[0.4em] text-indigo-600 uppercase">{t.install.title}</p>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${isStandalone ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 animate-pulse'}`}></div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20">
+                {isStandalone ? 'Secure Standalone' : 'Browser Overlay'}
+              </span>
+            </div>
           </div>
-        )}
+
+          {!isStandalone && (
+            <div className="animate-in">
+              {deferredPrompt ? (
+                <button 
+                  onClick={onInstall}
+                  className="w-full py-5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.4em] shadow-lg hover:bg-indigo-700 transition-all active:scale-[0.98]"
+                >
+                  {t.install.button}
+                </button>
+              ) : isIOS ? (
+                <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed border border-dashed border-white/10 p-4">
+                  {t.install.iosNote}
+                </p>
+              ) : (
+                <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed p-2">
+                  Verifying Mobile Protocol Readiness...
+                </p>
+              )}
+            </div>
+          )}
+        </div>
         
         <div className="grid grid-cols-1 gap-4">
           {!auth.currentUser && (
             <button 
               onClick={onGoCloud}
-              className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
+              className="w-full py-5 bg-slate-950 dark:bg-white text-white dark:text-slate-950 text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
             >
-              {t.goCloud}
+              {t.authAction}
             </button>
           )}
           <button 
@@ -385,7 +400,7 @@ export const Profile: React.FC<ProfileProps> = ({
                    </div>
                    <div>
                       <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1">{t.about.version}</p>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white">v1.2.1 "Sovereign PWA"</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">v1.2.2 "Full Mobile Protocol"</p>
                    </div>
                 </div>
               </div>
