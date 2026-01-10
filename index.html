@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Custos Sovereign</title>
+    <title>Custos</title>
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,8 +12,8 @@
     <meta name="theme-color" content="#4f46e5">
     
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/512/ffffff/shield.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/ffffff/shield.png">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/512/square.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/square.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -67,6 +67,12 @@
             width: 80vw;
             max-width: 800px;
         }
+        .brand-text {
+            font-weight: 900;
+            letter-spacing: -0.06em;
+            text-transform: uppercase;
+            line-height: 0.9;
+        }
     </style>
 <script type="importmap">
 {
@@ -85,14 +91,5 @@
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('[PWA] Service Worker Registered:', reg.scope))
-            .catch(err => console.error('[PWA] Service Worker Registration Failed:', err));
-        });
-      }
-    </script>
 </body>
 </html>

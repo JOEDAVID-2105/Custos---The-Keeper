@@ -35,7 +35,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 3200);
+    }, 4500);
 
     const handleBeforeInstall = (e: Event) => {
       console.log('[PWA] Ready for installation');
@@ -232,31 +232,22 @@ const App: React.FC = () => {
 
   if (showSplash) {
     return (
-      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[2800ms]">
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-6xl font-black tracking-[-0.15em] text-white animate-in zoom-in-95 duration-1000 delay-300">CUSTOS</h1>
-          <p className="text-[11px] tracking-[0.6em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-700">{t.theKeeper}</p>
+      <div className="fixed inset-0 bg-[#020617] flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[4000ms]">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <h1 className="text-8xl font-black tracking-[-0.15em] text-white animate-in slide-in-from-bottom-10 duration-1000 delay-500 uppercase">Custos</h1>
+          <p className="text-[11px] tracking-[0.9em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-900">{t.theKeeper}</p>
         </div>
-        <div className="absolute top-1/2 mt-32 flex flex-col items-center gap-3">
+        <div className="absolute top-1/2 mt-56 flex flex-col items-center gap-3">
             <div className="w-1.5 h-1.5 bg-white/20 rounded-full overflow-hidden">
                <div className="h-full bg-indigo-500 w-full animate-progress-fast"></div>
             </div>
-            <p className="text-[7px] tracking-[0.5em] text-white/10 uppercase font-black">{t.common.initializing}</p>
+            <p className="text-[7px] tracking-[0.5em] text-white/10 uppercase font-black">Establishing Sovereignty</p>
         </div>
-        <div className="absolute bottom-12 flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
-          <span className="text-[9px] tracking-[0.8em] text-white/30 uppercase font-black">DAVID'S CODES</span>
-          <div className="w-8 h-px bg-indigo-600/30"></div>
-          <span className="text-[7px] tracking-[0.4em] text-indigo-500/40 uppercase font-bold">Proprietary Software Protocol</span>
+        <div className="absolute bottom-12 flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500 text-center">
+          <span className="text-[9px] tracking-[0.8em] text-white/30 uppercase font-black">D'CODES</span>
+          <div className="w-12 h-px bg-indigo-600/30 my-2"></div>
+          <span className="text-[7px] tracking-[0.4em] text-indigo-500/40 uppercase font-bold">V3.0 PRIME ENGINE</span>
         </div>
-      </div>
-    );
-  }
-
-  if (loading && auth.currentUser) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 border-2 border-slate-200 dark:border-white/5 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p className="text-[9px] tracking-[0.5em] text-slate-400 dark:text-white/20 uppercase animate-pulse font-noto">{t.common.syncing}</p>
       </div>
     );
   }
@@ -269,8 +260,8 @@ const App: React.FC = () => {
 
       <aside className="hidden md:flex w-64 h-screen flex-col border-r border-slate-200 dark:border-white/5 p-10 sticky top-0 bg-white/50 dark:bg-[#020617]/50 backdrop-blur-xl z-20 no-print">
         <div className="mb-16">
-          <h1 className="text-2xl font-black tracking-tighter">CUSTOS</h1>
-          <p className="text-[9px] tracking-[0.4em] font-bold text-indigo-600 mt-1 uppercase font-noto">{t.theKeeper}</p>
+          <h1 className="brand-text text-4xl">Custos</h1>
+          <p className="text-[9px] tracking-[0.4em] font-bold text-indigo-600 mt-2 uppercase font-noto">{t.theKeeper}</p>
         </div>
 
         <nav className="flex-1 space-y-8">
@@ -333,6 +324,12 @@ const App: React.FC = () => {
       </nav>
 
       <main className="flex-1 p-6 md:p-12 pb-24 md:pb-12 relative z-10 overflow-y-auto">
+        <header className="md:hidden mb-12 flex justify-between items-center">
+          <h1 className="brand-text text-3xl">Custos</h1>
+          <button onClick={() => setActiveTab('profile')} className="w-8 h-8 rounded-full overflow-hidden border border-indigo-600/20">
+            {profile.photoURL ? <img src={profile.photoURL} className="w-full h-full object-cover grayscale" /> : <div className="w-full h-full bg-indigo-600/10" />}
+          </button>
+        </header>
         {renderContent()}
       </main>
     </div>
