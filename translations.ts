@@ -6,7 +6,7 @@ export const translations = {
     advisor: "ADVISOR",
     prefs: "PROFILE",
     authAction: "LOGIN / SIGNUP",
-    theKeeper: "SOVEREIGN PROTOCOL",
+    theKeeper: "D.SOVERIGN PROTOCOL",
     inflow: "INFLOW",
     outflow: "OUTFLOW",
     balance: "BALANCE",
@@ -48,13 +48,13 @@ export const translations = {
       missionTitle: "THE MISSION",
       missionBody: "PRECISION ARCHIVING FOR THE SOVEREIGN ELITE.",
       updatesTitle: "PROTOCOL UPDATES",
-      update1: "v2.0: SOVEREIGN ENGINE DEPLOYED",
+      update1: "v2.0.1: D.SOVERIGN ROYAL ENGINE",
       update2: "v1.2: CLOUD GUARDIAN SYNC ENABLED",
       update3: "v1.1: AI FINANCIAL ADVISOR INTEGRATED"
     },
     install: {
       title: "MOBILE PROTOCOL",
-      button: "INSTALL CUSTOS APP",
+      button: "INSTALL D.SOVERIGN",
       iosNote: "Tap Share > Add to Home Screen",
       success: "Protocol installed successfully."
     },
@@ -140,7 +140,7 @@ export const translations = {
     },
     ai: {
       intelligence: "AI-Powered Financial Intelligence",
-      wealthReport: "Custos Wealth Report",
+      wealthReport: "D.Soverign Wealth Report",
       digitalConsultation: "Digital Consultation",
       awaiting: "The Guardian awaits your request to analyze the family ledger and provide simple advice.",
       analyzing: "Analyzing Ledger...",
@@ -154,7 +154,7 @@ export const translations = {
     advisor: "ஆலோசகர்",
     prefs: "சுயவிவரம்",
     authAction: "உள்நுழை / பதிவு செய்",
-    theKeeper: "இறையாண்மை நெறிமுறை",
+    theKeeper: "D.SOVERIGN நெறிமுறை",
     inflow: "வரவு",
     outflow: "செலவு",
     balance: "மீதம்",
@@ -196,13 +196,13 @@ export const translations = {
       missionTitle: "நோக்கம்",
       missionBody: "இறையாண்மை மிக்க உயர்தர நிதி காப்பகம்.",
       updatesTitle: "புதிய மாற்றங்கள்",
-      update1: "v2.0: இறையாண்மை இயந்திரம் பயன்படுத்தப்பட்டது",
+      update1: "v2.0.1: D.SOVERIGN அரச இயந்திரம்",
       update2: "v1.2: கிளவுட் சிங்க் இணைக்கப்பட்டுள்ளது",
       update3: "v1.1: AI நிதி ஆலோசகர் சேர்க்கப்பட்டுள்ளது"
     },
     install: {
       title: "மொபைல் செயலி",
-      button: "செயலியை நிறுவு",
+      button: "நிறுவவும்",
       iosNote: "Share > Add to Home Screen கிளிக் செய்யவும்",
       success: "செயலி வெற்றிகரமாக நிறுவப்பட்டது."
     },
@@ -288,7 +288,7 @@ export const translations = {
     },
     ai: {
       intelligence: "AI நிதி நுண்ணறிவு",
-      wealthReport: "Custos நிதி அறிக்கை",
+      wealthReport: "D.Soverign நிதி அறிக்கை",
       digitalConsultation: "டிஜிட்டல் ஆலோசனை",
       awaiting: "காவலன் உங்கள் நிதி விவரங்களை ஆராய்ந்து எளிய ஆலோசனைகளை வழங்க காத்திருக்கிறார்.",
       analyzing: "கணக்கை ஆராய்கிறது...",

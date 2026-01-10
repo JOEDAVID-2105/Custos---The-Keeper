@@ -235,12 +235,12 @@ const App: React.FC = () => {
       <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[2800ms]">
         <div className="flex flex-col items-center gap-6">
           <img 
-            src="https://img.icons8.com/fluency/240/security-shield.png" 
-            className="w-32 h-32 animate-in zoom-in-50 duration-1000 delay-200 drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]"
-            alt="Custos Sovereign"
+            src="https://img.icons8.com/fluency/240/crown.png" 
+            className="w-32 h-32 animate-in zoom-in-50 duration-1000 delay-200 drop-shadow-[0_0_25px_rgba(79,70,229,0.4)]"
+            alt="D.Soverign"
           />
           <div className="flex flex-col items-center gap-1">
-            <h1 className="text-4xl font-black tracking-[-0.1em] text-white animate-in slide-in-from-bottom-4 duration-1000 delay-500">CUSTOS</h1>
+            <h1 className="text-4xl font-black tracking-[-0.1em] text-white animate-in slide-in-from-bottom-4 duration-1000 delay-500">D.SOVERIGN</h1>
             <p className="text-[10px] tracking-[0.6em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-800">{t.theKeeper}</p>
           </div>
         </div>
@@ -276,7 +276,7 @@ const App: React.FC = () => {
 
       <aside className="hidden md:flex w-64 h-screen flex-col border-r border-slate-200 dark:border-white/5 p-10 sticky top-0 bg-white/50 dark:bg-[#020617]/50 backdrop-blur-xl z-20 no-print">
         <div className="mb-16">
-          <h1 className="text-2xl font-black tracking-tighter">CUSTOS</h1>
+          <h1 className="text-2xl font-black tracking-tighter">D.SOVERIGN</h1>
           <p className="text-[9px] tracking-[0.4em] font-bold text-indigo-600 mt-1 uppercase font-noto">{t.theKeeper}</p>
         </div>
 

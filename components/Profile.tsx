@@ -400,7 +400,7 @@ export const Profile: React.FC<ProfileProps> = ({
                    </div>
                    <div>
                       <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1">{t.about.version}</p>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white">v1.2.2 "Full Mobile Protocol"</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">v2.0.1 "Elite Sovereign"</p>
                    </div>
                 </div>
               </div>
