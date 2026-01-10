@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custos - The Keeper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              slate: {
+                950: '#020617',
+              },
+              indigo: {
+                600: '#4f46e5',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+Tamil:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans Tamil', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .light .glass {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .animate-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .shield-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: -1;
+            width: 80vw;
+            max-width: 800px;
+        }
+
+        @media print {
+          .no-print { display: none !important; }
+          body { 
+            background: white !important; 
+            color: black !important; 
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          #root { display: block !important; }
+          .shield-watermark { display: none !important; }
+          main { 
+            padding: 0 !important; 
+            margin: 0 !important; 
+            width: 100% !important;
+          }
+          .glass { 
+            background: white !important; 
+            border: none !important; 
+            box-shadow: none !important; 
+            backdrop-filter: none !important;
+            padding: 0 !important;
+          }
+          .prose { 
+            max-width: 100% !important; 
+            color: black !important; 
+            font-size: 12pt !important;
+            line-height: 1.6 !important;
+          }
+          h1, h2, h3 { color: black !important; page-break-after: avoid; }
+          .print-header {
+            display: flex !important;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid black;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+          }
+          @page {
+            margin: 2cm;
+          }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
+  }
+}
+</script>
+</head>
+<body class="bg-slate-950 dark:bg-slate-950 text-slate-900 dark:text-white">
+    <div id="root"></div>
+</body>
+</html>

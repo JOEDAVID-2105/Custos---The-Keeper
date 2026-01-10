@@ -1,0 +1,7 @@
+{
+  "name": "Custos - The Keeper",
+  "description": "A luxury fintech application for high-end family and personal finance management, featuring AI-powered analysis and household synchronization.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

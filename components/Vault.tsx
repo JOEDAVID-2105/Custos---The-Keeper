@@ -1,0 +1,176 @@
+
+import React, { useState, useEffect } from 'react';
+import { CATEGORIES, PAYMENT_METHODS } from '../constants';
+import { Category, Transaction } from '../types';
+import { SummaryDashboard } from './SummaryDashboard';
+import { translations } from '../translations';
+import { auth } from '../services/firebase';
+
+interface VaultProps {
+  onAdd: (tx: Transaction) => void;
+  currencySymbol: string;
+  transactions: Transaction[];
+  language: 'en' | 'ta';
+}
+
+export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transactions, language }) => {
+  const [amount, setAmount] = useState('');
+  const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [note, setNote] = useState('');
+  const [category, setCategory] = useState<Category>('Luxury');
+  const [method, setMethod] = useState(PAYMENT_METHODS[0]);
+  const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [geoStatus, setGeoStatus] = useState<'idle' | 'tracking' | 'denied' | 'ready'>('idle');
+
+  const t = translations[language];
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      setGeoStatus('tracking');
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setGeoStatus('ready');
+        },
+        (error) => {
+          console.error("Location access denied", error);
+          setGeoStatus('denied');
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+  }, []);
+
+  const handleSeal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!amount || isNaN(Number(amount))) return;
+
+    const newTransaction: Transaction = {
+      id: Math.random().toString(36).substr(2, 9),
+      amount: Number(amount),
+      type,
+      note,
+      category,
+      paymentMethod: method,
+      timestamp: Date.now(),
+      userId: auth.currentUser?.uid || 'local-user',
+      userName: auth.currentUser?.displayName || 'Local Guardian',
+      location: location ? { 
+        ...location, 
+        label: `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` 
+      } : undefined
+    };
+
+    onAdd(newTransaction);
+    setAmount('');
+    setNote('');
+  };
+
+  return (
+    <div className="animate-in w-full max-w-3xl mx-auto pb-10 flex flex-col min-h-full">
+      <form onSubmit={handleSeal} className="space-y-10 flex-grow">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">{t.vault}</h2>
+          <div className="flex items-center justify-center gap-3 mt-2">
+            <p className="text-slate-400 dark:text-white/30 tracking-[0.4em] text-[9px] uppercase">{t.establishRecord}</p>
+            <div className="h-px w-8 bg-slate-200 dark:bg-white/5"></div>
+            <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${geoStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : geoStatus === 'tracking' ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'}`}></div>
+              <p className="text-[8px] tracking-[0.2em] font-black uppercase text-slate-400 dark:text-white/20">
+                {geoStatus === 'ready' ? t.locLocked : geoStatus === 'tracking' ? t.trackingSignal : t.signalLost}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-1 bg-slate-200 dark:bg-white/5 p-1 rounded-sm">
+          <button 
+            type="button"
+            onClick={() => setType('expense')}
+            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all ${type === 'expense' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 dark:text-white/20 hover:text-indigo-600'}`}
+          >
+            {t.outflow}
+          </button>
+          <button 
+            type="button"
+            onClick={() => setType('income')}
+            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all ${type === 'income' ? 'bg-indigo-600 text-white' : 'text-slate-400 dark:text-white/20 hover:text-indigo-600'}`}
+          >
+            {t.inflow}
+          </button>
+        </div>
+
+        <div className="relative group border-b border-slate-200 dark:border-white/10 focus-within:border-indigo-600 transition-all py-6">
+          <label className="text-[8px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase block mb-2">{t.magnitude}</label>
+          <div className="flex items-center">
+            <span className="text-2xl font-light text-slate-300 dark:text-white/10 mr-4">{currencySymbol}</span>
+            <input 
+              type="number" 
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              className="bg-transparent text-6xl font-black w-full outline-none placeholder:text-slate-200 dark:placeholder:text-white/5 tracking-tighter text-slate-900 dark:text-white"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[8px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.descriptor}</label>
+          <input 
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all text-sm font-light tracking-tight placeholder:text-slate-400/20 text-slate-900 dark:text-white font-noto"
+            placeholder="..."
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <label className="text-[8px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.protocol}</label>
+            <select 
+              value={method}
+              onChange={(e) => setMethod(e.target.value)}
+              className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white"
+            >
+              {PAYMENT_METHODS.map(m => (
+                <option key={m} value={m} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                  {(t.methods as any)[m] || m}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[8px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.assetClass}</label>
+            <select 
+              value={category}
+              onChange={(e) => setCategory(e.target.value as Category)}
+              className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white"
+            >
+              {CATEGORIES.map(cat => (
+                <option key={cat} value={cat} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                  {(t.categories as any)[cat] || cat}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <button 
+          type="submit"
+          className="w-full py-6 bg-indigo-600 text-white font-black text-sm tracking-[0.4em] hover:bg-slate-900 dark:hover:bg-white dark:hover:text-slate-950 transition-all uppercase rounded-sm"
+        >
+          {t.sealTransfer}
+        </button>
+      </form>
+
+      <div className="mt-20">
+        <SummaryDashboard transactions={transactions} currencySymbol={currencySymbol} language={language} />
+      </div>
+    </div>
+  );
+};
