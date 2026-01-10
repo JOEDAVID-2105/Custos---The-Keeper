@@ -214,7 +214,8 @@ export const Records: React.FC<RecordsProps> = ({ transactions, onDelete, onUpda
               </tr>
             </thead>
             <tbody>
-              {Object.entries(groupedTransactions).map(([date, txs]) => (
+              {/* Added explicit type casting to prevent 'unknown' map error */}
+              {(Object.entries(groupedTransactions) as [string, Transaction[]][]).map(([date, txs]) => (
                 <React.Fragment key={date}>
                   <tr className="bg-slate-100/50 dark:bg-white/[0.03] print:bg-slate-50">
                     <td colSpan={6} className="py-5 px-6 border-l-4 border-indigo-600">

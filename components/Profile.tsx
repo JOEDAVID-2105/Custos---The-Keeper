@@ -320,6 +320,60 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
              </div>
           </div>
         </div>
+
+        {/* Refined About App Section: 2 Columns, First column has stacked About and Mission */}
+        <div className="pt-20 border-t border-slate-200 dark:border-white/5 grid grid-cols-1 md:grid-cols-2 gap-16">
+           <div className="space-y-16">
+              {/* Row 1: About Protocol */}
+              <div className="space-y-4">
+                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.title}</label>
+                <div className="grid grid-cols-2 gap-8">
+                   <div>
+                      <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1">{t.about.proprietor}</p>
+                      <p className="text-sm font-black uppercase text-slate-900 dark:text-white">David's Codes</p>
+                   </div>
+                   <div>
+                      <p className="text-[8px] tracking-[0.3em] font-black text-indigo-600 uppercase mb-1">{t.about.version}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">v1.2.0 "Sovereign"</p>
+                   </div>
+                </div>
+              </div>
+
+              {/* Row 2: The Mission (Catchy line) */}
+              <div className="space-y-4">
+                <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.missionTitle}</label>
+                <p className="text-xl font-black text-slate-900 dark:text-white/90 uppercase tracking-tight font-noto leading-tight">
+                   {t.about.missionBody}
+                </p>
+              </div>
+           </div>
+
+           {/* Column 2: Updates */}
+           <div className="space-y-4">
+              <label className="text-[9px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase">{t.about.updatesTitle}</label>
+              <div className="space-y-6">
+                 <div className="flex items-start gap-4 group">
+                    <div className="w-1.5 h-1.5 bg-indigo-600 mt-1.5 flex-shrink-0"></div>
+                    <div>
+                       <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">{t.about.update1}</p>
+                       <p className="text-[8px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest mt-1">Status: Operational</p>
+                    </div>
+                 </div>
+                 <div className="flex items-start gap-4">
+                    <div className="w-1.5 h-1.5 bg-slate-300 dark:bg-white/10 mt-1.5 flex-shrink-0"></div>
+                    <div>
+                       <p className="text-[10px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-widest">{t.about.update2}</p>
+                    </div>
+                 </div>
+                 <div className="flex items-start gap-4">
+                    <div className="w-1.5 h-1.5 bg-slate-300 dark:bg-white/10 mt-1.5 flex-shrink-0"></div>
+                    <div>
+                       <p className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">{t.about.update3}</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
       </div>
     </div>
   );

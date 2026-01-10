@@ -11,11 +11,12 @@ import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
 import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'vault' | 'history' | 'ai' | 'profile' | 'auth'>('vault');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [showSplash, setShowSplash] = useState(true);
   const [profile, setProfile] = useState<UserProfile>({
     uid: 'local-user',
     displayName: 'The Local Guardian',
@@ -29,6 +30,14 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const t = translations[profile.language || 'en'];
+
+  useEffect(() => {
+    // Cinematic Splash Duration
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const isDark = profile.theme === 'dark';
@@ -192,6 +201,33 @@ const App: React.FC = () => {
     if (profile.uid === 'local-user') return t.common.localGuardian;
     return profile.displayName;
   }, [profile.uid, profile.displayName, t]);
+
+  if (showSplash) {
+    return (
+      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[2800ms]">
+        {/* Main Branding (Center) */}
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="text-6xl font-black tracking-[-0.15em] text-white animate-in zoom-in-95 duration-1000 delay-300">CUSTOS</h1>
+          <p className="text-[11px] tracking-[0.6em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-700">{t.theKeeper}</p>
+        </div>
+
+        {/* Status Indicator */}
+        <div className="absolute top-1/2 mt-32 flex flex-col items-center gap-3">
+            <div className="w-1.5 h-1.5 bg-white/20 rounded-full overflow-hidden">
+               <div className="h-full bg-indigo-500 w-full animate-progress-fast"></div>
+            </div>
+            <p className="text-[7px] tracking-[0.5em] text-white/10 uppercase font-black">{t.common.initializing}</p>
+        </div>
+
+        {/* Proprietor Branding (Bottom) */}
+        <div className="absolute bottom-12 flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
+          <span className="text-[9px] tracking-[0.8em] text-white/30 uppercase font-black">DAVID'S CODES</span>
+          <div className="w-8 h-px bg-indigo-600/30"></div>
+          <span className="text-[7px] tracking-[0.4em] text-indigo-500/40 uppercase font-bold">Proprietary Software Protocol</span>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && auth.currentUser) {
     return (

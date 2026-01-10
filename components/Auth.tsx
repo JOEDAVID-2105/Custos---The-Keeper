@@ -6,7 +6,7 @@ import {
   updateProfile,
   sendPasswordResetEmail,
   signOut
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+} from "firebase/auth";
 import { auth } from '../services/firebase';
 import { StorageService } from '../services/storageService';
 import { translations } from '../translations';
@@ -42,6 +42,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
         await updateProfile(cred.user, { displayName: name });
         
         // Initialize user record in Firestore
+        // Added type assertion for language to fix 'string' not assignable to 'en' | 'ta'
         await StorageService.saveProfile({
           uid: cred.user.uid,
           displayName: name,
@@ -50,7 +51,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
           country: 'US',
           isCloudGuardian: true,
           theme: 'dark',
-          language: language
+          language: language as 'en' | 'ta'
         });
         
         onSuccess();

@@ -11,7 +11,7 @@ import {
   deleteDoc, 
   onSnapshot,
   updateDoc
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+} from "firebase/firestore";
 
 const LOCAL_STORAGE_KEY = 'custos_transactions';
 const USER_PREFS_KEY = 'custos_user_prefs';

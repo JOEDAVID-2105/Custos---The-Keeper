@@ -38,7 +38,19 @@ export const translations = {
     terminateSession: "TERMINATE SESSION",
     common: {
       localGuardian: "THE LOCAL GUARDIAN",
-      syncing: "SYNCING"
+      syncing: "SYNCING",
+      initializing: "INITIALIZING PROTOCOLS"
+    },
+    about: {
+      title: "ABOUT PROTOCOL",
+      proprietor: "PROPRIETOR",
+      version: "VERSION",
+      missionTitle: "THE MISSION",
+      missionBody: "PRECISION ARCHIVING FOR THE SOVEREIGN ELITE.",
+      updatesTitle: "PROTOCOL UPDATES",
+      update1: "v1.2: CLOUD GUARDIAN SYNC ENABLED",
+      update2: "v1.1: AI FINANCIAL ADVISOR INTEGRATED",
+      update3: "v1.0: GENESIS LEDGER ESTABLISHED"
     },
     categories: {
       Housing: "Housing",
@@ -167,7 +179,19 @@ export const translations = {
     terminateSession: "அமர்வை முடிக்கவும்",
     common: {
       localGuardian: "உள்ளூர் காவலர்",
-      syncing: "இணைக்கப்படுகிறது"
+      syncing: "இணைக்கப்படுகிறது",
+      initializing: "தொடக்க நடவடிக்கைகள்"
+    },
+    about: {
+      title: "செயலி பற்றி",
+      proprietor: "உரிமையாளர்",
+      version: "பதிப்பு",
+      missionTitle: "நோக்கம்",
+      missionBody: "இறையாண்மை மிக்க உயர்தர நிதி காப்பகம்.",
+      updatesTitle: "புதிய மாற்றங்கள்",
+      update1: "v1.2: கிளவுட் சிங்க் இணைக்கப்பட்டுள்ளது",
+      update2: "v1.1: AI நிதி ஆலோசகர் சேர்க்கப்பட்டுள்ளது",
+      update3: "v1.0: ஆரம்ப கணக்கு பதிவேடு தொடங்கப்பட்டது"
     },
     categories: {
       Housing: "வீடு",
