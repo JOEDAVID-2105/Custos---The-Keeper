@@ -6,7 +6,7 @@ export const translations = {
     advisor: "ADVISOR",
     prefs: "PROFILE",
     authAction: "LOGIN / SIGNUP",
-    theKeeper: "THE KEEPER",
+    theKeeper: "SOVEREIGN PROTOCOL",
     inflow: "INFLOW",
     outflow: "OUTFLOW",
     balance: "BALANCE",
@@ -48,9 +48,9 @@ export const translations = {
       missionTitle: "THE MISSION",
       missionBody: "PRECISION ARCHIVING FOR THE SOVEREIGN ELITE.",
       updatesTitle: "PROTOCOL UPDATES",
-      update1: "v1.2: CLOUD GUARDIAN SYNC ENABLED",
-      update2: "v1.1: AI FINANCIAL ADVISOR INTEGRATED",
-      update3: "v1.0: GENESIS LEDGER ESTABLISHED"
+      update1: "v2.0: SOVEREIGN ENGINE DEPLOYED",
+      update2: "v1.2: CLOUD GUARDIAN SYNC ENABLED",
+      update3: "v1.1: AI FINANCIAL ADVISOR INTEGRATED"
     },
     install: {
       title: "MOBILE PROTOCOL",
@@ -154,7 +154,7 @@ export const translations = {
     advisor: "ஆலோசகர்",
     prefs: "சுயவிவரம்",
     authAction: "உள்நுழை / பதிவு செய்",
-    theKeeper: "காவலன்",
+    theKeeper: "இறையாண்மை நெறிமுறை",
     inflow: "வரவு",
     outflow: "செலவு",
     balance: "மீதம்",
@@ -196,9 +196,9 @@ export const translations = {
       missionTitle: "நோக்கம்",
       missionBody: "இறையாண்மை மிக்க உயர்தர நிதி காப்பகம்.",
       updatesTitle: "புதிய மாற்றங்கள்",
-      update1: "v1.2: கிளவுட் சிங்க் இணைக்கப்பட்டுள்ளது",
-      update2: "v1.1: AI நிதி ஆலோசகர் சேர்க்கப்பட்டுள்ளது",
-      update3: "v1.0: ஆரம்ப கணக்கு பதிவேடு தொடங்கப்பட்டது"
+      update1: "v2.0: இறையாண்மை இயந்திரம் பயன்படுத்தப்பட்டது",
+      update2: "v1.2: கிளவுட் சிங்க் இணைக்கப்பட்டுள்ளது",
+      update3: "v1.1: AI நிதி ஆலோசகர் சேர்க்கப்பட்டுள்ளது"
     },
     install: {
       title: "மொபைல் செயலி",

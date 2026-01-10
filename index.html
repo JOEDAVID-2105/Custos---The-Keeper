@@ -4,14 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Custos - The Keeper</title>
+    <title>Custos Sovereign</title>
     
-    <!-- PWA Primary Meta -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Custos">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#4f46e5">
     
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png">
@@ -24,12 +22,8 @@
         theme: {
           extend: {
             colors: {
-              slate: {
-                950: '#020617',
-              },
-              indigo: {
-                600: '#4f46e5',
-              }
+              slate: { 950: '#020617' },
+              indigo: { 600: '#4f46e5' }
             }
           }
         }
@@ -73,48 +67,6 @@
             width: 80vw;
             max-width: 800px;
         }
-
-        @media print {
-          .no-print { display: none !important; }
-          body { 
-            background: white !important; 
-            color: black !important; 
-            padding: 0 !important;
-            margin: 0 !important;
-          }
-          #root { display: block !important; }
-          .shield-watermark { display: none !important; }
-          main { 
-            padding: 0 !important; 
-            margin: 0 !important; 
-            width: 100% !important;
-          }
-          .glass { 
-            background: white !important; 
-            border: none !important; 
-            box-shadow: none !important; 
-            backdrop-filter: none !important;
-            padding: 0 !important;
-          }
-          .prose { 
-            max-width: 100% !important; 
-            color: black !important; 
-            font-size: 12pt !important;
-            line-height: 1.6 !important;
-          }
-          h1, h2, h3 { color: black !important; page-break-after: avoid; }
-          .print-header {
-            display: flex !important;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid black;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-          }
-          @page {
-            margin: 2cm;
-          }
-        }
     </style>
 <script type="importmap">
 {
@@ -137,9 +89,9 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').then(reg => {
-            console.log('[PWA] Service Worker Registered', reg.scope);
+            console.log('[PWA] Service Worker Operational');
           }).catch(err => {
-            console.error('[PWA] Service Worker Registration Failed', err);
+            console.error('[PWA] Service Worker Failed:', err);
           });
         });
       }
