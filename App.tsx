@@ -35,7 +35,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 3200);
+    }, 4500);
 
     const handleBeforeInstall = (e: Event) => {
       console.log('[PWA] Ready for installation');
@@ -232,38 +232,31 @@ const App: React.FC = () => {
 
   if (showSplash) {
     return (
-      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[2800ms]">
-        <div className="flex flex-col items-center gap-6">
-          <img 
-            src="https://img.icons8.com/fluency/240/crown.png" 
-            className="w-32 h-32 animate-in zoom-in-50 duration-1000 delay-200 drop-shadow-[0_0_25px_rgba(79,70,229,0.4)]"
-            alt="D.Soverign"
-          />
+      <div className="fixed inset-0 bg-[#020617] flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[4000ms]">
+        <div className="flex flex-col items-center gap-8">
+          <div className="relative">
+             <img 
+               src="https://img.icons8.com/fluency/240/royal-crown.png" 
+               className="w-44 h-44 animate-in zoom-in-50 duration-1000 delay-200 drop-shadow-[0_0_50px_rgba(79,70,229,0.4)]"
+               alt="Custos Shield"
+             />
+          </div>
           <div className="flex flex-col items-center gap-1">
-            <h1 className="text-4xl font-black tracking-[-0.1em] text-white animate-in slide-in-from-bottom-4 duration-1000 delay-500">D.SOVERIGN</h1>
-            <p className="text-[10px] tracking-[0.6em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-800">{t.theKeeper}</p>
+            <h1 className="text-6xl font-black tracking-[-0.15em] text-white animate-in slide-in-from-bottom-10 duration-1000 delay-500">CUSTOS</h1>
+            <p className="text-[11px] tracking-[0.9em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-900">{t.theKeeper}</p>
           </div>
         </div>
-        <div className="absolute top-1/2 mt-40 flex flex-col items-center gap-3">
+        <div className="absolute top-1/2 mt-56 flex flex-col items-center gap-3">
             <div className="w-1.5 h-1.5 bg-white/20 rounded-full overflow-hidden">
                <div className="h-full bg-indigo-500 w-full animate-progress-fast"></div>
             </div>
-            <p className="text-[7px] tracking-[0.5em] text-white/10 uppercase font-black">{t.common.initializing}</p>
+            <p className="text-[7px] tracking-[0.5em] text-white/10 uppercase font-black">Establishing Sovereignty</p>
         </div>
-        <div className="absolute bottom-12 flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
+        <div className="absolute bottom-12 flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500 text-center">
           <span className="text-[9px] tracking-[0.8em] text-white/30 uppercase font-black">DAVID'S CODES</span>
-          <div className="w-8 h-px bg-indigo-600/30"></div>
-          <span className="text-[7px] tracking-[0.4em] text-indigo-500/40 uppercase font-bold">Proprietary Software Protocol</span>
+          <div className="w-12 h-px bg-indigo-600/30 my-2"></div>
+          <span className="text-[7px] tracking-[0.4em] text-indigo-500/40 uppercase font-bold">V3.0 PRIME ENGINE</span>
         </div>
-      </div>
-    );
-  }
-
-  if (loading && auth.currentUser) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 border-2 border-slate-200 dark:border-white/5 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p className="text-[9px] tracking-[0.5em] text-slate-400 dark:text-white/20 uppercase animate-pulse font-noto">{t.common.syncing}</p>
       </div>
     );
   }
@@ -276,7 +269,7 @@ const App: React.FC = () => {
 
       <aside className="hidden md:flex w-64 h-screen flex-col border-r border-slate-200 dark:border-white/5 p-10 sticky top-0 bg-white/50 dark:bg-[#020617]/50 backdrop-blur-xl z-20 no-print">
         <div className="mb-16">
-          <h1 className="text-2xl font-black tracking-tighter">D.SOVERIGN</h1>
+          <h1 className="text-3xl font-black tracking-tighter">CUSTOS</h1>
           <p className="text-[9px] tracking-[0.4em] font-bold text-indigo-600 mt-1 uppercase font-noto">{t.theKeeper}</p>
         </div>
 

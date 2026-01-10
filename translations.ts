@@ -6,7 +6,7 @@ export const translations = {
     advisor: "ADVISOR",
     prefs: "PROFILE",
     authAction: "LOGIN / SIGNUP",
-    theKeeper: "D.SOVERIGN PROTOCOL",
+    theKeeper: "CUSTOS SOVERIGN PROTOCOL",
     inflow: "INFLOW",
     outflow: "OUTFLOW",
     balance: "BALANCE",
@@ -48,13 +48,13 @@ export const translations = {
       missionTitle: "THE MISSION",
       missionBody: "PRECISION ARCHIVING FOR THE SOVEREIGN ELITE.",
       updatesTitle: "PROTOCOL UPDATES",
-      update1: "v2.0.1: D.SOVERIGN ROYAL ENGINE",
-      update2: "v1.2: CLOUD GUARDIAN SYNC ENABLED",
-      update3: "v1.1: AI FINANCIAL ADVISOR INTEGRATED"
+      update1: "v3.0: CUSTOS SOVERIGN PRIME",
+      update2: "v2.0: ROYAL CORE INTEGRATION",
+      update3: "v1.2: CLOUD GUARDIAN SYNC"
     },
     install: {
       title: "MOBILE PROTOCOL",
-      button: "INSTALL D.SOVERIGN",
+      button: "INSTALL CUSTOS",
       iosNote: "Tap Share > Add to Home Screen",
       success: "Protocol installed successfully."
     },
@@ -140,7 +140,7 @@ export const translations = {
     },
     ai: {
       intelligence: "AI-Powered Financial Intelligence",
-      wealthReport: "D.Soverign Wealth Report",
+      wealthReport: "Custos Wealth Report",
       digitalConsultation: "Digital Consultation",
       awaiting: "The Guardian awaits your request to analyze the family ledger and provide simple advice.",
       analyzing: "Analyzing Ledger...",
@@ -154,7 +154,7 @@ export const translations = {
     advisor: "ஆலோசகர்",
     prefs: "சுயவிவரம்",
     authAction: "உள்நுழை / பதிவு செய்",
-    theKeeper: "D.SOVERIGN நெறிமுறை",
+    theKeeper: "CUSTOS SOVERIGN நெறிமுறை",
     inflow: "வரவு",
     outflow: "செலவு",
     balance: "மீதம்",
@@ -196,9 +196,9 @@ export const translations = {
       missionTitle: "நோக்கம்",
       missionBody: "இறையாண்மை மிக்க உயர்தர நிதி காப்பகம்.",
       updatesTitle: "புதிய மாற்றங்கள்",
-      update1: "v2.0.1: D.SOVERIGN அரச இயந்திரம்",
-      update2: "v1.2: கிளவுட் சிங்க் இணைக்கப்பட்டுள்ளது",
-      update3: "v1.1: AI நிதி ஆலோசகர் சேர்க்கப்பட்டுள்ளது"
+      update1: "v3.0: CUSTOS SOVERIGN பிரைம்",
+      update2: "v2.0: அரச இயந்திரம்",
+      update3: "v1.2: கிளவுட் சிங்க்"
     },
     install: {
       title: "மொபைல் செயலி",
@@ -242,7 +242,7 @@ export const translations = {
       title: "கிளவுட் பாதுகாவலர்",
       subtitle: "உங்கள் நிதி சுதந்திரத்தை மேம்படுத்துங்கள்",
       fullName: "முழு பெயர்",
-      email: "மின்னஞ்சல் முகவரி",
+      email: "முழு பெயர்",
       password: "பாதுகாப்பு குறியீடு",
       authenticate: "அடையாளம் காணவும்",
       establish: "பாதுகாப்பை உறுதி செய்",
@@ -288,7 +288,7 @@ export const translations = {
     },
     ai: {
       intelligence: "AI நிதி நுண்ணறிவு",
-      wealthReport: "D.Soverign நிதி அறிக்கை",
+      wealthReport: "Custos நிதி அறிக்கை",
       digitalConsultation: "டிஜிட்டல் ஆலோசனை",
       awaiting: "காவலன் உங்கள் நிதி விவரங்களை ஆராய்ந்து எளிய ஆலோசனைகளை வழங்க காத்திருக்கிறார்.",
       analyzing: "கணக்கை ஆராய்கிறது...",
