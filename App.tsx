@@ -33,21 +33,28 @@ const App: React.FC = () => {
   const t = translations[profile.language || 'en'];
 
   useEffect(() => {
-    // Cinematic Splash Duration
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 3200);
 
-    // Listen for PWA Install Prompt
     const handleBeforeInstall = (e: Event) => {
+      console.log('[PWA] Ready for installation');
       e.preventDefault();
       setDeferredPrompt(e);
     };
+
+    const handleAppInstalled = () => {
+      console.log('[PWA] Successfully installed');
+      setDeferredPrompt(null);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -156,6 +163,7 @@ const App: React.FC = () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
+    console.log(`[PWA] Install outcome: ${outcome}`);
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
     }
