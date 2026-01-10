@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'vault' | 'history' | 'ai' | 'profile' | 'auth'>('vault');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showSplash, setShowSplash] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile>({
     uid: 'local-user',
     displayName: 'The Local Guardian',
@@ -36,7 +37,18 @@ const App: React.FC = () => {
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 3200);
-    return () => clearTimeout(timer);
+
+    // Listen for PWA Install Prompt
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
   }, []);
 
   useEffect(() => {
@@ -140,6 +152,15 @@ const App: React.FC = () => {
     updateProfile({ ...profile, language: newLang });
   };
 
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
+
   const currencySymbol = useMemo(() => {
     return CURRENCIES.find(c => c.code === profile.currency)?.symbol || '$';
   }, [profile.currency]);
@@ -171,6 +192,8 @@ const App: React.FC = () => {
             onToggleTheme={() => updateProfile({...profile, theme: profile.theme === 'dark' ? 'light' : 'dark'})} 
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => setActiveTab('auth')}
+            deferredPrompt={deferredPrompt}
+            onInstall={handleInstall}
           />
           {auth.currentUser && (
             <div className="pt-12 border-t border-slate-200 dark:border-white/5 flex justify-center">
@@ -191,7 +214,7 @@ const App: React.FC = () => {
     { id: 'vault', label: t.vault },
     { id: 'history', label: t.ledger },
     { id: 'ai', label: t.advisor },
-    { id: 'profile', label: t.prefs }, // Changed label to PROFILE via t.prefs
+    { id: 'profile', label: t.prefs },
   ];
 
   const displayedUserName = useMemo(() => {

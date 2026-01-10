@@ -2,11 +2,13 @@
 {
   "name": "Custos - The Keeper",
   "short_name": "Custos",
-  "description": "High-end luxury fintech archiving protocol.",
+  "description": "High-end luxury fintech archiving protocol for family and personal finance management.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#020617",
+  "orientation": "portrait",
+  "categories": ["finance", "productivity"],
   "icons": [
     {
       "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png",
@@ -23,6 +25,22 @@
       "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "The Vault",
+      "short_name": "Vault",
+      "description": "Establish a new record",
+      "url": "/?tab=vault",
+      "icons": [{ "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "The Ledger",
+      "short_name": "Ledger",
+      "description": "View historical archives",
+      "url": "/?tab=history",
+      "icons": [{ "src": "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/shield/mw24/2x/baseline_shield_white_48dp.png", "sizes": "192x192" }]
     }
   ]
 }

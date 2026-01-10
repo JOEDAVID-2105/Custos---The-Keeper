@@ -52,6 +52,12 @@ export const translations = {
       update2: "v1.1: AI FINANCIAL ADVISOR INTEGRATED",
       update3: "v1.0: GENESIS LEDGER ESTABLISHED"
     },
+    install: {
+      title: "MOBILE PROTOCOL",
+      button: "INSTALL CUSTOS APP",
+      iosNote: "Tap Share > Add to Home Screen",
+      success: "Protocol installed successfully."
+    },
     categories: {
       Housing: "Housing",
       Food: "Food",
@@ -192,6 +198,12 @@ export const translations = {
       update1: "v1.2: கிளவுட் சிங்க் இணைக்கப்பட்டுள்ளது",
       update2: "v1.1: AI நிதி ஆலோசகர் சேர்க்கப்பட்டுள்ளது",
       update3: "v1.0: ஆரம்ப கணக்கு பதிவேடு தொடங்கப்பட்டது"
+    },
+    install: {
+      title: "மொபைல் செயலி",
+      button: "செயலியை நிறுவு",
+      iosNote: "Share > Add to Home Screen கிளிக் செய்யவும்",
+      success: "செயலி வெற்றிகரமாக நிறுவப்பட்டது."
     },
     categories: {
       Housing: "வீடு",

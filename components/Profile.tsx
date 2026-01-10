@@ -12,9 +12,19 @@ interface ProfileProps {
   onToggleTheme: () => void;
   onToggleLanguage: () => void;
   onGoCloud: () => void;
+  deferredPrompt?: any;
+  onInstall?: () => void;
 }
 
-export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleTheme, onToggleLanguage, onGoCloud }) => {
+export const Profile: React.FC<ProfileProps> = ({ 
+  profile, 
+  onUpdate, 
+  onToggleTheme, 
+  onToggleLanguage, 
+  onGoCloud,
+  deferredPrompt,
+  onInstall
+}) => {
   const [joinId, setJoinId] = useState('');
   const [familyMetadata, setFamilyMetadata] = useState<{ name: string; creatorId: string } | null>(null);
   const [isNamingFamily, setIsNamingFamily] = useState(false);
@@ -24,6 +34,9 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
   const familyId = profile.familyId;
   const language = profile.language || 'en';
   const t = translations[language];
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
 
   useEffect(() => {
     if (familyId) {
@@ -96,22 +109,42 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onToggleThe
         <p className="text-slate-400 dark:text-white/30 tracking-[0.5em] text-[10px] mt-3 uppercase">{t.guardianConfig}</p>
       </div>
 
-      {/* Mobile-Only Quick Settings Hub */}
-      <div className="md:hidden grid grid-cols-1 gap-4 pt-4">
-        {!auth.currentUser && (
-          <button 
-            onClick={onGoCloud}
-            className="w-full py-5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
-          >
-            {t.goCloud}
-          </button>
+      {/* Mobile Installation & Settings Hub */}
+      <div className="md:hidden space-y-4">
+        {!isStandalone && (
+          <div className="p-8 border border-indigo-500/30 bg-indigo-500/5 space-y-6">
+            <p className="text-[10px] font-black tracking-[0.4em] text-indigo-600 uppercase text-center">{t.install.title}</p>
+            {deferredPrompt ? (
+              <button 
+                onClick={onInstall}
+                className="w-full py-5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
+              >
+                {t.install.button}
+              </button>
+            ) : isIOS ? (
+              <p className="text-[9px] font-bold text-center text-slate-400 uppercase tracking-widest leading-relaxed">
+                {t.install.iosNote}
+              </p>
+            ) : null}
+          </div>
         )}
-        <button 
-          onClick={onToggleLanguage}
-          className="w-full py-5 border border-indigo-600/20 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600"
-        >
-          {language === 'en' ? 'SWITCH TO தமிழ்' : 'SWITCH TO ENGLISH'}
-        </button>
+        
+        <div className="grid grid-cols-1 gap-4">
+          {!auth.currentUser && (
+            <button 
+              onClick={onGoCloud}
+              className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-[10px] font-black uppercase tracking-[0.4em] shadow-lg"
+            >
+              {t.goCloud}
+            </button>
+          )}
+          <button 
+            onClick={onToggleLanguage}
+            className="w-full py-5 border border-indigo-600/20 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600"
+          >
+            {language === 'en' ? 'SWITCH TO தமிழ்' : 'SWITCH TO ENGLISH'}
+          </button>
+        </div>
       </div>
 
       <div className="space-y-12">
