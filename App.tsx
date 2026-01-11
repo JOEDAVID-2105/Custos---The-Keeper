@@ -31,6 +31,7 @@ const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showContactPopup, setShowContactPopup] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
   const [profile, setProfile] = useState<UserProfile>({
     uid: 'local-user',
     displayName: 'The Local User',
@@ -72,6 +73,30 @@ const App: React.FC = () => {
   const allCategories = useMemo(() => {
     return [...new Set([...DEFAULT_CATEGORIES, 'Other', ...(profile.customCategories || [])])];
   }, [profile.customCategories]);
+
+  // Global Font Scale Listener
+  useEffect(() => {
+    document.documentElement.style.setProperty('--app-font-size', `${fontSize}px`);
+  }, [fontSize]);
+
+  // History API - Back button handling
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.tab) {
+        setActiveTab(event.state.tab);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    // Initial state
+    window.history.replaceState({ tab: 'vault' }, '');
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (tab: AppTab) => {
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+    window.history.pushState({ tab }, '');
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -135,7 +160,6 @@ const App: React.FC = () => {
         let cloudProfile = await StorageService.getProfile(user.uid);
         
         if (!cloudProfile) {
-          // New User Setup
           const loc = await detectLocationInfo();
           const newProfile: UserProfile = {
             uid: user.uid,
@@ -154,7 +178,6 @@ const App: React.FC = () => {
           await StorageService.saveProfile(newProfile);
           setProfile(newProfile);
         } else {
-          // Existing User check for location if missing
           if (!cloudProfile.country && !cloudProfile.state) {
             const loc = await detectLocationInfo();
             cloudProfile = { ...cloudProfile, ...loc };
@@ -318,7 +341,7 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
-    if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => setActiveTab('profile')} />;
+    if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => navigateTo('profile')} />;
     
     switch (activeTab) {
       case 'vault': return (
@@ -328,7 +351,7 @@ const App: React.FC = () => {
           transactions={transactions} 
           language={profile.language} 
           categories={allCategories}
-          onNavigateToEditLimits={() => setActiveTab('budget-edit')}
+          onNavigateToEditLimits={() => navigateTo('budget-edit')}
         />
       );
       case 'history': return (
@@ -336,8 +359,8 @@ const App: React.FC = () => {
           transactions={transactions} 
           onDelete={deleteTransaction} 
           onUpdate={updateTransaction}
-          onNavigateToOutflow={() => setActiveTab('outflow')}
-          onNavigateToFilters={() => setActiveTab('filters')}
+          onNavigateToOutflow={() => navigateTo('outflow')}
+          onNavigateToFilters={() => navigateTo('filters')}
           search={search}
           typeFilter={typeFilter}
           startDate={startDate}
@@ -358,7 +381,7 @@ const App: React.FC = () => {
           endDate={endDate} setEndDate={setEndDate}
           sortBy={sortBy} setSortBy={setSortBy}
           sortOrder={sortOrder} setSortOrder={setSortOrder}
-          onBack={() => setActiveTab('history')}
+          onBack={() => navigateTo('history')}
           onClear={clearFilters}
           language={profile.language}
         />
@@ -367,7 +390,7 @@ const App: React.FC = () => {
         <ClassWiseOutflow 
           transactions={transactions} 
           profile={profile} 
-          onBack={() => setActiveTab('history')} 
+          onBack={() => navigateTo('history')} 
           language={profile.language} 
           categories={allCategories}
         />
@@ -378,7 +401,7 @@ const App: React.FC = () => {
           onUpdate={updateProfile} 
           onDeleteCategory={deleteCategory}
           onRenameCategory={renameCategory}
-          onBack={() => setActiveTab('vault')} 
+          onBack={() => navigateTo('vault')} 
           language={profile.language} 
         />
       );
@@ -389,10 +412,12 @@ const App: React.FC = () => {
             profile={profile} 
             onUpdate={updateProfile} 
             onToggleLanguage={toggleLanguage}
-            onGoCloud={() => setActiveTab('auth')}
-            onNavigateToEditLimits={() => setActiveTab('budget-edit')}
+            onGoCloud={() => navigateTo('auth')}
+            onNavigateToEditLimits={() => navigateTo('budget-edit')}
             onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
           />
           {auth.currentUser && (
             <div className="pt-12 border-t border-slate-300 dark:border-white/5 flex justify-center">
@@ -463,7 +488,7 @@ const App: React.FC = () => {
           className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden"
           aria-label="Toggle Language"
         >
-          <span className="text-[12px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto">
+          <span className={`text-[12px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto flex items-center justify-center w-full h-full ${profile.language === 'en' ? 'pt-0.5' : ''}`}>
             {profile.language === 'en' ? 'த' : 'EN'}
           </span>
         </button>
@@ -507,7 +532,7 @@ const App: React.FC = () => {
           {navItems.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => navigateTo(item.id as any)}
               className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600 translate-x-1' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
             >
               {item.label}
@@ -515,7 +540,7 @@ const App: React.FC = () => {
           ))}
           {!auth.currentUser && (
             <button
-              onClick={() => setActiveTab('auth')}
+              onClick={() => navigateTo('auth')}
               className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all pt-8 mt-8 border-t border-slate-300 dark:border-white/5 font-noto ${activeTab === 'auth' ? 'text-indigo-600' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
             >
               {t.authAction}
@@ -528,7 +553,7 @@ const App: React.FC = () => {
          {navItems.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => navigateTo(item.id as any)}
               className={`text-[8px] tracking-[0.2em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600' : 'text-slate-500 dark:text-white/30'}`}
             >
               {item.label}

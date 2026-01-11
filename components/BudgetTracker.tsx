@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { Transaction, Budget, Category } from '../types';
+import { translations } from '../translations';
 
 interface BudgetTrackerProps {
   transactions: Transaction[];
@@ -9,9 +10,11 @@ interface BudgetTrackerProps {
   onUpdateLimit?: (category: string, limit: number) => void;
   limits?: Record<string, number>;
   categories?: string[];
+  language?: 'en' | 'ta';
 }
 
-export const BudgetTracker: React.FC<BudgetTrackerProps> = ({ transactions, currencySymbol, limits = {}, categories = DEFAULT_CATEGORIES }) => {
+export const BudgetTracker: React.FC<BudgetTrackerProps> = ({ transactions, currencySymbol, limits = {}, categories = DEFAULT_CATEGORIES, language = 'en' }) => {
+  const t = translations[language];
   const budgets: Budget[] = useMemo(() => {
     return categories.map(cat => {
       if (cat === 'Income') return null;
@@ -34,12 +37,14 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({ transactions, curr
         return (
           <div key={b.category} className="glass p-5 md:p-6 border border-white/5 relative group/budget">
             <div className="flex justify-between items-end mb-4">
-              <span className="text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500 dark:text-white/50">{b.category}</span>
+              <span className="text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500 dark:text-white/50 font-noto">
+                {(t.categories as any)[b.category] || b.category}
+              </span>
               <div className="flex flex-col items-end">
-                <span className="text-[10px] md:text-xs font-black text-slate-900 dark:text-white">
+                <span className="text-[10px] md:text-xs font-black text-slate-900 dark:text-white font-noto">
                   {currencySymbol}{b.spent.toLocaleString()} / {b.limit.toLocaleString()}
                 </span>
-                <span className="text-[6px] font-black uppercase text-indigo-500 opacity-0 group-hover/budget:opacity-100 transition-opacity">Protocol limit</span>
+                <span className="text-[6px] font-black uppercase text-indigo-500 opacity-0 group-hover/budget:opacity-100 transition-opacity font-noto">Protocol limit</span>
               </div>
             </div>
             <div className="w-full h-1 bg-slate-200 dark:bg-white/5 overflow-hidden">

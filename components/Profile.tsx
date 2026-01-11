@@ -15,6 +15,8 @@ interface ProfileProps {
   onNavigateToEditLimits: () => void;
   onOpenContact: () => void;
   deferredPrompt?: any;
+  fontSize: number;
+  setFontSize: (s: number) => void;
 }
 
 export const Profile: React.FC<ProfileProps> = ({ 
@@ -22,7 +24,9 @@ export const Profile: React.FC<ProfileProps> = ({
   onUpdate, 
   onGoCloud,
   onOpenContact,
-  deferredPrompt
+  deferredPrompt,
+  fontSize,
+  setFontSize
 }) => {
   const [joinId, setJoinId] = useState('');
   const [familyMetadata, setFamilyMetadata] = useState<{ name: string; creatorId: string } | null>(null);
@@ -126,7 +130,6 @@ export const Profile: React.FC<ProfileProps> = ({
             </button>
           )}
 
-          {/* Initials Placeholder Shield */}
           <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center">
             <InitialShield name={profile.displayName} size="lg" />
           </div>
@@ -152,6 +155,30 @@ export const Profile: React.FC<ProfileProps> = ({
              </button>
           </div>
         )}
+
+        {/* Font Magnification Calibration */}
+        <div className="pt-16 border-t border-slate-300 dark:border-white/5">
+          <div className="flex justify-between items-end mb-8">
+            <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">Font Size</p>
+            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{fontSize}px</p>
+          </div>
+          <div className="px-4">
+            <input 
+              type="range" 
+              min="12" 
+              max="24" 
+              step="1" 
+              value={fontSize} 
+              onChange={(e) => setFontSize(parseInt(e.target.value))}
+              className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full appearance-none accent-indigo-600 cursor-pointer"
+            />
+            <div className="flex justify-between mt-4">
+              <span className="text-[8px] font-black text-slate-400 dark:text-white/10 uppercase">compact</span>
+              <span className="text-[8px] font-black text-slate-400 dark:text-white/10 uppercase">standard</span>
+              <span className="text-[8px] font-black text-slate-400 dark:text-white/10 uppercase">magnified</span>
+            </div>
+          </div>
+        </div>
 
         <div className="pt-16 border-t border-slate-300 dark:border-white/5 space-y-10">
           <div className="flex flex-col gap-2">

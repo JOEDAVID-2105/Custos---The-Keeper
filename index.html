@@ -12,9 +12,8 @@
     <meta name="theme-color" content="#4f46e5">
     
     <link rel="manifest" href="/manifest.json">
-    <!-- Custom SVG Favicon: Indigo Square with lowercase 'custos' text -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='512' height='512' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='512' height='512' rx='100' fill='%234f46e5'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='100' fill='%23ffffff' letter-spacing='-2'%3Ecustos%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='512' height='512' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='512' height='512' rx='100' fill='%234f46e5'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='100' fill='%23ffffff' letter-spacing='-2'%3Ecustos%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='512' height='512' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='512' height='512' rx='100' fill='%234f46e5'/%3E%text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='100' fill='%23ffffff' letter-spacing='-2'%3Ecustos%3C/text%3E%3C/svg%3E">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -32,6 +31,12 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+Tamil:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --app-font-size: 16px;
+        }
+        html {
+            font-size: var(--app-font-size);
+        }
         body {
             font-family: 'Inter', 'Noto Sans Tamil', sans-serif;
             margin: 0;
@@ -73,6 +78,13 @@
             letter-spacing: -0.06em;
             text-transform: uppercase;
             line-height: 0.9;
+        }
+        /* Custom scrollbar for desktop elegance */
+        @media (min-width: 768px) {
+          ::-webkit-scrollbar { width: 5px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb { background: rgba(79, 70, 229, 0.2); border-radius: 10px; }
+          ::-webkit-scrollbar-thumb:hover { background: rgba(79, 70, 229, 0.5); }
         }
     </style>
 <script type="importmap">

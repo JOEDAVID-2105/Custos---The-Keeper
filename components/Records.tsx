@@ -23,6 +23,12 @@ interface RecordsProps {
   categories: string[];
 }
 
+const LocationIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+  </svg>
+);
+
 export const Records: React.FC<RecordsProps> = ({ 
   transactions, onDelete, onUpdate, onNavigateToOutflow, onNavigateToFilters,
   search, typeFilter, startDate, endDate, sortBy, sortOrder,
@@ -109,13 +115,13 @@ export const Records: React.FC<RecordsProps> = ({
           <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <button 
               onClick={onNavigateToOutflow}
-              className="flex-1 md:flex-none px-6 py-3 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg"
+              className="flex-1 md:flex-none px-6 py-3 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg font-noto"
             >
               {t.categoryWiseExpenditure}
             </button>
             <button 
               onClick={onNavigateToFilters}
-              className="flex-1 md:flex-none px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10"
+              className="flex-1 md:flex-none px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10 font-noto"
             >
               {t.filtersLabel}
             </button>
@@ -130,7 +136,7 @@ export const Records: React.FC<RecordsProps> = ({
           <table className="w-full text-left border-collapse print:text-black min-w-full">
             <thead>
               <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/20 uppercase font-black">
-                <th className="pb-4 px-2 md:px-6 font-normal">TIME</th>
+                <th className="pb-4 px-2 md:px-6 font-normal">TIME & ALIAS</th>
                 <th className="pb-4 font-normal">CATEGORY</th>
                 <th className="pb-4 font-normal">DESC</th>
                 <th className="pb-4 font-normal text-right">VAL</th>
@@ -153,8 +159,14 @@ export const Records: React.FC<RecordsProps> = ({
                       <tr key={tx.id} className="border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.01]">
                         <td className="py-3 px-2 md:px-6">
                            <div className="flex flex-col">
-                             <span className="text-[9px] md:text-[11px] font-black text-slate-900 dark:text-white/80 font-mono tracking-tighter md:tracking-widest print:text-black">
-                               {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                             <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] md:text-[11px] font-black text-slate-900 dark:text-white/80 font-mono tracking-tighter md:tracking-widest print:text-black">
+                                  {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                </span>
+                                {tx.location && <LocationIcon className="w-2 h-2 text-indigo-500 opacity-60" />}
+                             </div>
+                             <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/10 uppercase tracking-widest truncate max-w-[80px]">
+                               {tx.userName || 'LOCAL'}
                              </span>
                            </div>
                         </td>
@@ -190,12 +202,12 @@ export const Records: React.FC<RecordsProps> = ({
                             <div className="flex justify-end gap-2 md:gap-4 items-center">
                               {isEditing ? (
                                 <>
-                                  <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest">SAVE</button>
-                                  <button onClick={cancelEdit} className="text-slate-600 dark:text-white/40 text-[8px] font-black uppercase tracking-widest">EXIT</button>
+                                  <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest font-noto">SAVE</button>
+                                  <button onClick={cancelEdit} className="text-slate-600 dark:text-white/40 text-[8px] font-black uppercase tracking-widest font-noto">EXIT</button>
                                 </>
                               ) : (
                                 <>
-                                  <button onClick={() => startEdit(tx)} className="text-indigo-600 dark:text-indigo-400 text-[8px] font-black uppercase tracking-widest underline decoration-2 decoration-indigo-600/20">EDIT</button>
+                                  <button onClick={() => startEdit(tx)} className="text-indigo-600 dark:text-indigo-400 text-[8px] font-black uppercase tracking-widest underline decoration-2 decoration-indigo-600/20 font-noto">EDIT</button>
                                   <button onClick={() => onDelete(tx.id)} className="text-rose-600 hover:scale-110 transition-transform p-1">
                                     <TrashIcon className="w-4 h-4" />
                                   </button>

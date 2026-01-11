@@ -38,6 +38,7 @@ export const ClassWiseOutflow: React.FC<ClassWiseOutflowProps> = ({ transactions
           currencySymbol={currencySymbol} 
           limits={profile.budgetLimits}
           categories={categories}
+          language={language}
         />
       </div>
     </div>

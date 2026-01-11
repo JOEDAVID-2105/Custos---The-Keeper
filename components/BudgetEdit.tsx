@@ -82,7 +82,9 @@ export const BudgetEdit: React.FC<BudgetEditProps> = ({
             <span className="text-white text-[10px] font-black tracking-widest uppercase font-noto">CATEGORY ESTABLISHED</span>
           </div>
         )}
-        <label className="text-[10px] tracking-[0.4em] font-black text-slate-800 dark:text-white/40 uppercase block mb-6 font-noto">Establish New Category</label>
+        <label className="text-[10px] tracking-[0.4em] font-black text-slate-800 dark:text-white/40 uppercase block mb-6 font-noto">
+          {language === 'ta' ? 'புதிய வகையை உருவாக்கு' : `Establish New ${t.category}`}
+        </label>
         <div className="flex flex-col md:flex-row gap-6 w-full">
           <input 
             type="text" 
@@ -90,13 +92,13 @@ export const BudgetEdit: React.FC<BudgetEditProps> = ({
             onChange={(e) => setNewCategoryName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addCategory()}
             className="w-full md:flex-1 bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-lg md:text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white font-noto"
-            placeholder="Category Name..."
+            placeholder="..."
           />
           <button 
             onClick={addCategory}
             className="w-full md:w-auto px-12 py-4 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg font-noto"
           >
-            Add Category
+            {language === 'ta' ? 'வகையைச் சேர்' : `Add ${t.category}`}
           </button>
         </div>
       </div>
