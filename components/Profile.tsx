@@ -5,6 +5,7 @@ import { CURRENCIES, TrashIcon } from '../constants';
 import { StorageService } from '../services/storageService';
 import { auth } from '../services/firebase';
 import { translations } from '../translations';
+import { InitialShield } from './InitialShield';
 
 interface ProfileProps {
   profile: UserProfile;
@@ -125,6 +126,11 @@ export const Profile: React.FC<ProfileProps> = ({
             </button>
           )}
 
+          {/* Initials Placeholder Shield */}
+          <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center">
+            <InitialShield name={profile.displayName} size="lg" />
+          </div>
+
           <div className="text-center space-y-2">
              <p className="text-sm font-black uppercase tracking-[0.4em] text-slate-900 dark:text-white font-noto">{profile.displayName}</p>
              <div className="inline-flex items-center gap-2 px-3 py-1 border border-indigo-500/20 bg-indigo-500/5">
@@ -142,7 +148,7 @@ export const Profile: React.FC<ProfileProps> = ({
                onClick={handleInstallClick}
                className="w-full py-5 bg-emerald-600 text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-emerald-700 transition-all shadow-lg font-noto"
              >
-               INSTALL CUSTOS PROTOCOL
+               {t.install.button}
              </button>
           </div>
         )}
@@ -160,7 +166,7 @@ export const Profile: React.FC<ProfileProps> = ({
           {familyId ? (
             <div className="space-y-12 animate-in">
               <div className="space-y-6">
-                 <h3 className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">Household Guardians</h3>
+                 <h3 className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">Household Members</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {familyMembers.map(member => (
                        <div key={member.uid} className="flex items-center justify-between p-4 border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
@@ -168,7 +174,7 @@ export const Profile: React.FC<ProfileProps> = ({
                              <div>
                                 <p className="text-xs font-black uppercase text-slate-900 dark:text-white truncate">{member.displayName}</p>
                                 <p className="text-[7px] font-black text-indigo-600 uppercase tracking-widest">
-                                   {member.uid === familyMetadata?.creatorId ? 'Head of Household' : 'Guardian'}
+                                   {member.uid === familyMetadata?.creatorId ? t.profile.headOfHousehold : t.profile.member}
                                 </p>
                              </div>
                           </div>
@@ -260,10 +266,11 @@ export const Profile: React.FC<ProfileProps> = ({
 
         <div className="pt-20 border-t border-slate-300 dark:border-white/5 flex flex-col items-center gap-12">
           <div className="w-full max-w-sm flex flex-col items-center gap-6">
+            {/* Non-clickable info text */}
             <div className="flex items-center gap-6 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
-               <span className="text-indigo-400/60 pb-1">issue?</span>
+               <span className="text-indigo-400/60 pb-1 cursor-default">issue?</span>
                <span className="opacity-10 text-slate-400">|</span>
-               <span className="text-amber-400/60 pb-1">suggest update?</span>
+               <span className="text-amber-400/60 pb-1 cursor-default">suggest update?</span>
             </div>
             
             <button 
@@ -279,7 +286,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 VERSION: 1.1.0 ALPHA
              </p>
              <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
-                PROPRIETOR: DAVID CODES
+                PROPRIETOR: D'CODES / DAVID CODES
              </p>
           </div>
         </div>

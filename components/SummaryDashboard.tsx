@@ -25,14 +25,14 @@ export const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ transactions
       {/* Metrics Row - Multi-row on mobile, single on desktop */}
       <div className="grid grid-cols-2 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-white/10">
         <div className="p-4 md:p-8 group hover:bg-emerald-500/[0.02] transition-colors border-r border-slate-200 dark:border-white/10">
-          <p className="text-[7px] md:text-[8px] tracking-[0.2em] md:tracking-[0.4em] font-black text-emerald-600 dark:text-emerald-500/50 uppercase mb-2 md:mb-4">{t.totalInflow}</p>
+          <p className="text-[7px] md:text-[8px] tracking-[0.2em] md:tracking-[0.4em] font-black text-emerald-600 dark:text-emerald-500/50 uppercase mb-2 md:mb-4">{t.totalIncome}</p>
           <p className="text-base md:text-2xl font-black tracking-tighter text-emerald-700 dark:text-emerald-500">
             {currencySymbol}{summary.income.toLocaleString()}
           </p>
         </div>
 
         <div className="p-4 md:p-8 group hover:bg-rose-500/[0.02] transition-colors">
-          <p className="text-[7px] md:text-[8px] tracking-[0.2em] md:tracking-[0.4em] font-black text-rose-600 dark:text-rose-500/50 uppercase mb-2 md:mb-4">{t.totalOutflow}</p>
+          <p className="text-[7px] md:text-[8px] tracking-[0.2em] md:tracking-[0.4em] font-black text-rose-600 dark:text-rose-500/50 uppercase mb-2 md:mb-4">{t.totalExpenditure}</p>
           <p className="text-base md:text-2xl font-black tracking-tighter text-rose-700 dark:text-rose-500">
             {currencySymbol}{summary.expense.toLocaleString()}
           </p>

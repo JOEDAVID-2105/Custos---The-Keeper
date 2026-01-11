@@ -111,7 +111,7 @@ export const Records: React.FC<RecordsProps> = ({
               onClick={onNavigateToOutflow}
               className="flex-1 md:flex-none px-6 py-3 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg"
             >
-              {t.classWiseOutflow}
+              {t.categoryWiseExpenditure}
             </button>
             <button 
               onClick={onNavigateToFilters}
@@ -131,7 +131,7 @@ export const Records: React.FC<RecordsProps> = ({
             <thead>
               <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/20 uppercase font-black">
                 <th className="pb-4 px-2 md:px-6 font-normal">TIME</th>
-                <th className="pb-4 font-normal">CLASS</th>
+                <th className="pb-4 font-normal">CATEGORY</th>
                 <th className="pb-4 font-normal">DESC</th>
                 <th className="pb-4 font-normal text-right">VAL</th>
                 <th className="pb-4 px-2 md:px-6 font-normal text-right no-print">ACT</th>

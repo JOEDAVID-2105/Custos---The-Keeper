@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Vault } from './components/Vault';
 import { Records } from './components/Records';
 import { AIAdvisor } from './components/AIAdvisor';
@@ -18,6 +18,12 @@ import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters';
+
+interface SnackbarState {
+  isVisible: boolean;
+  message: string;
+  onUndo: () => void;
+}
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('vault');
@@ -38,6 +44,15 @@ const App: React.FC = () => {
     customCategories: []
   });
   const [loading, setLoading] = useState(true);
+  
+  const [snackbar, setSnackbar] = useState<SnackbarState>({
+    isVisible: false,
+    message: '',
+    onUndo: () => {}
+  });
+  
+  // Fix: Replaced NodeJS.Timeout with any to avoid namespace errors in browser environments
+  const snackbarTimeoutRef = useRef<any>(null);
 
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; category: string }>({ 
     isOpen: false, 
@@ -85,25 +100,15 @@ const App: React.FC = () => {
     }
   }, [profile.theme]);
 
+  // Auth & Profile Listener
   useEffect(() => {
-    const localTx = StorageService.getLocalTransactions();
-    setTransactions(localTx);
-    
-    let unsubscribeTxs: (() => void) | undefined;
-
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
-      if (unsubscribeTxs) unsubscribeTxs();
-
       if (user) {
         await StorageService.syncLocalToCloud(user.uid, user.displayName || 'User');
-        
         const cloudProfile = await StorageService.getProfile(user.uid);
         if (cloudProfile) {
           setProfile({ ...cloudProfile, language: cloudProfile.language || 'en' });
-          unsubscribeTxs = StorageService.subscribeToTransactions(user.uid, cloudProfile.familyId, (txs) => {
-            setTransactions(txs);
-          });
         } else {
           const newProfile: UserProfile = {
             uid: user.uid,
@@ -111,8 +116,6 @@ const App: React.FC = () => {
             email: user.email || '',
             currency: 'INR',
             country: 'India',
-            state: '',
-            city: '',
             isCloudGuardian: true,
             theme: 'dark',
             language: 'en',
@@ -121,11 +124,7 @@ const App: React.FC = () => {
           };
           setProfile(newProfile);
           await StorageService.saveProfile(newProfile);
-          unsubscribeTxs = StorageService.subscribeToTransactions(user.uid, null, (txs) => {
-            setTransactions(txs);
-          });
         }
-        setLoading(false);
       } else {
         const localPrefs = StorageService.getUserPrefs();
         setProfile(localPrefs || {
@@ -140,16 +139,41 @@ const App: React.FC = () => {
           budgetLimits: {},
           customCategories: []
         });
-        setTransactions(StorageService.getLocalTransactions());
-        setLoading(false);
       }
+      setLoading(false);
     });
 
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Transaction Subscription
+  useEffect(() => {
+    let unsubscribeTxs: (() => void) | undefined;
+
+    if (auth.currentUser) {
+      unsubscribeTxs = StorageService.subscribeToTransactions(
+        auth.currentUser.uid, 
+        profile.familyId, 
+        (txs) => {
+          setTransactions(txs);
+        }
+      );
+    } else {
+      setTransactions(StorageService.getLocalTransactions());
+    }
+
     return () => {
-      unsubscribeAuth();
       if (unsubscribeTxs) unsubscribeTxs();
     };
-  }, []);
+  }, [profile.uid, profile.familyId]);
+
+  const triggerSnackbar = (message: string, onUndo: () => void) => {
+    if (snackbarTimeoutRef.current) clearTimeout(snackbarTimeoutRef.current);
+    setSnackbar({ isVisible: true, message, onUndo });
+    snackbarTimeoutRef.current = setTimeout(() => {
+      setSnackbar(prev => ({ ...prev, isVisible: false }));
+    }, 5000);
+  };
 
   const updateProfile = async (p: UserProfile) => {
     setProfile(p);
@@ -176,11 +200,18 @@ const App: React.FC = () => {
   };
 
   const deleteTransaction = async (id: string) => {
+    const txToDelete = transactions.find(t => t.id === id);
+    if (!txToDelete) return;
+
     if (auth.currentUser) await StorageService.removeTransaction(id);
     else {
       StorageService.deleteLocalTransaction(id);
       setTransactions(prev => prev.filter(tx => tx.id !== id));
     }
+
+    triggerSnackbar(t.itemDeleted, () => {
+      addTransaction(txToDelete);
+    });
   };
 
   const deleteCategory = (catName: string) => {
@@ -190,12 +221,19 @@ const App: React.FC = () => {
 
   const confirmDeleteCategory = async () => {
     const catName = deleteModal.category;
-    const newCustom = (profile.customCategories || []).filter(c => c !== catName);
-    const newLimits = { ...(profile.budgetLimits || {}) };
+    const oldCustom = [...(profile.customCategories || [])];
+    const oldLimits = { ...(profile.budgetLimits || {}) };
+
+    const newCustom = oldCustom.filter(c => c !== catName);
+    const newLimits = { ...oldLimits };
     delete newLimits[catName];
     
     await updateProfile({ ...profile, customCategories: newCustom, budgetLimits: newLimits });
     setDeleteModal({ isOpen: false, category: '' });
+
+    triggerSnackbar(t.categoryDeleted, () => {
+      updateProfile({ ...profile, customCategories: oldCustom, budgetLimits: oldLimits });
+    });
   };
 
   const renameCategory = async (oldName: string, newName: string) => {
@@ -368,8 +406,8 @@ const App: React.FC = () => {
 
       <ConfirmationModal 
         isOpen={deleteModal.isOpen}
-        title="Dissolve Asset Class"
-        message={`Are you sure you want to dissolve '${deleteModal.category}'? Transactions mapped to this class will persist but the class itself will be removed from your palette.`}
+        title="Dissolve Category"
+        message={`Are you sure you want to dissolve '${deleteModal.category}'? Transactions mapped to this category will persist but the category itself will be removed from your palette.`}
         confirmLabel="DISSOLVE"
         cancelLabel="PRESERVE"
         onConfirm={confirmDeleteCategory}
@@ -379,34 +417,46 @@ const App: React.FC = () => {
 
       {showContactPopup && <ContactPopup onClose={() => setShowContactPopup(false)} language={profile.language} />}
 
-      <button 
-        onClick={toggleTheme}
-        className="fixed top-6 right-6 z-[100] w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group overflow-hidden no-print"
-        aria-label="Toggle Theme"
-      >
-        <div className={`relative w-full h-full flex items-center justify-center transition-transform duration-700 ${profile.theme === 'dark' ? 'rotate-0' : 'rotate-[360deg]'}`}>
-          {profile.theme === 'dark' ? (
-            <svg className="w-8 h-8 text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="5" />
-              {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => (
-                <line 
-                  key={deg} 
-                  x1="12" y1="1" x2="12" y2="4" 
-                  stroke="currentColor" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round"
-                  transform={`rotate(${deg}, 12, 12)`}
-                />
-              ))}
-            </svg>
-          ) : (
-            <svg className="w-6 h-6 text-indigo-600 fill-indigo-600" viewBox="0 0 24 24">
-              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-            </svg>
-          )}
-        </div>
-        <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-      </button>
+      {/* Global Controls: Theme and Language */}
+      <div className="fixed top-6 right-6 z-[100] flex items-center gap-4 no-print">
+        <button 
+          onClick={toggleLanguage}
+          className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden"
+          aria-label="Toggle Language"
+        >
+          <span className="text-[10px] font-black tracking-widest text-indigo-600 dark:text-indigo-400">
+            {profile.language === 'en' ? 'TA' : 'EN'}
+          </span>
+        </button>
+
+        <button 
+          onClick={toggleTheme}
+          className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group overflow-hidden"
+          aria-label="Toggle Theme"
+        >
+          <div className={`relative w-full h-full flex items-center justify-center transition-transform duration-700 ${profile.theme === 'dark' ? 'rotate-0' : 'rotate-[360deg]'}`}>
+            {profile.theme === 'dark' ? (
+              <svg className="w-8 h-8 text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5" />
+                {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => (
+                  <line 
+                    key={deg} 
+                    x1="12" y1="1" x2="12" y2="4" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round"
+                    transform={`rotate(${deg}, 12, 12)`}
+                  />
+                ))}
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-indigo-600 fill-indigo-600" viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+              </svg>
+            )}
+          </div>
+        </button>
+      </div>
 
       <aside className="hidden md:flex w-64 h-screen flex-col border-r border-slate-300 dark:border-white/5 p-10 sticky top-0 bg-white/50 dark:bg-[#020617]/50 backdrop-blur-xl z-20 no-print">
         <div className="mb-16">
@@ -433,17 +483,6 @@ const App: React.FC = () => {
             </button>
           )}
         </nav>
-
-        <div className="pt-10 space-y-6">
-          <button 
-            onClick={toggleLanguage}
-            className="flex items-center gap-2 px-3 py-1 border border-indigo-600/20 text-[10px] font-black tracking-widest hover:bg-indigo-600 hover:text-white transition-all font-noto"
-          >
-            <span className={profile.language === 'en' ? 'text-indigo-600' : ''}>EN</span>
-            <span className="opacity-20">/</span>
-            <span className={profile.language === 'ta' ? 'text-indigo-600' : ''}>தமிழ்</span>
-          </button>
-        </div>
       </aside>
 
       <nav className="md:hidden fixed bottom-4 left-4 right-4 h-14 glass z-50 flex items-center justify-around rounded-none border border-slate-300 dark:border-white/10 no-print">
@@ -457,6 +496,22 @@ const App: React.FC = () => {
             </button>
           ))}
       </nav>
+
+      {/* Snackbar Portal */}
+      {snackbar.isVisible && (
+        <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-6 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-950 border border-white/10 shadow-2xl animate-in slide-in-from-bottom-4">
+          <p className="text-[10px] font-black tracking-widest uppercase">{snackbar.message}</p>
+          <button 
+            onClick={() => {
+              snackbar.onUndo();
+              setSnackbar(prev => ({ ...prev, isVisible: false }));
+            }}
+            className="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline"
+          >
+            {t.undo}
+          </button>
+        </div>
+      )}
 
       <main className="flex-1 p-6 md:p-12 pb-24 md:pb-12 relative z-10 overflow-y-auto">
         <header className="md:hidden mb-12 flex justify-between items-center">

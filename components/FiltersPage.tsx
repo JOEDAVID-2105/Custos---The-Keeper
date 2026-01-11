@@ -74,8 +74,8 @@ export const FiltersPage: React.FC<FiltersPageProps> = ({
             className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none text-sm md:text-base font-bold text-slate-900 dark:text-white uppercase"
           >
             <option value="all">ALL</option>
-            <option value="income">{t.inflow}</option>
-            <option value="expense">{t.outflow}</option>
+            <option value="income">{t.income}</option>
+            <option value="expense">{t.expenditure}</option>
           </select>
         </div>
         <div className="space-y-2">

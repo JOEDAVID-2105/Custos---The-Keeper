@@ -11,6 +11,7 @@ import {
 import { auth } from '../services/firebase';
 import { StorageService } from '../services/storageService';
 import { translations } from '../translations';
+import { ShieldIcon } from '../constants';
 
 interface AuthProps {
   onSuccess: () => void;
@@ -101,6 +102,21 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
     setError('');
     setMessage('');
   };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center animate-in">
+        <div className="relative w-24 h-24 mb-8">
+          <div className="absolute inset-0 border-2 border-indigo-600/20 rounded-full animate-ping"></div>
+          <div className="absolute inset-2 border-2 border-indigo-600/40 rounded-full animate-ping delay-75"></div>
+          <div className="relative z-10 w-full h-full flex items-center justify-center bg-white dark:bg-slate-900 border border-indigo-600/50 shadow-2xl">
+             <ShieldIcon className="w-10 h-10 text-indigo-600 animate-pulse" />
+          </div>
+        </div>
+        <p className="text-[11px] tracking-[0.8em] font-black text-indigo-600 uppercase animate-pulse">{t.processing}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-in max-w-md mx-auto py-20 px-6">
@@ -203,7 +219,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
             type="submit"
             className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black tracking-[0.2em] text-sm uppercase hover:bg-indigo-600 dark:hover:bg-indigo-600 hover:text-white dark:hover:text-white transition-all disabled:opacity-50 font-noto shadow-xl"
           >
-            {loading ? t.processing : mode === 'login' ? t.authenticate : mode === 'signup' ? t.establish : t.sendReset}
+            {mode === 'login' ? t.authenticate : mode === 'signup' ? t.establish : t.sendReset}
           </button>
         </form>
       </div>

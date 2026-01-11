@@ -97,14 +97,14 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
             onClick={() => setType('expense')}
             className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'expense' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
           >
-            {t.outflow}
+            {t.expenditure}
           </button>
           <button 
             type="button"
             onClick={() => setType('income')}
             className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'income' ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
           >
-            {t.inflow}
+            {t.income}
           </button>
         </div>
 
@@ -150,7 +150,7 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.assetClass}</label>
+            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.category}</label>
             <select 
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -182,7 +182,7 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
           onClick={onNavigateToEditLimits}
           className="w-full py-5 border border-indigo-600/30 bg-indigo-600/[0.02] text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-indigo-600 hover:text-white transition-all font-noto shadow-lg"
         >
-          {t.classAmountEdit}
+          {t.categoryAmountEdit}
         </button>
       </div>
     </div>

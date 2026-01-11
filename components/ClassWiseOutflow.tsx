@@ -21,7 +21,7 @@ export const ClassWiseOutflow: React.FC<ClassWiseOutflowProps> = ({ transactions
     <div className="animate-in w-full max-w-5xl mx-auto space-y-12 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white uppercase font-noto">{t.classWiseOutflow}</h2>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white uppercase font-noto">{t.categoryWiseExpenditure}</h2>
           <p className="text-slate-800 dark:text-white/30 tracking-[0.4em] text-[10px] mt-1 uppercase font-black">{t.ledger} / BREAKDOWN</p>
         </div>
         <button 
