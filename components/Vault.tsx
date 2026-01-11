@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { CATEGORIES, PAYMENT_METHODS } from '../constants';
+import { PAYMENT_METHODS } from '../constants';
 import { Category, Transaction } from '../types';
 import { SummaryDashboard } from './SummaryDashboard';
 import { translations } from '../translations';
@@ -11,16 +11,18 @@ interface VaultProps {
   currencySymbol: string;
   transactions: Transaction[];
   language: 'en' | 'ta';
+  categories: string[];
 }
 
-export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transactions, language }) => {
+export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transactions, language, categories }) => {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [note, setNote] = useState('');
-  const [category, setCategory] = useState<Category>('Luxury');
+  const [category, setCategory] = useState<Category>('Food');
   const [method, setMethod] = useState(PAYMENT_METHODS[0]);
   const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [geoStatus, setGeoStatus] = useState<'idle' | 'tracking' | 'denied' | 'ready'>('idle');
+  const [successMsg, setSuccessMsg] = useState(false);
 
   const t = translations[language];
 
@@ -57,7 +59,7 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
       paymentMethod: method,
       timestamp: Date.now(),
       userId: auth.currentUser?.uid || 'local-user',
-      userName: auth.currentUser?.displayName || 'Local Guardian',
+      userName: auth.currentUser?.displayName || 'Local User',
       location: location ? { 
         ...location, 
         label: `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` 
@@ -67,6 +69,8 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
     onAdd(newTransaction);
     setAmount('');
     setNote('');
+    setSuccessMsg(true);
+    setTimeout(() => setSuccessMsg(false), 2000);
   };
 
   return (
@@ -75,11 +79,11 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
         <div className="text-center mb-12">
           <h2 className="text-4xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">{t.vault}</h2>
           <div className="flex items-center justify-center gap-3 mt-2">
-            <p className="text-slate-400 dark:text-white/30 tracking-[0.4em] text-[9px] uppercase">{t.establishRecord}</p>
-            <div className="h-px w-8 bg-slate-200 dark:bg-white/5"></div>
+            <p className="text-slate-800 dark:text-white/30 tracking-[0.4em] text-[9px] uppercase">{t.establishRecord}</p>
+            <div className="h-px w-8 bg-slate-300 dark:bg-white/5"></div>
             <div className="flex items-center gap-2">
               <div className={`w-1.5 h-1.5 rounded-full ${geoStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : geoStatus === 'tracking' ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'}`}></div>
-              <p className="text-[8px] tracking-[0.2em] font-black uppercase text-slate-400 dark:text-white/20">
+              <p className="text-[8px] tracking-[0.2em] font-black uppercase text-slate-800 dark:text-white/20">
                 {geoStatus === 'ready' ? t.locLocked : geoStatus === 'tracking' ? t.trackingSignal : t.signalLost}
               </p>
             </div>
@@ -90,23 +94,23 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
           <button 
             type="button"
             onClick={() => setType('expense')}
-            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all ${type === 'expense' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 dark:text-white/20 hover:text-indigo-600'}`}
+            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all ${type === 'expense' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
           >
             {t.outflow}
           </button>
           <button 
             type="button"
             onClick={() => setType('income')}
-            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all ${type === 'income' ? 'bg-indigo-600 text-white' : 'text-slate-400 dark:text-white/20 hover:text-indigo-600'}`}
+            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all ${type === 'income' ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
           >
             {t.inflow}
           </button>
         </div>
 
-        <div className="relative group border-b border-slate-200 dark:border-white/10 focus-within:border-indigo-600 transition-all py-6">
-          <label className="text-[8px] tracking-[0.5em] font-black text-slate-400 dark:text-white/20 uppercase block mb-2">{t.magnitude}</label>
+        <div className="relative group border-b border-slate-400 dark:border-white/10 focus-within:border-indigo-600 transition-all py-6">
+          <label className="text-[8px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase block mb-2">{t.magnitude}</label>
           <div className="flex items-center">
-            <span className="text-2xl font-light text-slate-300 dark:text-white/10 mr-4">{currencySymbol}</span>
+            <span className="text-2xl font-light text-slate-400 dark:text-white/10 mr-4">{currencySymbol}</span>
             <input 
               type="number" 
               value={amount}
@@ -119,23 +123,23 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
         </div>
 
         <div className="space-y-2">
-          <label className="text-[8px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.descriptor}</label>
+          <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase">{t.descriptor}</label>
           <input 
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all text-sm font-light tracking-tight placeholder:text-slate-400/20 text-slate-900 dark:text-white font-noto"
+            className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all text-sm font-light tracking-tight placeholder:text-slate-400/20 text-slate-900 dark:text-white font-noto"
             placeholder="..."
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-2">
-            <label className="text-[8px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.protocol}</label>
+            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase">{t.protocol}</label>
             <select 
               value={method}
               onChange={(e) => setMethod(e.target.value)}
-              className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white"
+              className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white"
             >
               {PAYMENT_METHODS.map(m => (
                 <option key={m} value={m} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
@@ -145,13 +149,13 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-[8px] tracking-[0.4em] font-black text-slate-400 dark:text-white/20 uppercase">{t.assetClass}</label>
+            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase">{t.assetClass}</label>
             <select 
               value={category}
-              onChange={(e) => setCategory(e.target.value as Category)}
-              className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white"
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white"
             >
-              {CATEGORIES.map(cat => (
+              {categories.map(cat => (
                 <option key={cat} value={cat} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                   {(t.categories as any)[cat] || cat}
                 </option>
@@ -162,9 +166,9 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
 
         <button 
           type="submit"
-          className="w-full py-6 bg-indigo-600 text-white font-black text-sm tracking-[0.4em] hover:bg-slate-900 dark:hover:bg-white dark:hover:text-slate-950 transition-all uppercase rounded-sm"
+          className={`w-full py-6 font-black text-sm tracking-[0.4em] transition-all uppercase rounded-sm ${successMsg ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white hover:bg-slate-900 dark:hover:bg-white dark:hover:text-slate-950'}`}
         >
-          {t.sealTransfer}
+          {successMsg ? 'DISPATCHED' : t.sealTransfer}
         </button>
       </form>
 

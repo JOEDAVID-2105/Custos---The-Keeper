@@ -6,18 +6,20 @@ import {
   doc, 
   setDoc, 
   getDoc, 
+  getDocs,
   query, 
   where, 
   deleteDoc, 
   onSnapshot,
-  updateDoc
+  updateDoc,
+  writeBatch,
+  addDoc
 } from "firebase/firestore";
 
 const LOCAL_STORAGE_KEY = 'custos_transactions';
 const USER_PREFS_KEY = 'custos_user_prefs';
 
 export class StorageService {
-  // Local Storage Fallbacks
   static getLocalTransactions(): Transaction[] {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     return data ? JSON.parse(data) : [];
@@ -52,7 +54,33 @@ export class StorageService {
     localStorage.setItem(USER_PREFS_KEY, JSON.stringify(prefs));
   }
 
-  // Firestore Logic
+  // SYNC UTILITIES
+  static async syncLocalToCloud(userId: string, userName: string) {
+    const local = this.getLocalTransactions();
+    if (local.length === 0) return;
+    
+    const batch = writeBatch(db);
+    local.forEach(tx => {
+      const ref = doc(db, 'transactions', tx.id);
+      batch.set(ref, { ...tx, userId, userName });
+    });
+    await batch.commit();
+    this.clearLocalTransactions();
+  }
+
+  static async syncPersonalToFamily(userId: string, familyId: string) {
+    const q = query(collection(db, 'transactions'), where('userId', '==', userId), where('familyId', '==', null));
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+
+    const batch = writeBatch(db);
+    snap.docs.forEach(d => {
+      batch.update(doc(db, 'transactions', d.id), { familyId });
+    });
+    await batch.commit();
+  }
+
+  // FIRESTORE
   static async syncTransaction(transaction: Transaction) {
     if (!auth.currentUser) return;
     const ref = doc(db, 'transactions', transaction.id);
@@ -87,6 +115,7 @@ export class StorageService {
   static async joinFamily(familyId: string) {
     if (!auth.currentUser) return;
     await updateDoc(doc(db, 'users', auth.currentUser.uid), { familyId });
+    await this.syncPersonalToFamily(auth.currentUser.uid, familyId);
   }
 
   static async leaveFamily() {
@@ -97,14 +126,13 @@ export class StorageService {
   static async createFamily(name: string) {
     if (!auth.currentUser) return;
     const familyId = `FAM-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    // Create family metadata document
     await setDoc(doc(db, 'families', familyId), {
       name: name || 'House Custos',
       creatorId: auth.currentUser.uid,
       createdAt: Date.now()
     });
-    // Update user's familyId
     await updateDoc(doc(db, 'users', auth.currentUser.uid), { familyId });
+    await this.syncPersonalToFamily(auth.currentUser.uid, familyId);
     return familyId;
   }
 
@@ -123,6 +151,19 @@ export class StorageService {
     });
   }
 
+  static subscribeToFamilyMembers(familyId: string, callback: (users: UserProfile[]) => void) {
+    const q = query(collection(db, 'users'), where('familyId', '==', familyId));
+    return onSnapshot(q, (snap) => {
+      const users = snap.docs.map(d => d.data() as UserProfile);
+      callback(users);
+    });
+  }
+
+  static async removeMemberFromFamily(memberUid: string) {
+    if (!auth.currentUser) return;
+    await updateDoc(doc(db, 'users', memberUid), { familyId: null });
+  }
+
   static subscribeToTransactions(uid: string, familyId: string | null | undefined, callback: (txs: Transaction[]) => void) {
     if (!auth.currentUser) return () => {};
 
@@ -133,6 +174,18 @@ export class StorageService {
     return onSnapshot(q, (snapshot) => {
       const txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
       callback(txs);
+    });
+  }
+
+  static async saveFeedback(type: 'issue' | 'update', message: string, userProfile?: UserProfile) {
+    const feedbackRef = collection(db, 'feedback');
+    await addDoc(feedbackRef, {
+      type,
+      message,
+      userId: auth.currentUser?.uid || 'local-user',
+      userName: userProfile?.displayName || 'Unknown',
+      timestamp: Date.now(),
+      version: 'v3.0.0-sovereign'
     });
   }
 }

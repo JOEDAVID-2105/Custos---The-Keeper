@@ -1,5 +1,5 @@
 
-export type Category = 'Housing' | 'Food' | 'Transport' | 'Luxury' | 'Wellness' | 'Investment' | 'Utility' | 'Family' | 'Income' | 'Other';
+export type Category = string;
 
 export interface Transaction {
   id: string;
@@ -10,7 +10,7 @@ export interface Transaction {
   paymentMethod: string;
   timestamp: number;
   userId: string;
-  userName?: string; // Track who made the transaction
+  userName?: string; 
   familyId?: string;
   location?: {
     lat: number;
@@ -32,6 +32,8 @@ export interface UserProfile {
   isCloudGuardian: boolean;
   theme: 'dark' | 'light';
   language: 'en' | 'ta';
+  budgetLimits?: Record<string, number>;
+  customCategories?: string[];
 }
 
 export interface Budget {

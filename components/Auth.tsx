@@ -21,6 +21,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -42,8 +43,8 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
           uid: user.uid,
           displayName: user.displayName || 'The Guardian',
           email: user.email || '',
-          currency: 'USD',
-          country: 'US',
+          currency: 'INR',
+          country: 'India',
           isCloudGuardian: true,
           theme: 'dark',
           language: language as 'en' | 'ta'
@@ -75,11 +76,12 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
           uid: cred.user.uid,
           displayName: name,
           email: email,
-          currency: 'USD',
-          country: 'US',
+          currency: 'INR',
+          country: 'India',
           isCloudGuardian: true,
           theme: 'dark',
-          language: language as 'en' | 'ta'
+          language: language as 'en' | 'ta',
+          budgetLimits: {}
         });
         
         onSuccess();
@@ -103,10 +105,10 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
   return (
     <div className="animate-in max-w-md mx-auto py-20 px-6">
       <div className="mb-12 text-center">
-        <h2 className="text-4xl font-black tracking-tighter mb-2 uppercase text-slate-900 dark:text-white">
+        <h2 className="text-4xl font-black tracking-tighter mb-2 uppercase text-slate-900 dark:text-white font-noto">
           {mode === 'forgot' ? t.resetTitle : t.title}
         </h2>
-        <p className="text-[10px] tracking-[0.4em] text-slate-500 dark:text-white/40 uppercase font-noto">
+        <p className="text-[10px] tracking-[0.4em] text-slate-800 dark:text-white/40 uppercase font-noto">
           {mode === 'forgot' ? t.resetSubtitle : t.subtitle}
         </p>
       </div>
@@ -116,7 +118,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
           <button 
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-4 py-4 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white font-black tracking-[0.2em] text-[10px] uppercase hover:bg-slate-100 dark:hover:bg-white dark:hover:text-slate-950 transition-all font-noto bg-white dark:bg-transparent"
+            className="w-full flex items-center justify-center gap-4 py-4 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white font-black tracking-[0.2em] text-[10px] uppercase hover:bg-slate-100 dark:hover:bg-white dark:hover:text-slate-950 transition-all font-noto bg-white dark:bg-transparent shadow-md"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -131,7 +133,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
         {mode !== 'forgot' && (
           <div className="flex items-center gap-4">
             <div className="flex-1 h-px bg-slate-300 dark:bg-white/10"></div>
-            <span className="text-[8px] font-black text-slate-400 dark:text-white/10 uppercase tracking-widest">OR</span>
+            <span className="text-[8px] font-black text-slate-500 dark:text-white/10 uppercase tracking-widest">OR</span>
             <div className="flex-1 h-px bg-slate-300 dark:bg-white/10"></div>
           </div>
         )}
@@ -139,39 +141,48 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {mode === 'signup' && (
             <div className="space-y-2">
-              <label className="text-[10px] tracking-widest text-slate-500 dark:text-white/40 uppercase font-noto">{t.fullName}</label>
+              <label className="text-[10px] tracking-widest text-slate-800 dark:text-white/40 uppercase font-noto">{t.fullName}</label>
               <input 
                 type="text" 
                 value={name}
                 onChange={e => setName(e.target.value)}
-                className="w-full bg-slate-200/50 dark:bg-transparent border border-slate-300 dark:border-white/10 p-4 focus:border-indigo-500 outline-none transition-all font-noto text-slate-900 dark:text-white placeholder-slate-400"
+                className="w-full bg-slate-100/50 dark:bg-transparent border border-slate-300 dark:border-white/10 p-4 focus:border-indigo-500 outline-none transition-all font-noto text-slate-900 dark:text-white placeholder-slate-400"
                 placeholder="..."
                 required
               />
             </div>
           )}
           <div className="space-y-2">
-            <label className="text-[10px] tracking-widest text-slate-500 dark:text-white/40 uppercase font-noto">{t.email}</label>
+            <label className="text-[10px] tracking-widest text-slate-800 dark:text-white/40 uppercase font-noto">{t.email}</label>
             <input 
               type="email" 
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full bg-slate-200/50 dark:bg-transparent border border-slate-300 dark:border-white/10 p-4 focus:border-indigo-500 outline-none transition-all font-noto text-slate-900 dark:text-white placeholder-slate-400"
+              className="w-full bg-slate-100/50 dark:bg-transparent border border-slate-300 dark:border-white/10 p-4 focus:border-indigo-500 outline-none transition-all font-noto text-slate-900 dark:text-white placeholder-slate-400"
               placeholder="..."
               required
             />
           </div>
           {mode !== 'forgot' && (
-            <div className="space-y-2">
-              <label className="text-[10px] tracking-widest text-slate-500 dark:text-white/40 uppercase font-noto">{t.password}</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full bg-slate-200/50 dark:bg-transparent border border-slate-300 dark:border-white/10 p-4 focus:border-indigo-500 outline-none transition-all font-noto text-slate-900 dark:text-white placeholder-slate-400"
-                placeholder="••••••••"
-                required
-              />
+            <div className="space-y-2 relative">
+              <label className="text-[10px] tracking-widest text-slate-800 dark:text-white/40 uppercase font-noto">{t.password}</label>
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full bg-slate-100/50 dark:bg-transparent border border-slate-300 dark:border-white/10 p-4 pr-16 focus:border-indigo-500 outline-none transition-all font-noto text-slate-900 dark:text-white placeholder-slate-400"
+                  placeholder="••••••••"
+                  required
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[8px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest"
+                >
+                  {showPassword ? t.hide : t.show}
+                </button>
+              </div>
               {mode === 'login' && (
                 <button 
                   type="button"
@@ -184,13 +195,13 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
             </div>
           )}
 
-          {error && <p className="text-rose-500 text-[10px] tracking-widest uppercase font-bold text-center font-noto">{error}</p>}
-          {message && <p className="text-emerald-500 text-[10px] tracking-widest uppercase font-bold text-center font-noto">{message}</p>}
+          {error && <p className="text-rose-600 text-[10px] tracking-widest uppercase font-bold text-center font-noto">{error}</p>}
+          {message && <p className="text-emerald-600 text-[10px] tracking-widest uppercase font-bold text-center font-noto">{message}</p>}
 
           <button 
             disabled={loading}
             type="submit"
-            className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black tracking-[0.2em] text-sm uppercase hover:bg-indigo-600 dark:hover:bg-indigo-600 hover:text-white dark:hover:text-white transition-all disabled:opacity-50 font-noto"
+            className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black tracking-[0.2em] text-sm uppercase hover:bg-indigo-600 dark:hover:bg-indigo-600 hover:text-white dark:hover:text-white transition-all disabled:opacity-50 font-noto shadow-xl"
           >
             {loading ? t.processing : mode === 'login' ? t.authenticate : mode === 'signup' ? t.establish : t.sendReset}
           </button>
@@ -201,7 +212,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
         {mode === 'login' && (
           <button 
             onClick={() => { setMode('signup'); setError(''); setMessage(''); }}
-            className="w-full text-[10px] tracking-widest text-slate-500 dark:text-white/30 hover:text-slate-900 dark:hover:text-white transition-all uppercase font-bold font-noto"
+            className="w-full text-[10px] tracking-widest text-slate-800 dark:text-white/30 hover:text-slate-900 dark:hover:text-white transition-all uppercase font-black font-noto"
           >
             {t.newGuardianship}
           </button>
@@ -209,7 +220,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, language = 'en' }) => {
         {(mode === 'signup' || mode === 'forgot') && (
           <button 
             onClick={handleReturn}
-            className="w-full text-[10px] tracking-widest text-slate-500 dark:text-white/30 hover:text-slate-900 dark:hover:text-white transition-all uppercase font-bold font-noto"
+            className="w-full text-[10px] tracking-widest text-slate-800 dark:text-white/30 hover:text-slate-900 dark:hover:text-white transition-all uppercase font-black font-noto"
           >
             {t.returnAuth}
           </button>
