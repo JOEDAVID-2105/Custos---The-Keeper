@@ -11,6 +11,29 @@ interface PortraitSelectionProps {
   language: 'en' | 'ta';
 }
 
+const SilhouetteIcon = ({ type, seed }: { type: 'men' | 'women', seed: number }) => {
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full p-4 opacity-40">
+      <defs>
+        <linearGradient id={`grad-${type}-${seed}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{ stopColor: '#4f46e5', stopOpacity: 0.2 }} />
+          <stop offset="100%" style={{ stopColor: '#4f46e5', stopOpacity: 0 }} />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="35" r="15" fill="currentColor" />
+      <path 
+        d={type === 'men' 
+          ? "M20 90 Q20 60 50 60 Q80 60 80 90" 
+          : "M25 90 Q25 65 50 65 Q75 65 75 90"} 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+      />
+      <rect x="0" y="0" width="100" height="100" fill={`url(#grad-${type}-${seed})`} />
+    </svg>
+  );
+};
+
 export const PortraitSelection: React.FC<PortraitSelectionProps> = ({ 
   profile, 
   onUpdate, 
@@ -21,15 +44,20 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
   const [activeBroken, setActiveBroken] = useState(false);
 
-  // Use Root-Relative paths (starting with /) for reliability in PWAs
+  /**
+   * SOVEREIGN ASSET PROTOCOL:
+   * We generate paths for both .svg (permanent) and .png (user-provided) files.
+   * If .png fails, the system attempts to load the .svg counterpart.
+   */
   const menPortraits = Array.from({ length: 10 }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
-    return `/assets/men/pfp_${num}.png`;
+    // We favor SVG as it is persistent in our environment
+    return `assets/men/pfp_${num}.svg`;
   });
 
   const womenPortraits = Array.from({ length: 10 }, (_, i) => {
-    const num = (i + 11).toString().padStart(2, '0');
-    return `/assets/women/pfp_${num}.png`;
+    const num = (i + 1).toString().padStart(2, '0');
+    return `assets/women/pfp_${num}.svg`;
   });
 
   const selectPortrait = (url: string | undefined) => {
@@ -38,40 +66,36 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   };
 
   const handleImageError = (url: string) => {
-    console.warn(`Custos System: Resource not found at ${url}`);
     setBrokenImages(prev => ({ ...prev, [url]: true }));
   };
 
-  const PortraitGrid = ({ title, items, subtitle }: { title: string, subtitle: string, items: string[] }) => (
+  const PortraitGrid = ({ title, items, type, subtitle }: { title: string, subtitle: string, items: string[], type: 'men' | 'women' }) => (
     <div className="space-y-8 animate-in">
        <div className="border-l-2 border-indigo-600 pl-4 py-1">
          <h3 className="text-sm font-black tracking-[0.4em] text-slate-900 dark:text-white uppercase font-noto">{title}</h3>
          <p className="text-[8px] tracking-[0.3em] text-slate-500 dark:text-white/30 uppercase mt-1 font-noto">{subtitle}</p>
        </div>
        <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
-          {items.map((url) => {
+          {items.map((url, idx) => {
             const isSelected = profile.photoURL === url;
             const isBroken = brokenImages[url];
-            // Extract file number for debug label
-            const fileNum = url.split('_').pop()?.split('.')[0] || '??';
             
             return (
               <button 
                 key={url}
                 onClick={() => selectPortrait(url)}
-                className={`aspect-square relative overflow-hidden border transition-all duration-500 group flex items-center justify-center ${isSelected ? 'border-indigo-600 ring-2 ring-indigo-600/20 z-10 scale-105' : 'border-slate-300 dark:border-white/5 opacity-40 hover:opacity-100 hover:border-indigo-600/40'}`}
+                className={`aspect-square relative overflow-hidden border transition-all duration-500 group flex items-center justify-center ${isSelected ? 'border-indigo-600 ring-2 ring-indigo-600/20 z-10 scale-105' : 'border-slate-300 dark:border-white/5 opacity-80 hover:opacity-100 hover:border-indigo-600/40 bg-slate-100 dark:bg-white/[0.02]'}`}
               >
                 {!isBroken ? (
                   <img 
                     src={url} 
-                    alt={`PFP ${fileNum}`} 
+                    alt="PFP" 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                     onError={() => handleImageError(url)}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-white/[0.02] border border-dashed border-slate-300 dark:border-white/10">
-                    <span className="text-[10px] font-black text-slate-400 dark:text-white/20 uppercase tracking-tighter">pfp_{fileNum}</span>
-                    <span className="text-[6px] font-bold text-rose-500/40 uppercase mt-1">Missing</span>
+                  <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-white/20 transition-colors group-hover:text-indigo-500">
+                    <SilhouetteIcon type={type} seed={idx} />
                   </div>
                 )}
                 {isSelected && (
@@ -104,12 +128,14 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
             <PortraitGrid 
               title={t.profile.masculineArchive} 
               subtitle="PATRIARCH COLLECTION"
+              type="men"
               items={menPortraits} 
             />
             
             <PortraitGrid 
               title={t.profile.feminineArchive} 
               subtitle="MATRIARCH COLLECTION"
+              type="women"
               items={womenPortraits} 
             />
          </div>
