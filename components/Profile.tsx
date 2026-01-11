@@ -41,6 +41,12 @@ export const Profile: React.FC<ProfileProps> = ({
   const [unlockProgress, setUnlockProgress] = useState(0);
   const unlockTimerRef = useRef<any>(null);
 
+  // Archive Portraits
+  const portraits = Array.from({ length: 20 }, (_, i) => {
+    const num = (i + 1).toString().padStart(2, '0');
+    return `./assets/pfp_${num}.png`;
+  });
+
   const familyId = profile.familyId;
   const language = profile.language || 'en';
   const t = translations[language];
@@ -143,6 +149,10 @@ export const Profile: React.FC<ProfileProps> = ({
     }
   };
 
+  const selectPortrait = (url: string) => {
+    onUpdate({ ...profile, photoURL: url });
+  };
+
   const handleInstallClick = () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -174,8 +184,17 @@ export const Profile: React.FC<ProfileProps> = ({
             </button>
           )}
 
-          <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center">
-            <InitialShield name={profile.displayName} size="lg" />
+          <div className="relative group">
+            <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center overflow-hidden">
+              {profile.photoURL ? (
+                <img src={profile.photoURL} alt="Identity" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              ) : (
+                <InitialShield name={profile.displayName} size="lg" />
+              )}
+            </div>
+            {profile.photoURL && (
+              <div className="absolute -inset-1 border border-indigo-600/20 animate-pulse pointer-events-none"></div>
+            )}
           </div>
 
           <div className="text-center space-y-2">
@@ -187,6 +206,32 @@ export const Profile: React.FC<ProfileProps> = ({
                 </p>
              </div>
           </div>
+        </div>
+
+        {/* Portrait Archive Gallery */}
+        <div className="pt-16 border-t border-slate-300 dark:border-white/5">
+           <div className="mb-8">
+             <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.portraitArchive}</p>
+             <p className="text-[8px] tracking-widest text-slate-500 dark:text-white/20 uppercase mt-1">{t.profile.selectIdentity}</p>
+           </div>
+           
+           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2 md:gap-3">
+              {portraits.map((url, idx) => {
+                const isSelected = profile.photoURL === url;
+                return (
+                  <button 
+                    key={idx}
+                    onClick={() => selectPortrait(url)}
+                    className={`aspect-square relative overflow-hidden border transition-all duration-300 ${isSelected ? 'border-indigo-600 scale-105 shadow-lg z-10' : 'border-slate-200 dark:border-white/5 opacity-40 hover:opacity-100 hover:border-indigo-600/50'}`}
+                  >
+                    <img src={url} alt={`Archive ${idx+1}`} className="w-full h-full object-cover" />
+                    {isSelected && (
+                      <div className="absolute inset-0 border-2 border-indigo-600/50"></div>
+                    )}
+                  </button>
+                );
+              })}
+           </div>
         </div>
 
         {deferredPrompt && (
@@ -292,6 +337,15 @@ export const Profile: React.FC<ProfileProps> = ({
                     {familyMembers.map(member => (
                        <div key={member.uid} className="flex items-center justify-between p-4 border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
                           <div className="flex items-center gap-4">
+                             <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-white/10">
+                                {member.photoURL ? (
+                                  <img src={member.photoURL} alt={member.displayName} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full bg-slate-200 dark:bg-white/5 flex items-center justify-center text-[10px] font-black text-indigo-600 uppercase">
+                                    {member.displayName.charAt(0)}
+                                  </div>
+                                )}
+                             </div>
                              <div>
                                 <p className="text-xs font-black uppercase text-slate-900 dark:text-white truncate">{member.displayName}</p>
                                 <p className="text-[7px] font-black text-indigo-600 uppercase tracking-widest">

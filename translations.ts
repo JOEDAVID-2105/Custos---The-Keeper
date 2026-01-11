@@ -184,7 +184,9 @@ export const translations = {
       locked: "LOCKED",
       unlocked: "UNLOCKED",
       issueLabel: "issue?",
-      suggestUpdateLabel: "suggest update?"
+      suggestUpdateLabel: "suggest update?",
+      portraitArchive: "PORTRAIT ARCHIVE",
+      selectIdentity: "SELECT YOUR IDENTITY"
     },
     ledgerHeaders: {
       timeAndAlias: "TIME & ALIAS",
@@ -334,7 +336,7 @@ export const translations = {
       processing: "VAULT ஒத்திசைக்கப்படுகிறது...",
       newGuardianship: "புதிய கணக்கை உருவாக்கு",
       returnAuth: "அடையாளம் காணும் பக்கத்திற்கு திரும்புக",
-      denied: "அணுகல் மறுக்கப்பட்டது.",
+      denied: "Access denied.",
       forgotPassword: "கடவுச்சொல்லை மறந்தீர்களா?",
       resetTitle: "கடவுச்சொல் மீட்பு",
       resetSubtitle: "மின்னஞ்சல் மூலம் அணுகலை மீட்டெடுக்கவும்",
@@ -387,7 +389,9 @@ export const translations = {
       locked: "பூட்டப்பட்டது",
       unlocked: "திறக்கப்பட்டது",
       issueLabel: "பிரச்சனை?",
-      suggestUpdateLabel: "மாற்றம் பரிந்துரைக்கவா?"
+      suggestUpdateLabel: "மாற்றம் பரிந்துரைக்கவா?",
+      portraitArchive: "அடையாள படம் சேகரிப்பு",
+      selectIdentity: "உங்கள் அடையாளத்தைத் தேர்ந்தெடுக்கவும்"
     },
     ledgerHeaders: {
       timeAndAlias: "நேரம் / பெயர்",
