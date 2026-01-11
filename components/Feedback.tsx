@@ -28,24 +28,28 @@ export const Feedback: React.FC<FeedbackProps> = ({ type, profile, onBack, langu
     const webhookUrl = "https://discord.com/api/webhooks/1459843625830846681/2MlaruIukNi5owkl7eRAWjtgs-g3GW3o2i9xqz9AzWPfzosiTESz1xMIOrEtdRdg-NA4";
     
     try {
-      // 1. Save to Firestore for archive
-      await StorageService.saveFeedback(type, message, profile);
+      // 1. Save to Firestore and get current batch count
+      const currentTotal = await StorageService.saveFeedback(type, message, profile);
       
       // 2. Dispatch to Discord Webhook
+      const isThresholdReached = currentTotal > 0 && currentTotal % 10 === 0;
+
       await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          content: isThresholdReached ? `🚨 **THRESHOLD ALERT**: 10+ messages recorded. Check mail: joelsofflmail@gmail.com` : null,
           embeds: [{
             title: `System Feedback: ${type.toUpperCase()}`,
             description: message,
             color: type === 'issue' ? 0xF43F5E : 0x4F46E5,
             fields: [
               { name: "User", value: profile.displayName, inline: true },
+              { name: "Email", value: profile.email || 'No email provided', inline: true },
               { name: "Currency", value: profile.currency, inline: true },
-              { name: "Timestamp", value: new Date().toLocaleString(), inline: true }
+              { name: "Total Received", value: currentTotal.toString(), inline: true }
             ],
-            footer: { text: "Custos v3.1 Sovereign Protocol" }
+            footer: { text: "Custos v3.1 Sovereign Protocol | Dispatch Timestamp: " + new Date().toLocaleString() }
           }]
         })
       });

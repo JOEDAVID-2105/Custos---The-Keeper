@@ -31,8 +31,6 @@ export const ContactPopup: React.FC<ContactPopupProps> = ({ onClose, language })
 
           <a 
             href="mailto:davidcodes2105@gmail.com"
-            target="_blank"
-            rel="noopener noreferrer"
             className="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 group hover:border-indigo-600 transition-all"
           >
             <span className="text-xs font-black tracking-widest uppercase text-slate-700 dark:text-white/70 font-noto">EMAIL</span>

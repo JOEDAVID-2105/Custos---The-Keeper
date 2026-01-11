@@ -13,7 +13,8 @@ import {
   onSnapshot,
   updateDoc,
   writeBatch,
-  addDoc
+  addDoc,
+  increment
 } from "firebase/firestore";
 
 const LOCAL_STORAGE_KEY = 'custos_transactions';
@@ -177,15 +178,29 @@ export class StorageService {
     });
   }
 
-  static async saveFeedback(type: 'issue' | 'update', message: string, userProfile?: UserProfile) {
+  static async saveFeedback(type: 'issue' | 'update', message: string, userProfile?: UserProfile): Promise<number> {
     const feedbackRef = collection(db, 'feedback');
+    const statsRef = doc(db, 'metadata', 'feedback_stats');
+
+    // Record the actual feedback
     await addDoc(feedbackRef, {
       type,
       message,
       userId: auth.currentUser?.uid || 'local-user',
       userName: userProfile?.displayName || 'Unknown',
+      userEmail: userProfile?.email || 'N/A',
       timestamp: Date.now(),
-      version: 'v3.0.0-sovereign'
+      version: 'v3.1.0-sovereign'
     });
+
+    // Handle counter for 10+ alerts
+    try {
+      await setDoc(statsRef, { count: increment(1) }, { merge: true });
+      const snap = await getDoc(statsRef);
+      return snap.data()?.count || 0;
+    } catch (e) {
+      console.error("Counter increment failed, rules may need updating", e);
+      return 0;
+    }
   }
 }
