@@ -19,16 +19,17 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
 }) => {
   const t = translations[language];
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
+  const [activeBroken, setActiveBroken] = useState(false);
 
-  // Assets organized by gender folders as requested
+  // Use Root-Relative paths (starting with /) for reliability in PWAs
   const menPortraits = Array.from({ length: 10 }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
-    return `./assets/men/pfp_${num}.png`;
+    return `/assets/men/pfp_${num}.png`;
   });
 
   const womenPortraits = Array.from({ length: 10 }, (_, i) => {
-    const num = (i + 11).toString().padStart(2, '0'); // Assuming 11-20 are women
-    return `./assets/women/pfp_${num}.png`;
+    const num = (i + 11).toString().padStart(2, '0');
+    return `/assets/women/pfp_${num}.png`;
   });
 
   const selectPortrait = (url: string | undefined) => {
@@ -37,6 +38,7 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   };
 
   const handleImageError = (url: string) => {
+    console.warn(`Custos System: Resource not found at ${url}`);
     setBrokenImages(prev => ({ ...prev, [url]: true }));
   };
 
@@ -46,26 +48,30 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
          <h3 className="text-sm font-black tracking-[0.4em] text-slate-900 dark:text-white uppercase font-noto">{title}</h3>
          <p className="text-[8px] tracking-[0.3em] text-slate-500 dark:text-white/30 uppercase mt-1 font-noto">{subtitle}</p>
        </div>
-       <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-3">
-          {items.map((url, idx) => {
+       <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
+          {items.map((url) => {
             const isSelected = profile.photoURL === url;
             const isBroken = brokenImages[url];
+            // Extract file number for debug label
+            const fileNum = url.split('_').pop()?.split('.')[0] || '??';
+            
             return (
               <button 
                 key={url}
                 onClick={() => selectPortrait(url)}
-                className={`aspect-square relative overflow-hidden border transition-all duration-500 group ${isSelected ? 'border-indigo-600 ring-2 ring-indigo-600/20 z-10 scale-105' : 'border-slate-300 dark:border-white/5 opacity-40 hover:opacity-100 hover:border-indigo-600/40'}`}
+                className={`aspect-square relative overflow-hidden border transition-all duration-500 group flex items-center justify-center ${isSelected ? 'border-indigo-600 ring-2 ring-indigo-600/20 z-10 scale-105' : 'border-slate-300 dark:border-white/5 opacity-40 hover:opacity-100 hover:border-indigo-600/40'}`}
               >
                 {!isBroken ? (
                   <img 
                     src={url} 
-                    alt={`PFP ${idx+1}`} 
+                    alt={`PFP ${fileNum}`} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                     onError={() => handleImageError(url)}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-white/[0.02]">
-                    <span className="text-[10px] font-black text-slate-400 dark:text-white/10 uppercase">#{idx+1}</span>
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-white/[0.02] border border-dashed border-slate-300 dark:border-white/10">
+                    <span className="text-[10px] font-black text-slate-400 dark:text-white/20 uppercase tracking-tighter">pfp_{fileNum}</span>
+                    <span className="text-[6px] font-bold text-rose-500/40 uppercase mt-1">Missing</span>
                   </div>
                 )}
                 {isSelected && (
@@ -111,9 +117,14 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
          <div className="space-y-12">
             <div className="p-10 border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/[0.02] flex flex-col items-center gap-8 text-center sticky top-24">
                <h3 className="text-[10px] font-black tracking-[0.4em] text-slate-500 dark:text-white/30 uppercase font-noto">CURRENT RESOLUTION</h3>
-               <div className="w-40 h-40 border border-slate-400 dark:border-white/10 p-4 shadow-3xl bg-white dark:bg-transparent">
-                  {profile.photoURL ? (
-                    <img src={profile.photoURL} alt="Active" className="w-full h-full object-cover" />
+               <div className="w-40 h-40 border border-slate-400 dark:border-white/10 p-4 shadow-3xl bg-white dark:bg-transparent overflow-hidden">
+                  {profile.photoURL && !activeBroken ? (
+                    <img 
+                      src={profile.photoURL} 
+                      alt="Active" 
+                      className="w-full h-full object-cover" 
+                      onError={() => setActiveBroken(true)}
+                    />
                   ) : (
                     <InitialShield name={profile.displayName} size="lg" />
                   )}
