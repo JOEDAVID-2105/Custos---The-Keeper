@@ -45,19 +45,19 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   const [activeBroken, setActiveBroken] = useState(false);
 
   /**
-   * SOVEREIGN ASSET PROTOCOL:
-   * We generate paths for both .svg (permanent) and .png (user-provided) files.
-   * If .png fails, the system attempts to load the .svg counterpart.
+   * PHOTO ARCHIVE PROTOCOL:
+   * Optimized to load .png assets from the project's physical directory.
+   * Men: pfp_01.png to pfp_10.png
+   * Women: pfp_11.png to pfp_20.png
    */
   const menPortraits = Array.from({ length: 10 }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
-    // We favor SVG as it is persistent in our environment
-    return `assets/men/pfp_${num}.svg`;
+    return `assets/men/pfp_${num}.png`;
   });
 
   const womenPortraits = Array.from({ length: 10 }, (_, i) => {
-    const num = (i + 1).toString().padStart(2, '0');
-    return `assets/women/pfp_${num}.svg`;
+    const num = (i + 11).toString().padStart(2, '0');
+    return `assets/women/pfp_${num}.png`;
   });
 
   const selectPortrait = (url: string | undefined) => {
