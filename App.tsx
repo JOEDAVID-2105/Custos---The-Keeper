@@ -8,8 +8,8 @@ import { Auth } from './components/Auth';
 import { BudgetEdit } from './components/BudgetEdit';
 import { ClassWiseOutflow } from './components/ClassWiseOutflow';
 import { FiltersPage } from './components/FiltersPage';
-import { About } from './components/About';
 import { Feedback } from './components/Feedback';
+import { ContactPopup } from './components/ContactPopup';
 import { InitialShield } from './components/InitialShield';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
@@ -19,7 +19,7 @@ import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters' | 'about' | 'feedback';
+type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters' | 'feedback';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('vault');
@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showSplash, setShowSplash] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showContactPopup, setShowContactPopup] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     uid: 'local-user',
     displayName: 'The Local User',
@@ -41,13 +42,11 @@ const App: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Confirmation Modal State
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; category: string }>({ 
     isOpen: false, 
     category: '' 
   });
 
-  // Filters State
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [startDate, setStartDate] = useState('');
@@ -207,7 +206,6 @@ const App: React.FC = () => {
     const trimmedNew = newName.trim();
     if (!trimmedNew || oldName === trimmedNew) return;
 
-    // 1. Update Profile State
     const newCustom = (profile.customCategories || []).map(c => c === oldName ? trimmedNew : c);
     const newLimits = { ...(profile.budgetLimits || {}) };
     if (newLimits[oldName] !== undefined) {
@@ -216,7 +214,6 @@ const App: React.FC = () => {
     }
     await updateProfile({ ...profile, customCategories: newCustom, budgetLimits: newLimits });
 
-    // 2. Deep Update Historical Records
     const affected = transactions.filter(tx => tx.category === oldName);
     for (const tx of affected) {
       await updateTransaction({ ...tx, category: trimmedNew });
@@ -302,22 +299,12 @@ const App: React.FC = () => {
           language={profile.language} 
         />
       );
-      case 'about': return (
-        <About 
-          language={profile.language} 
-          onBack={() => setActiveTab('profile')} 
-          onNavigateToFeedback={(type) => {
-            setFeedbackType(type);
-            setActiveTab('feedback');
-          }}
-        />
-      );
       case 'feedback': return (
         <Feedback 
           type={feedbackType} 
           profile={profile} 
           language={profile.language} 
-          onBack={() => setActiveTab('about')} 
+          onBack={() => setActiveTab('profile')} 
         />
       );
       case 'ai': return <div className="max-w-3xl mx-auto"><AIAdvisor transactions={transactions} currency={profile.currency} language={profile.language} /></div>;
@@ -329,7 +316,11 @@ const App: React.FC = () => {
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => setActiveTab('auth')}
             onNavigateToEditLimits={() => setActiveTab('budget-edit')}
-            onNavigateToAbout={() => setActiveTab('about')}
+            onNavigateToFeedback={(type) => {
+              setFeedbackType(type);
+              setActiveTab('feedback');
+            }}
+            onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
           />
           {auth.currentUser && (
@@ -391,6 +382,8 @@ const App: React.FC = () => {
         onCancel={() => setDeleteModal({ isOpen: false, category: '' })}
         language={profile.language}
       />
+
+      {showContactPopup && <ContactPopup onClose={() => setShowContactPopup(false)} language={profile.language} />}
 
       <button 
         onClick={toggleTheme}
