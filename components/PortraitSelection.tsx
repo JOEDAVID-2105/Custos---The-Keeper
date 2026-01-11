@@ -48,7 +48,7 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   /**
    * PHOTO ARCHIVE PROTOCOL:
    * Men folder: pfp_01.png - pfp_10.png
-   * Women folder: pfp_11.png - pfp_20.png (as per project README)
+   * Women folder: pfp_11.png - pfp_20.png
    */
   const menPortraits = Array.from({ length: 10 }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
@@ -102,7 +102,7 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
                       onError={() => handleImageError(url)}
                     />
                     {isLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center bg-slate-200 dark:bg-white/5">
                         <div className="w-4 h-4 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
                       </div>
                     )}
