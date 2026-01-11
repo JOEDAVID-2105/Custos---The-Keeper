@@ -5,7 +5,6 @@ import { CURRENCIES, TrashIcon } from '../constants';
 import { StorageService } from '../services/storageService';
 import { auth } from '../services/firebase';
 import { translations } from '../translations';
-import { InitialShield } from './InitialShield';
 
 interface ProfileProps {
   profile: UserProfile;
@@ -20,10 +19,9 @@ interface ProfileProps {
 export const Profile: React.FC<ProfileProps> = ({ 
   profile, 
   onUpdate, 
-  onToggleLanguage, 
   onGoCloud,
-  onNavigateToEditLimits,
-  onOpenContact
+  onOpenContact,
+  deferredPrompt
 }) => {
   const [joinId, setJoinId] = useState('');
   const [familyMetadata, setFamilyMetadata] = useState<{ name: string; creatorId: string } | null>(null);
@@ -31,7 +29,6 @@ export const Profile: React.FC<ProfileProps> = ({
   const [isNamingFamily, setIsNamingFamily] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
   const [showCopied, setShowCopied] = useState(false);
-  const [showVisionModal, setShowVisionModal] = useState(false);
   
   const familyId = profile.familyId;
   const language = profile.language || 'en';
@@ -97,6 +94,17 @@ export const Profile: React.FC<ProfileProps> = ({
     }
   };
 
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        }
+      });
+    }
+  };
+
   const isFamilyCreator = familyMetadata?.creatorId === auth.currentUser?.uid;
 
   return (
@@ -117,15 +125,6 @@ export const Profile: React.FC<ProfileProps> = ({
             </button>
           )}
 
-          <div className="relative group">
-            <button 
-              onClick={() => setShowVisionModal(true)}
-              className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 relative cursor-pointer bg-slate-50 dark:bg-white/[0.02] shadow-2xl transition-transform hover:scale-105 flex items-center justify-center"
-            >
-              <InitialShield name={profile.displayName} size="lg" />
-            </button>
-          </div>
-
           <div className="text-center space-y-2">
              <p className="text-sm font-black uppercase tracking-[0.4em] text-slate-900 dark:text-white font-noto">{profile.displayName}</p>
              <div className="inline-flex items-center gap-2 px-3 py-1 border border-indigo-500/20 bg-indigo-500/5">
@@ -137,22 +136,14 @@ export const Profile: React.FC<ProfileProps> = ({
           </div>
         </div>
 
-        {showVisionModal && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-xl animate-in">
-            <div className="w-full max-w-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 p-10 space-y-10 shadow-3xl">
-              <div className="flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-6">
-                <h3 className="text-xl font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Secure Vision</h3>
-                <button onClick={() => setShowVisionModal(false)} className="text-rose-600 hover:text-rose-400 transition-colors text-[10px] font-black uppercase tracking-widest">CLOSE</button>
-              </div>
-
-              <div className="aspect-square w-full max-w-[320px] mx-auto border border-slate-200 dark:border-white/5 p-4 bg-slate-50 dark:bg-white/[0.02] flex items-center justify-center">
-                <InitialShield name={profile.displayName} size="xl" />
-              </div>
-
-              <div className="text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-white/20">Identity Protected by Sovereign Core</p>
-              </div>
-            </div>
+        {deferredPrompt && (
+          <div className="pt-8 border-t border-slate-300 dark:border-white/5">
+             <button 
+               onClick={handleInstallClick}
+               className="w-full py-5 bg-emerald-600 text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-emerald-700 transition-all shadow-lg font-noto"
+             >
+               INSTALL CUSTOS PROTOCOL
+             </button>
           </div>
         )}
 
@@ -174,9 +165,6 @@ export const Profile: React.FC<ProfileProps> = ({
                     {familyMembers.map(member => (
                        <div key={member.uid} className="flex items-center justify-between p-4 border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
                           <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 border border-slate-300 dark:border-white/10 p-1 flex items-center justify-center">
-                                <InitialShield name={member.displayName} size="sm" />
-                             </div>
                              <div>
                                 <p className="text-xs font-black uppercase text-slate-900 dark:text-white truncate">{member.displayName}</p>
                                 <p className="text-[7px] font-black text-indigo-600 uppercase tracking-widest">
@@ -272,20 +260,10 @@ export const Profile: React.FC<ProfileProps> = ({
 
         <div className="pt-20 border-t border-slate-300 dark:border-white/5 flex flex-col items-center gap-12">
           <div className="w-full max-w-sm flex flex-col items-center gap-6">
-            <div className="flex items-center gap-4 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
-               <button 
-                  onClick={onOpenContact}
-                  className="text-slate-500 dark:text-white/30 hover:text-indigo-600 transition-all pb-1"
-               >
-                 {t.reportIssue}
-               </button>
-               <span className="opacity-10 text-slate-400">||</span>
-               <button 
-                  onClick={onOpenContact}
-                  className="text-slate-500 dark:text-white/30 hover:text-amber-500 transition-all pb-1"
-               >
-                 {t.suggestUpdate}
-               </button>
+            <div className="flex items-center gap-6 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
+               <span className="text-indigo-400/60 pb-1">issue?</span>
+               <span className="opacity-10 text-slate-400">|</span>
+               <span className="text-amber-400/60 pb-1">suggest update?</span>
             </div>
             
             <button 
@@ -298,10 +276,10 @@ export const Profile: React.FC<ProfileProps> = ({
 
           <div className="w-full border-t border-slate-200 dark:border-white/5 pt-12 space-y-2 text-center">
              <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
-                VERSION: 4.0.0 ALPHA
+                VERSION: 1.1.0 ALPHA
              </p>
              <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
-                PROPRIETOR: D'CODES / DAVID CODES
+                PROPRIETOR: DAVID CODES
              </p>
           </div>
         </div>
