@@ -10,7 +10,6 @@ import { ClassWiseOutflow } from './components/ClassWiseOutflow';
 import { FiltersPage } from './components/FiltersPage';
 import { ContactPopup } from './components/ContactPopup';
 import { ConfirmationModal } from './components/ConfirmationModal';
-import { PortraitSelection } from './components/PortraitSelection';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
 import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
@@ -18,7 +17,7 @@ import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters' | 'portrait-selection';
+type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters';
 
 interface SnackbarState {
   isVisible: boolean;
@@ -328,14 +327,6 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => navigateTo('profile')} />;
-    if (activeTab === 'portrait-selection') return (
-      <PortraitSelection 
-        profile={profile} 
-        onUpdate={updateProfile} 
-        onBack={() => navigateTo('profile')} 
-        language={profile.language} 
-      />
-    );
     
     switch (activeTab) {
       case 'vault': return (
@@ -408,7 +399,7 @@ const App: React.FC = () => {
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => navigateTo('auth')}
             onNavigateToEditLimits={() => navigateTo('budget-edit')}
-            onNavigateToPortraitSelection={() => navigateTo('portrait-selection')}
+            onNavigateToPortraitSelection={() => {}} // Disabled for now
             onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
             fontSize={fontSize}

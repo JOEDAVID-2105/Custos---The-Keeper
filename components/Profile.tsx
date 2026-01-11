@@ -181,25 +181,20 @@ export const Profile: React.FC<ProfileProps> = ({
             </button>
           )}
 
-          <div className="relative group cursor-pointer" onClick={onNavigateToPortraitSelection}>
+          <div className="relative group">
             <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center overflow-hidden">
                {profile.photoURL && !brokenImages[profile.photoURL] ? (
                  <img 
                     src={profile.photoURL} 
                     alt="PFP" 
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125"
+                    className="w-full h-full object-cover transition-transform duration-1000"
                     onError={() => handleImageError(profile.photoURL!)}
                  />
                ) : (
                  <InitialShield name={profile.displayName} size="lg" />
                )}
-               <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors flex items-center justify-center">
-                 <span className="opacity-0 group-hover:opacity-100 text-[8px] font-black uppercase tracking-widest text-white transition-all">
-                   {t.profile.portraitArchive}
-                 </span>
-               </div>
             </div>
-            <div className="absolute -inset-1 border border-indigo-600/20 pointer-events-none group-hover:border-indigo-600/50 transition-colors"></div>
+            <div className="absolute -inset-1 border border-indigo-600/20 pointer-events-none"></div>
           </div>
 
           <div className="text-center space-y-2">
