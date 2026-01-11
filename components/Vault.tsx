@@ -80,11 +80,11 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
         <div className="text-center mb-12">
           <h2 className="text-4xl font-black tracking-tighter uppercase text-slate-900 dark:text-white font-noto">{t.vault}</h2>
           <div className="flex items-center justify-center gap-3 mt-2">
-            <p className="text-slate-800 dark:text-white/30 tracking-[0.4em] text-[9px] uppercase font-noto">{t.establishRecord}</p>
-            <div className="h-px w-8 bg-slate-300 dark:bg-white/5"></div>
+            <p className="text-slate-800 dark:text-white/50 tracking-[0.4em] text-[9px] uppercase font-noto">{t.establishRecord}</p>
+            <div className="h-px w-8 bg-slate-300 dark:bg-white/10"></div>
             <div className="flex items-center gap-2">
               <div className={`w-1.5 h-1.5 rounded-full ${geoStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : geoStatus === 'tracking' ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'}`}></div>
-              <p className="text-[8px] tracking-[0.2em] font-black uppercase text-slate-800 dark:text-white/20 font-noto">
+              <p className="text-[8px] tracking-[0.2em] font-black uppercase text-slate-800 dark:text-white/50 font-noto">
                 {geoStatus === 'ready' ? t.locLocked : geoStatus === 'tracking' ? t.trackingSignal : t.signalLost}
               </p>
             </div>
@@ -95,48 +95,48 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
           <button 
             type="button"
             onClick={() => setType('expense')}
-            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'expense' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
+            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'expense' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}
           >
             {t.expenditure}
           </button>
           <button 
             type="button"
             onClick={() => setType('income')}
-            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'income' ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
+            className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'income' ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}
           >
             {t.income}
           </button>
         </div>
 
         <div className="relative group border-b border-slate-400 dark:border-white/10 focus-within:border-indigo-600 transition-all py-6">
-          <label className="text-[8px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase block mb-2 font-noto">{t.magnitude}</label>
+          <label className="text-[8px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase block mb-2 font-noto">{t.magnitude}</label>
           <div className="flex items-center">
-            <span className="text-2xl font-light text-slate-400 dark:text-white/10 mr-4 font-noto">{currencySymbol}</span>
+            <span className="text-2xl font-light text-slate-400 dark:text-white/30 mr-4 font-noto">{currencySymbol}</span>
             <input 
               type="number" 
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
-              className="bg-transparent text-6xl font-black w-full outline-none placeholder:text-slate-200 dark:placeholder:text-white/5 tracking-tighter text-slate-900 dark:text-white font-noto"
+              className="bg-transparent text-6xl font-black w-full outline-none placeholder:text-slate-200 dark:placeholder:text-white/10 tracking-tighter text-slate-900 dark:text-white font-noto"
               required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.descriptor}</label>
+          <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.descriptor}</label>
           <input 
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all text-sm font-light tracking-tight placeholder:text-slate-400/20 text-slate-900 dark:text-white font-noto"
+            className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all text-sm font-light tracking-tight placeholder:text-slate-400/30 text-slate-900 dark:text-white font-noto"
             placeholder="..."
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-2">
-            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.protocol}</label>
+            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.protocol}</label>
             <select 
               value={method}
               onChange={(e) => setMethod(e.target.value)}
@@ -150,7 +150,7 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.category}</label>
+            <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.category}</label>
             <select 
               value={category}
               onChange={(e) => setCategory(e.target.value)}

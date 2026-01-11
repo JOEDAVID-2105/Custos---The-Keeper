@@ -488,7 +488,7 @@ const App: React.FC = () => {
           className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden"
           aria-label="Toggle Language"
         >
-          <span className={`text-[12px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto flex items-center justify-center w-full h-full ${profile.language === 'en' ? 'pt-0.5' : ''}`}>
+          <span className={`text-[12px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto flex items-center justify-center w-full h-full transition-transform duration-300 ${profile.language === 'en' ? 'translate-x-[2px] -translate-y-[2px]' : ''}`}>
             {profile.language === 'en' ? 'த' : 'EN'}
           </span>
         </button>
@@ -533,7 +533,7 @@ const App: React.FC = () => {
             <button
               key={item.id}
               onClick={() => navigateTo(item.id as any)}
-              className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600 translate-x-1' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
+              className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600 translate-x-1' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}
             >
               {item.label}
             </button>
@@ -541,7 +541,7 @@ const App: React.FC = () => {
           {!auth.currentUser && (
             <button
               onClick={() => navigateTo('auth')}
-              className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all pt-8 mt-8 border-t border-slate-300 dark:border-white/5 font-noto ${activeTab === 'auth' ? 'text-indigo-600' : 'text-slate-500 dark:text-white/20 hover:text-indigo-600'}`}
+              className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all pt-8 mt-8 border-t border-slate-300 dark:border-white/5 font-noto ${activeTab === 'auth' ? 'text-indigo-600' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}
             >
               {t.authAction}
             </button>
@@ -554,7 +554,7 @@ const App: React.FC = () => {
             <button
               key={item.id}
               onClick={() => navigateTo(item.id as any)}
-              className={`text-[8px] tracking-[0.2em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600' : 'text-slate-500 dark:text-white/30'}`}
+              className={`text-[8px] tracking-[0.2em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600' : 'text-slate-500 dark:text-white/50'}`}
             >
               {item.label}
             </button>

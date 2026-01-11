@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile } from '../types';
 import { CURRENCIES, TrashIcon } from '../constants';
 import { StorageService } from '../services/storageService';
@@ -35,9 +35,24 @@ export const Profile: React.FC<ProfileProps> = ({
   const [tempFamilyName, setTempFamilyName] = useState('');
   const [showCopied, setShowCopied] = useState(false);
   
+  // Font States
+  const [previewFontSize, setPreviewFontSize] = useState(fontSize);
+  const [isLocked, setIsLocked] = useState(true);
+  const [unlockProgress, setUnlockProgress] = useState(0);
+  const unlockTimerRef = useRef<any>(null);
+
   const familyId = profile.familyId;
   const language = profile.language || 'en';
   const t = translations[language];
+
+  useEffect(() => {
+    setPreviewFontSize(fontSize);
+  }, [fontSize]);
+
+  // Live Preview Font Effect
+  useEffect(() => {
+    document.documentElement.style.setProperty('--app-font-size', `${previewFontSize}px`);
+  }, [previewFontSize]);
 
   useEffect(() => {
     if (familyId) {
@@ -56,6 +71,35 @@ export const Profile: React.FC<ProfileProps> = ({
       setFamilyMembers([]);
     }
   }, [familyId]);
+
+  const handleApplyFont = () => {
+    setFontSize(previewFontSize);
+    setIsLocked(true);
+  };
+
+  const handleRevertFont = () => {
+    setPreviewFontSize(fontSize);
+    setIsLocked(true);
+  };
+
+  const startUnlock = () => {
+    let progress = 0;
+    unlockTimerRef.current = setInterval(() => {
+      progress += 5;
+      setUnlockProgress(progress);
+      if (progress >= 100) {
+        setIsLocked(false);
+        setUnlockProgress(0);
+        clearInterval(unlockTimerRef.current);
+      }
+    }, 100);
+  };
+
+  const stopUnlock = () => {
+    if (!isLocked) return;
+    clearInterval(unlockTimerRef.current);
+    setUnlockProgress(0);
+  };
 
   const createFamily = async () => {
     if (!tempFamilyName.trim()) return;
@@ -116,7 +160,7 @@ export const Profile: React.FC<ProfileProps> = ({
     <div className="animate-in w-full space-y-16 pb-20">
       <div className="text-center">
         <h2 className="text-5xl font-black tracking-tighter uppercase text-slate-900 dark:text-white font-noto">{t.identity}</h2>
-        <p className="text-slate-800 dark:text-white/30 tracking-[0.5em] text-[10px] mt-3 uppercase font-noto">{t.guardianConfig}</p>
+        <p className="text-slate-800 dark:text-white/50 tracking-[0.5em] text-[10px] mt-3 uppercase font-noto">{t.guardianConfig}</p>
       </div>
 
       <div className="space-y-12">
@@ -156,44 +200,94 @@ export const Profile: React.FC<ProfileProps> = ({
           </div>
         )}
 
-        {/* Font Magnification Calibration */}
+        {/* Font Control Interface */}
         <div className="pt-16 border-t border-slate-300 dark:border-white/5">
           <div className="flex justify-between items-end mb-8">
-            <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">Font Size</p>
-            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{fontSize}px</p>
-          </div>
-          <div className="px-4">
-            <input 
-              type="range" 
-              min="12" 
-              max="24" 
-              step="1" 
-              value={fontSize} 
-              onChange={(e) => setFontSize(parseInt(e.target.value))}
-              className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full appearance-none accent-indigo-600 cursor-pointer"
-            />
-            <div className="flex justify-between mt-4">
-              <span className="text-[8px] font-black text-slate-400 dark:text-white/10 uppercase">compact</span>
-              <span className="text-[8px] font-black text-slate-400 dark:text-white/10 uppercase">standard</span>
-              <span className="text-[8px] font-black text-slate-400 dark:text-white/10 uppercase">magnified</span>
+            <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.fontSize}</p>
+            <div className="flex items-center gap-3">
+              <span className={`text-[8px] font-black uppercase tracking-widest ${isLocked ? 'text-rose-500' : 'text-emerald-500 animate-pulse'}`}>
+                {isLocked ? t.profile.locked : t.profile.unlocked}
+              </span>
+              <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{previewFontSize}px</p>
             </div>
+          </div>
+          
+          <div className="px-4 space-y-10 relative">
+            <div className={`transition-all duration-500 ${isLocked ? 'opacity-30 pointer-events-none grayscale' : 'opacity-100'}`}>
+              <input 
+                type="range" 
+                min="12" 
+                max="24" 
+                step="1" 
+                value={previewFontSize} 
+                onChange={(e) => setPreviewFontSize(parseInt(e.target.value))}
+                className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full appearance-none accent-indigo-600 cursor-pointer"
+              />
+              <div className="flex justify-between mt-4">
+                <span className="text-[8px] font-black text-slate-400 dark:text-white/30 uppercase">{language === 'ta' ? 'சிறியது' : 'compact'}</span>
+                <span className="text-[8px] font-black text-slate-400 dark:text-white/30 uppercase">{language === 'ta' ? 'சாதாரணமானது' : 'standard'}</span>
+                <span className="text-[8px] font-black text-slate-400 dark:text-white/30 uppercase">{language === 'ta' ? 'பெரியது' : 'magnified'}</span>
+              </div>
+            </div>
+
+            {isLocked && (
+              <div className="flex flex-col items-center gap-4 py-4">
+                <button 
+                  onMouseDown={startUnlock}
+                  onMouseUp={stopUnlock}
+                  onMouseLeave={stopUnlock}
+                  onTouchStart={startUnlock}
+                  onTouchEnd={stopUnlock}
+                  className="relative px-8 py-3 bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-white/50 overflow-hidden"
+                >
+                  <div 
+                    className="absolute inset-0 bg-indigo-600/20 transition-all duration-100 ease-linear"
+                    style={{ width: `${unlockProgress}%` }}
+                  />
+                  <span className="relative z-10">{t.profile.holdToUnlock}</span>
+                </button>
+              </div>
+            )}
+
+            {!isLocked && (
+              <div className="flex flex-wrap justify-center gap-4 animate-in">
+                <button 
+                  onClick={handleApplyFont}
+                  className="px-8 py-3 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-xl font-noto"
+                >
+                  {t.profile.applyChanges}
+                </button>
+                <button 
+                  onClick={handleRevertFont}
+                  className="px-8 py-3 border border-slate-300 dark:border-white/10 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/50 font-noto"
+                >
+                  {t.profile.revert}
+                </button>
+                <button 
+                  onClick={() => { setPreviewFontSize(16); handleApplyFont(); }}
+                  className="px-8 py-3 border border-indigo-600/30 text-[9px] font-black uppercase tracking-[0.2em] text-indigo-600 font-noto"
+                >
+                  {t.profile.resetToDefault}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="pt-16 border-t border-slate-300 dark:border-white/5 space-y-10">
           <div className="flex flex-col gap-2">
-            <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.profile.householdSovereignty}</p>
+            <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.householdSovereignty}</p>
             {familyMetadata ? (
               <p className="text-3xl font-black tracking-tighter text-indigo-600 uppercase transition-all font-noto">{familyMetadata.name}</p>
             ) : (
-              <p className="text-lg font-light tracking-tight text-slate-600 dark:text-white/10 italic font-noto">{t.profile.noHousehold}</p>
+              <p className="text-lg font-light tracking-tight text-slate-600 dark:text-white/30 italic font-noto">{t.profile.noHousehold}</p>
             )}
           </div>
           
           {familyId ? (
             <div className="space-y-12 animate-in">
               <div className="space-y-6">
-                 <h3 className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">Household Members</h3>
+                 <h3 className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.householdMembers}</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {familyMembers.map(member => (
                        <div key={member.uid} className="flex items-center justify-between p-4 border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
@@ -221,7 +315,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
               {isFamilyCreator && (
                 <div className="space-y-4 max-w-lg">
-                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.profile.renameHousehold}</label>
+                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.renameHousehold}</label>
                   <div className="relative">
                     <input type="text" defaultValue={familyMetadata?.name} onBlur={(e) => updateFamilyName(e.target.value)} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-sm font-black uppercase tracking-widest placeholder:text-slate-400/10 text-slate-900 dark:text-white font-noto" placeholder="..." />
                     <div className="absolute right-0 bottom-3 text-[8px] font-black text-indigo-500/40 uppercase tracking-widest font-noto">{t.profile.creatorControls}</div>
@@ -231,7 +325,7 @@ export const Profile: React.FC<ProfileProps> = ({
               
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.profile.uniqueSignature}</label>
+                  <label className="text-[9px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.uniqueSignature}</label>
                   {showCopied && <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest animate-in font-noto">{t.profile.sigCopied}</span>}
                 </div>
                 <div className="flex gap-1">
@@ -280,11 +374,11 @@ export const Profile: React.FC<ProfileProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 border-t border-slate-300 dark:border-white/5 pt-16">
           <div className="space-y-4">
-            <label className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.profile.alias}</label>
+            <label className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.alias}</label>
             <input type="text" value={profile.displayName} onChange={(e) => onUpdate({ ...profile, displayName: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-4 outline-none focus:border-indigo-600 transition-all text-sm font-bold tracking-widest text-slate-900 dark:text-white font-noto" />
           </div>
           <div className="space-y-4">
-            <label className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase font-noto">{t.profile.denomination}</label>
+            <label className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.denomination}</label>
             <select value={profile.currency} onChange={(e) => onUpdate({ ...profile, currency: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-4 outline-none focus:border-indigo-600 transition-all text-sm font-bold uppercase tracking-[0.2em] cursor-pointer appearance-none text-slate-900 dark:text-white font-noto">
               {CURRENCIES.map(c => <option key={c.code} value={c.code} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{c.code} — {c.symbol}</option>)}
             </select>
@@ -292,19 +386,19 @@ export const Profile: React.FC<ProfileProps> = ({
         </div>
 
         <div className="pt-16 border-t border-slate-300 dark:border-white/5">
-          <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase mb-8 font-noto">Geographic Jurisdiction</p>
+          <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase mb-8 font-noto">{t.profile.geographicJurisdiction}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div className="space-y-2">
-              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/10 uppercase font-noto">{t.profile.jurisdiction}</label>
-              <input type="text" value={profile.country || ''} onChange={(e) => onUpdate({ ...profile, country: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder="Country" />
+              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/30 uppercase font-noto">{t.profile.jurisdiction}</label>
+              <input type="text" value={profile.country || ''} onChange={(e) => onUpdate({ ...profile, country: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder={language === 'ta' ? 'நாடு' : 'Country'} />
             </div>
             <div className="space-y-2">
-              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/10 uppercase font-noto">{t.profile.state}</label>
-              <input type="text" value={profile.state || ''} onChange={(e) => onUpdate({ ...profile, state: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder="State/Province" />
+              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/30 uppercase font-noto">{t.profile.state}</label>
+              <input type="text" value={profile.state || ''} onChange={(e) => onUpdate({ ...profile, state: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder={language === 'ta' ? 'மாநிலம்' : 'State/Province'} />
             </div>
             <div className="space-y-2">
-              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/10 uppercase font-noto">{t.profile.city}</label>
-              <input type="text" value={profile.city || ''} onChange={(e) => onUpdate({ ...profile, city: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder="City" />
+              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/30 uppercase font-noto">{t.profile.city}</label>
+              <input type="text" value={profile.city || ''} onChange={(e) => onUpdate({ ...profile, city: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder={language === 'ta' ? 'நகரம்' : 'City'} />
             </div>
           </div>
         </div>
@@ -312,9 +406,9 @@ export const Profile: React.FC<ProfileProps> = ({
         <div className="pt-20 border-t border-slate-300 dark:border-white/5 flex flex-col items-center gap-12">
           <div className="w-full max-w-sm flex flex-col items-center gap-6">
             <div className="flex items-center gap-6 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
-               <span className="text-indigo-400/60 pb-1 cursor-default">issue?</span>
+               <span className="text-indigo-400/80 pb-1 cursor-default">{t.profile.issueLabel}</span>
                <span className="opacity-10 text-slate-400">|</span>
-               <span className="text-amber-400/60 pb-1 cursor-default">suggest update?</span>
+               <span className="text-amber-400/80 pb-1 cursor-default">{t.profile.suggestUpdateLabel}</span>
             </div>
             
             <button 
@@ -326,10 +420,10 @@ export const Profile: React.FC<ProfileProps> = ({
           </div>
 
           <div className="w-full border-t border-slate-200 dark:border-white/5 pt-12 space-y-2 text-center">
-             <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
+             <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/30 uppercase font-noto">
                 VERSION: 1.1.0 ALPHA
              </p>
-             <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
+             <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/30 uppercase font-noto">
                 PROPRIETOR: D'CODES / DAVID CODES
              </p>
           </div>

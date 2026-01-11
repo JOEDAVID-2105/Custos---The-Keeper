@@ -110,7 +110,7 @@ export const Records: React.FC<RecordsProps> = ({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="flex-1">
             <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{t.ledger}</h2>
-            <p className="text-slate-800 dark:text-white/30 tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] mt-1 uppercase font-black">Archive of Sovereignty</p>
+            <p className="text-slate-800 dark:text-white/50 tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] mt-1 uppercase font-black">Archive of Sovereignty</p>
           </div>
           <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <button 
@@ -135,7 +135,7 @@ export const Records: React.FC<RecordsProps> = ({
         <div className="overflow-x-auto w-full -mx-4 md:mx-0 px-4 md:px-0 scrollbar-hide">
           <table className="w-full text-left border-collapse print:text-black min-w-full">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/20 uppercase font-black">
+              <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/50 uppercase font-black">
                 <th className="pb-4 px-2 md:px-6 font-normal">TIME & ALIAS</th>
                 <th className="pb-4 font-normal">CATEGORY</th>
                 <th className="pb-4 font-normal">DESC</th>
@@ -165,7 +165,7 @@ export const Records: React.FC<RecordsProps> = ({
                                 </span>
                                 {tx.location && <LocationIcon className="w-2 h-2 text-indigo-500 opacity-60" />}
                              </div>
-                             <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/10 uppercase tracking-widest truncate max-w-[80px]">
+                             <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest truncate max-w-[80px]">
                                {tx.userName || 'LOCAL'}
                              </span>
                            </div>
@@ -215,7 +215,7 @@ export const Records: React.FC<RecordsProps> = ({
                               )}
                             </div>
                           ) : (
-                            <span className="text-[6px] font-black uppercase tracking-widest text-slate-500 dark:text-white/5 italic">LOCKED</span>
+                            <span className="text-[6px] font-black uppercase tracking-widest text-slate-500 dark:text-white/10 italic">LOCKED</span>
                           )}
                         </td>
                       </tr>
