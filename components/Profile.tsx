@@ -264,9 +264,26 @@ export const Profile: React.FC<ProfileProps> = ({
           </div>
         </div>
 
+        <div className="pt-16 border-t border-slate-300 dark:border-white/5">
+          <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/20 uppercase mb-8 font-noto">Geographic Jurisdiction</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="space-y-2">
+              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/10 uppercase font-noto">{t.profile.jurisdiction}</label>
+              <input type="text" value={profile.country || ''} onChange={(e) => onUpdate({ ...profile, country: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder="Country" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/10 uppercase font-noto">{t.profile.state}</label>
+              <input type="text" value={profile.state || ''} onChange={(e) => onUpdate({ ...profile, state: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder="State/Province" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[8px] tracking-widest font-black text-slate-500 dark:text-white/10 uppercase font-noto">{t.profile.city}</label>
+              <input type="text" value={profile.city || ''} onChange={(e) => onUpdate({ ...profile, city: e.target.value })} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-xs font-bold uppercase text-slate-900 dark:text-white font-noto" placeholder="City" />
+            </div>
+          </div>
+        </div>
+
         <div className="pt-20 border-t border-slate-300 dark:border-white/5 flex flex-col items-center gap-12">
           <div className="w-full max-w-sm flex flex-col items-center gap-6">
-            {/* Non-clickable info text */}
             <div className="flex items-center gap-6 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
                <span className="text-indigo-400/60 pb-1 cursor-default">issue?</span>
                <span className="opacity-10 text-slate-400">|</span>

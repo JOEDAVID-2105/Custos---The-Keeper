@@ -36,7 +36,9 @@ const App: React.FC = () => {
     displayName: 'The Local User',
     email: '',
     currency: 'INR',
-    country: 'India',
+    country: '',
+    state: '',
+    city: '',
     isCloudGuardian: false,
     theme: 'dark',
     language: 'en',
@@ -51,7 +53,6 @@ const App: React.FC = () => {
     onUndo: () => {}
   });
   
-  // Fix: Replaced NodeJS.Timeout with any to avoid namespace errors in browser environments
   const snackbarTimeoutRef = useRef<any>(null);
 
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; category: string }>({ 
@@ -100,30 +101,66 @@ const App: React.FC = () => {
     }
   }, [profile.theme]);
 
+  // Helper: Reverse Geocode (Simple Free API for Country/State/City)
+  const detectLocationInfo = async (): Promise<{country: string, state: string, city: string}> => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({ country: '', state: '', city: '' });
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&zoom=10`);
+          const data = await res.json();
+          const addr = data.address || {};
+          resolve({
+            country: addr.country || '',
+            state: addr.state || addr.region || '',
+            city: addr.city || addr.town || addr.village || addr.suburb || ''
+          });
+        } catch (e) {
+          resolve({ country: '', state: '', city: '' });
+        }
+      }, () => resolve({ country: '', state: '', city: '' }));
+    });
+  };
+
   // Auth & Profile Listener
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       if (user) {
         await StorageService.syncLocalToCloud(user.uid, user.displayName || 'User');
-        const cloudProfile = await StorageService.getProfile(user.uid);
-        if (cloudProfile) {
-          setProfile({ ...cloudProfile, language: cloudProfile.language || 'en' });
-        } else {
+        let cloudProfile = await StorageService.getProfile(user.uid);
+        
+        if (!cloudProfile) {
+          // New User Setup
+          const loc = await detectLocationInfo();
           const newProfile: UserProfile = {
             uid: user.uid,
             displayName: user.displayName || 'The User',
             email: user.email || '',
             currency: 'INR',
-            country: 'India',
+            country: loc.country,
+            state: loc.state,
+            city: loc.city,
             isCloudGuardian: true,
             theme: 'dark',
             language: 'en',
             budgetLimits: {},
             customCategories: []
           };
-          setProfile(newProfile);
           await StorageService.saveProfile(newProfile);
+          setProfile(newProfile);
+        } else {
+          // Existing User check for location if missing
+          if (!cloudProfile.country && !cloudProfile.state) {
+            const loc = await detectLocationInfo();
+            cloudProfile = { ...cloudProfile, ...loc };
+            await StorageService.saveProfile(cloudProfile);
+          }
+          setProfile({ ...cloudProfile, language: cloudProfile.language || 'en' });
         }
       } else {
         const localPrefs = StorageService.getUserPrefs();
@@ -132,7 +169,9 @@ const App: React.FC = () => {
           displayName: 'The Local User',
           email: '',
           currency: 'INR',
-          country: 'India',
+          country: '',
+          state: '',
+          city: '',
           isCloudGuardian: false,
           theme: 'dark',
           language: 'en',
@@ -424,8 +463,8 @@ const App: React.FC = () => {
           className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden"
           aria-label="Toggle Language"
         >
-          <span className="text-[10px] font-black tracking-widest text-indigo-600 dark:text-indigo-400">
-            {profile.language === 'en' ? 'TA' : 'EN'}
+          <span className="text-[12px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto">
+            {profile.language === 'en' ? 'த' : 'EN'}
           </span>
         </button>
 
