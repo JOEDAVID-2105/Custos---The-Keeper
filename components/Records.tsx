@@ -4,6 +4,7 @@ import { Transaction, Category } from '../types';
 import { SummaryDashboard } from './SummaryDashboard';
 import { translations } from '../translations';
 import { TrashIcon } from '../constants';
+import { InitialShield } from './InitialShield';
 
 interface RecordsProps {
   transactions: Transaction[];
@@ -165,9 +166,14 @@ export const Records: React.FC<RecordsProps> = ({
                                 </span>
                                 {tx.location && <LocationIcon className="w-2 h-2 text-indigo-500 opacity-60" />}
                              </div>
-                             <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest truncate max-w-[80px]">
-                               {tx.userName || 'LOCAL'}
-                             </span>
+                             <div className="flex items-center gap-2 mt-1">
+                                <div className="w-4 h-4 border border-indigo-500/10">
+                                  <InitialShield name={tx.userName || 'LOCAL'} size="sm" />
+                                </div>
+                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest truncate max-w-[80px]">
+                                  {tx.userName || 'LOCAL'}
+                                </span>
+                             </div>
                            </div>
                         </td>
                         <td className="py-3">

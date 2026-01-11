@@ -23,7 +23,7 @@ export interface UserProfile {
   uid: string;
   displayName: string;
   email: string;
-  photoURL?: string;
+  photoURL?: string; // Legacy support, currently using InitialShield
   currency: string;
   country: string;
   state?: string;

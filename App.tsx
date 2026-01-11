@@ -10,7 +10,6 @@ import { ClassWiseOutflow } from './components/ClassWiseOutflow';
 import { FiltersPage } from './components/FiltersPage';
 import { ContactPopup } from './components/ContactPopup';
 import { ConfirmationModal } from './components/ConfirmationModal';
-import { PortraitSelection } from './components/PortraitSelection';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
 import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
@@ -18,7 +17,7 @@ import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters' | 'portrait-selection';
+type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters';
 
 interface SnackbarState {
   isVisible: boolean;
@@ -406,14 +405,6 @@ const App: React.FC = () => {
           language={profile.language} 
         />
       );
-      case 'portrait-selection': return (
-        <PortraitSelection 
-          profile={profile} 
-          onUpdate={updateProfile} 
-          onBack={() => navigateTo('profile')} 
-          language={profile.language} 
-        />
-      );
       case 'ai': return <div className="max-w-3xl mx-auto"><AIAdvisor transactions={transactions} currency={profile.currency} language={profile.language} /></div>;
       case 'profile': return (
         <div className="space-y-12 max-w-3xl mx-auto">
@@ -423,7 +414,6 @@ const App: React.FC = () => {
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => navigateTo('auth')}
             onNavigateToEditLimits={() => navigateTo('budget-edit')}
-            onNavigateToPortraitSelection={() => navigateTo('portrait-selection')}
             onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
             fontSize={fontSize}
