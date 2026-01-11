@@ -231,7 +231,7 @@ export const Profile: React.FC<ProfileProps> = ({
             <div className="space-y-6">
               {!isNamingFamily ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <button onClick={() => setIsNamingFamily(true)} className="w-full py-6 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-900 transition-all rounded-sm font-noto shadow-xl">
+                  <button onClick={() => setIsNamingFamily(true)} className="w-full py-6 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-900 transition-all rounded-sm shadow-xl font-noto">
                     {t.profile.foundNew}
                   </button>
                   <div className="flex gap-1">
@@ -272,19 +272,19 @@ export const Profile: React.FC<ProfileProps> = ({
 
         <div className="pt-20 border-t border-slate-300 dark:border-white/5 flex flex-col items-center gap-12">
           <div className="w-full max-w-sm flex flex-col items-center gap-6">
-            <div className="flex items-center gap-6 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
+            <div className="flex items-center gap-4 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
                <button 
                   onClick={onOpenContact}
-                  className="text-indigo-400 hover:text-indigo-300 transition-all border-b border-indigo-400 pb-1"
+                  className="text-slate-500 dark:text-white/30 hover:text-indigo-600 transition-all pb-1"
                >
-                 issue?
+                 {t.reportIssue}
                </button>
-               <span className="opacity-10 text-slate-400">|</span>
+               <span className="opacity-10 text-slate-400">||</span>
                <button 
                   onClick={onOpenContact}
-                  className="text-amber-400 hover:text-amber-300 transition-all border-b border-amber-400 pb-1"
+                  className="text-slate-500 dark:text-white/30 hover:text-amber-500 transition-all pb-1"
                >
-                 suggest update?
+                 {t.suggestUpdate}
                </button>
             </div>
             

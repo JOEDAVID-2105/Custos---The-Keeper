@@ -147,7 +147,7 @@ export const BudgetEdit: React.FC<BudgetEditProps> = ({
                 <span className="text-xl font-light text-slate-400 dark:text-white/10 font-noto">{currencySymbol}</span>
                 <input 
                   type="number" 
-                  value={profile.budgetLimits?.[cat] || 0}
+                  value={profile.budgetLimits?.[cat] || ''}
                   onChange={(e) => updateLimit(cat, Number(e.target.value))}
                   className="flex-1 bg-transparent outline-none text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white font-noto placeholder:text-slate-200"
                   placeholder="0"
