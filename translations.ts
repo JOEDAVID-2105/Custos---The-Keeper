@@ -35,7 +35,7 @@ export const translations = {
     locLocked: "LOCATION LOCKED",
     trackingSignal: "TRACKING SIGNAL",
     signalLost: "SIGNAL LOST",
-    terminateSession: "TERMINATE SESSION",
+    terminateSession: "LOGOUT",
     categoryWiseExpenditure: "CATEGORY WISE EXPENDITURE",
     categoryAmountEdit: "CATEGORY EDIT",
     backToLedger: "BACK TO LEDGER",
@@ -180,11 +180,18 @@ export const translations = {
       resetToDefault: "RESET TO DEFAULT",
       applyChanges: "APPLY CHANGES",
       revert: "REVERT",
-      holdToUnlock: "HOLD 2S TO UNLOCK",
+      holdToUnlock: "HOLD TO UNLOCK",
       locked: "LOCKED",
       unlocked: "UNLOCKED",
       issueLabel: "issue?",
       suggestUpdateLabel: "suggest update?"
+    },
+    ledgerHeaders: {
+      timeAndAlias: "TIME & ALIAS",
+      category: "CATEGORY",
+      desc: "DESC",
+      val: "VAL",
+      act: "ACT"
     },
     ai: {
       intelligence: "AI-Powered Financial Intelligence",
@@ -231,7 +238,7 @@ export const translations = {
     locLocked: "இடம் உறுதிசெய்யப்பட்டது",
     trackingSignal: "சிக்னல் தேடப்படுகிறது",
     signalLost: "சிக்னல் இல்லை",
-    terminateSession: "அமர்வை முடிக்கவும்",
+    terminateSession: "வெளியேறு",
     categoryWiseExpenditure: "வகை வாரியான செலவு",
     categoryAmountEdit: "வகை திருத்தம்",
     backToLedger: "கணக்கிற்கு திரும்பவும்",
@@ -376,11 +383,18 @@ export const translations = {
       resetToDefault: "மீட்டமை",
       applyChanges: "மாற்றங்களைச் சேமி",
       revert: "திருப்பு",
-      holdToUnlock: "திறக்க 2 விநாடிகள் அழுத்தவும்",
+      holdToUnlock: "திறக்க அழுத்தவும்",
       locked: "பூட்டப்பட்டது",
       unlocked: "திறக்கப்பட்டது",
       issueLabel: "பிரச்சனை?",
       suggestUpdateLabel: "மாற்றம் பரிந்துரைக்கவா?"
+    },
+    ledgerHeaders: {
+      timeAndAlias: "நேரம் / பெயர்",
+      category: "வகை",
+      desc: "விவரம்",
+      val: "மதிப்பு",
+      act: "செயல்"
     },
     ai: {
       intelligence: "AI நிதி நுண்ணறிவு",

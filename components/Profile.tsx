@@ -85,7 +85,7 @@ export const Profile: React.FC<ProfileProps> = ({
   const startUnlock = () => {
     let progress = 0;
     unlockTimerRef.current = setInterval(() => {
-      progress += 5;
+      progress += 10; // 10% every 100ms = 100% in 1s
       setUnlockProgress(progress);
       if (progress >= 100) {
         setIsLocked(false);

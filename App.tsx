@@ -488,7 +488,7 @@ const App: React.FC = () => {
           className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden"
           aria-label="Toggle Language"
         >
-          <span className={`text-[12px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto flex items-center justify-center w-full h-full transition-transform duration-300 ${profile.language === 'en' ? 'translate-x-[2px] -translate-y-[2px]' : ''}`}>
+          <span className={`text-[16px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto flex items-center justify-center w-full h-full transition-transform duration-300 ${profile.language === 'en' ? 'translate-x-[0px] -translate-y-[2.5px]' : ''}`}>
             {profile.language === 'en' ? 'த' : 'EN'}
           </span>
         </button>

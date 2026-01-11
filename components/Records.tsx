@@ -136,11 +136,11 @@ export const Records: React.FC<RecordsProps> = ({
           <table className="w-full text-left border-collapse print:text-black min-w-full">
             <thead>
               <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/50 uppercase font-black">
-                <th className="pb-4 px-2 md:px-6 font-normal">TIME & ALIAS</th>
-                <th className="pb-4 font-normal">CATEGORY</th>
-                <th className="pb-4 font-normal">DESC</th>
-                <th className="pb-4 font-normal text-right">VAL</th>
-                <th className="pb-4 px-2 md:px-6 font-normal text-right no-print">ACT</th>
+                <th className="pb-4 px-2 md:px-6 font-normal">{t.ledgerHeaders.timeAndAlias}</th>
+                <th className="pb-4 font-normal">{t.ledgerHeaders.category}</th>
+                <th className="pb-4 font-normal">{t.ledgerHeaders.desc}</th>
+                <th className="pb-4 font-normal text-right">{t.ledgerHeaders.val}</th>
+                <th className="pb-4 px-2 md:px-6 font-normal text-right no-print">{t.ledgerHeaders.act}</th>
               </tr>
             </thead>
             <tbody>
@@ -202,12 +202,12 @@ export const Records: React.FC<RecordsProps> = ({
                             <div className="flex justify-end gap-2 md:gap-4 items-center">
                               {isEditing ? (
                                 <>
-                                  <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest font-noto">SAVE</button>
-                                  <button onClick={cancelEdit} className="text-slate-600 dark:text-white/40 text-[8px] font-black uppercase tracking-widest font-noto">EXIT</button>
+                                  <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest font-noto">{t.commit}</button>
+                                  <button onClick={cancelEdit} className="text-slate-600 dark:text-white/40 text-[8px] font-black uppercase tracking-widest font-noto">{t.discard}</button>
                                 </>
                               ) : (
                                 <>
-                                  <button onClick={() => startEdit(tx)} className="text-indigo-600 dark:text-indigo-400 text-[8px] font-black uppercase tracking-widest underline decoration-2 decoration-indigo-600/20 font-noto">EDIT</button>
+                                  <button onClick={() => startEdit(tx)} className="text-indigo-600 dark:text-indigo-400 text-[8px] font-black uppercase tracking-widest underline decoration-2 decoration-indigo-600/20 font-noto">{t.edit}</button>
                                   <button onClick={() => onDelete(tx.id)} className="text-rose-600 hover:scale-110 transition-transform p-1">
                                     <TrashIcon className="w-4 h-4" />
                                   </button>
