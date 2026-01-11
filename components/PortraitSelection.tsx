@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { translations } from '../translations';
 import { InitialShield } from './InitialShield';
@@ -42,11 +42,13 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
 }) => {
   const t = translations[language];
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
+  const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
   const [activeBroken, setActiveBroken] = useState(false);
 
   /**
    * PHOTO ARCHIVE PROTOCOL:
-   * Updated with leading slashes to ensure absolute pathing from the root assets directory.
+   * Updated logic: Both folders now expect pfp_01.png through pfp_10.png
+   * This is more intuitive for separate archives.
    */
   const menPortraits = Array.from({ length: 10 }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
@@ -54,7 +56,7 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   });
 
   const womenPortraits = Array.from({ length: 10 }, (_, i) => {
-    const num = (i + 11).toString().padStart(2, '0');
+    const num = (i + 1).toString().padStart(2, '0');
     return `/assets/women/pfp_${num}.png`;
   });
 
@@ -64,7 +66,13 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   };
 
   const handleImageError = (url: string) => {
+    console.warn(`[Custos Asset Protocol] Failed to locate: ${url}`);
     setBrokenImages(prev => ({ ...prev, [url]: true }));
+    setLoadingImages(prev => ({ ...prev, [url]: false }));
+  };
+
+  const handleImageLoad = (url: string) => {
+    setLoadingImages(prev => ({ ...prev, [url]: false }));
   };
 
   const PortraitGrid = ({ title, items, type, subtitle }: { title: string, subtitle: string, items: string[], type: 'men' | 'women' }) => (
@@ -77,6 +85,7 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
           {items.map((url, idx) => {
             const isSelected = profile.photoURL === url;
             const isBroken = brokenImages[url];
+            const isLoading = loadingImages[url] !== false;
             
             return (
               <button 
@@ -85,12 +94,20 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
                 className={`aspect-square relative overflow-hidden border transition-all duration-700 group flex items-center justify-center ${isSelected ? 'border-indigo-600 ring-4 ring-indigo-600/10 z-10 scale-105 bg-indigo-600/5' : 'border-slate-300 dark:border-white/5 opacity-80 hover:opacity-100 hover:border-indigo-600/40 bg-slate-100 dark:bg-white/[0.02]'}`}
               >
                 {!isBroken ? (
-                  <img 
-                    src={url} 
-                    alt="PFP" 
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" 
-                    onError={() => handleImageError(url)}
-                  />
+                  <>
+                    <img 
+                      src={url} 
+                      alt="PFP" 
+                      className={`w-full h-full object-cover transition-all duration-1000 ${isLoading ? 'opacity-0 scale-90' : 'opacity-100 scale-100 group-hover:scale-125'}`} 
+                      onLoad={() => handleImageLoad(url)}
+                      onError={() => handleImageError(url)}
+                    />
+                    {isLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-white/10 transition-colors group-hover:text-indigo-500">
                     <SilhouetteIcon type={type} seed={idx} />
