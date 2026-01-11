@@ -13,6 +13,7 @@ interface ProfileProps {
   onToggleLanguage: () => void;
   onGoCloud: () => void;
   onNavigateToEditLimits: () => void;
+  onNavigateToPortraitSelection: () => void;
   onOpenContact: () => void;
   deferredPrompt?: any;
   fontSize: number;
@@ -23,6 +24,7 @@ export const Profile: React.FC<ProfileProps> = ({
   profile, 
   onUpdate, 
   onGoCloud,
+  onNavigateToPortraitSelection,
   onOpenContact,
   deferredPrompt,
   fontSize,
@@ -34,6 +36,7 @@ export const Profile: React.FC<ProfileProps> = ({
   const [isNamingFamily, setIsNamingFamily] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
   const [showCopied, setShowCopied] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
   
   // Font States
   const [previewFontSize, setPreviewFontSize] = useState(fontSize);
@@ -154,6 +157,10 @@ export const Profile: React.FC<ProfileProps> = ({
     }
   };
 
+  const handleImageError = (url: string) => {
+    setBrokenImages(prev => ({ ...prev, [url]: true }));
+  };
+
   const isFamilyCreator = familyMetadata?.creatorId === auth.currentUser?.uid;
 
   return (
@@ -174,11 +181,25 @@ export const Profile: React.FC<ProfileProps> = ({
             </button>
           )}
 
-          <div className="relative group">
+          <div className="relative group cursor-pointer" onClick={onNavigateToPortraitSelection}>
             <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center overflow-hidden">
-               <InitialShield name={profile.displayName} size="lg" />
+               {profile.photoURL && !brokenImages[profile.photoURL] ? (
+                 <img 
+                    src={profile.photoURL} 
+                    alt="PFP" 
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125"
+                    onError={() => handleImageError(profile.photoURL!)}
+                 />
+               ) : (
+                 <InitialShield name={profile.displayName} size="lg" />
+               )}
+               <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors flex items-center justify-center">
+                 <span className="opacity-0 group-hover:opacity-100 text-[8px] font-black uppercase tracking-widest text-white transition-all">
+                   {t.profile.portraitArchive}
+                 </span>
+               </div>
             </div>
-            <div className="absolute -inset-1 border border-indigo-600/20 pointer-events-none"></div>
+            <div className="absolute -inset-1 border border-indigo-600/20 pointer-events-none group-hover:border-indigo-600/50 transition-colors"></div>
           </div>
 
           <div className="text-center space-y-2">
@@ -203,7 +224,6 @@ export const Profile: React.FC<ProfileProps> = ({
           </div>
         )}
 
-        {/* Font Control Interface */}
         <div className="pt-16 border-t border-slate-300 dark:border-white/5">
           <div className="flex justify-between items-end mb-8">
             <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.fontSize}</p>

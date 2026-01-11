@@ -10,6 +10,7 @@ import { ClassWiseOutflow } from './components/ClassWiseOutflow';
 import { FiltersPage } from './components/FiltersPage';
 import { ContactPopup } from './components/ContactPopup';
 import { ConfirmationModal } from './components/ConfirmationModal';
+import { PortraitSelection } from './components/PortraitSelection';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
 import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
@@ -17,7 +18,7 @@ import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters';
+type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters' | 'portrait-selection';
 
 interface SnackbarState {
   isVisible: boolean;
@@ -74,12 +75,10 @@ const App: React.FC = () => {
     return [...new Set([...DEFAULT_CATEGORIES, 'Other', ...(profile.customCategories || [])])];
   }, [profile.customCategories]);
 
-  // Global Font Scale Listener
   useEffect(() => {
     document.documentElement.style.setProperty('--app-font-size', `${fontSize}px`);
   }, [fontSize]);
 
-  // History API - Back button handling
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (event.state && event.state.tab) {
@@ -87,7 +86,6 @@ const App: React.FC = () => {
       }
     };
     window.addEventListener('popstate', handlePopState);
-    // Initial state
     window.history.replaceState({ tab: 'vault' }, '');
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -126,7 +124,6 @@ const App: React.FC = () => {
     }
   }, [profile.theme]);
 
-  // Helper: Reverse Geocode (Simple Free API for Country/State/City)
   const detectLocationInfo = async (): Promise<{country: string, state: string, city: string}> => {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
@@ -151,7 +148,6 @@ const App: React.FC = () => {
     });
   };
 
-  // Auth & Profile Listener
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
@@ -208,10 +204,8 @@ const App: React.FC = () => {
     return () => unsubscribeAuth();
   }, []);
 
-  // Transaction Subscription
   useEffect(() => {
     let unsubscribeTxs: (() => void) | undefined;
-
     if (auth.currentUser) {
       unsubscribeTxs = StorageService.subscribeToTransactions(
         auth.currentUser.uid, 
@@ -223,7 +217,6 @@ const App: React.FC = () => {
     } else {
       setTransactions(StorageService.getLocalTransactions());
     }
-
     return () => {
       if (unsubscribeTxs) unsubscribeTxs();
     };
@@ -264,13 +257,11 @@ const App: React.FC = () => {
   const deleteTransaction = async (id: string) => {
     const txToDelete = transactions.find(t => t.id === id);
     if (!txToDelete) return;
-
     if (auth.currentUser) await StorageService.removeTransaction(id);
     else {
       StorageService.deleteLocalTransaction(id);
       setTransactions(prev => prev.filter(tx => tx.id !== id));
     }
-
     triggerSnackbar(t.itemDeleted, () => {
       addTransaction(txToDelete);
     });
@@ -285,14 +276,11 @@ const App: React.FC = () => {
     const catName = deleteModal.category;
     const oldCustom = [...(profile.customCategories || [])];
     const oldLimits = { ...(profile.budgetLimits || {}) };
-
     const newCustom = oldCustom.filter(c => c !== catName);
     const newLimits = { ...oldLimits };
     delete newLimits[catName];
-    
     await updateProfile({ ...profile, customCategories: newCustom, budgetLimits: newLimits });
     setDeleteModal({ isOpen: false, category: '' });
-
     triggerSnackbar(t.categoryDeleted, () => {
       updateProfile({ ...profile, customCategories: oldCustom, budgetLimits: oldLimits });
     });
@@ -302,7 +290,6 @@ const App: React.FC = () => {
     if (DEFAULT_CATEGORIES.includes(oldName)) return;
     const trimmedNew = newName.trim();
     if (!trimmedNew || oldName === trimmedNew) return;
-
     const newCustom = (profile.customCategories || []).map(c => c === oldName ? trimmedNew : c);
     const newLimits = { ...(profile.budgetLimits || {}) };
     if (newLimits[oldName] !== undefined) {
@@ -310,7 +297,6 @@ const App: React.FC = () => {
       delete newLimits[oldName];
     }
     await updateProfile({ ...profile, customCategories: newCustom, budgetLimits: newLimits });
-
     const affected = transactions.filter(tx => tx.category === oldName);
     for (const tx of affected) {
       await updateTransaction({ ...tx, category: trimmedNew });
@@ -342,6 +328,14 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => navigateTo('profile')} />;
+    if (activeTab === 'portrait-selection') return (
+      <PortraitSelection 
+        profile={profile} 
+        onUpdate={updateProfile} 
+        onBack={() => navigateTo('profile')} 
+        language={profile.language} 
+      />
+    );
     
     switch (activeTab) {
       case 'vault': return (
@@ -414,6 +408,7 @@ const App: React.FC = () => {
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => navigateTo('auth')}
             onNavigateToEditLimits={() => navigateTo('budget-edit')}
+            onNavigateToPortraitSelection={() => navigateTo('portrait-selection')}
             onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
             fontSize={fontSize}
@@ -448,7 +443,6 @@ const App: React.FC = () => {
           <h1 className="text-8xl font-black tracking-[-0.15em] text-white animate-in slide-in-from-bottom-10 duration-1000 delay-500 uppercase">Custos</h1>
           <p className="text-[11px] tracking-[0.9em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-900">{t.theKeeper}</p>
         </div>
-        
         <div className="absolute bottom-20 flex flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-2">
                <p className="text-[7px] tracking-[0.4em] text-white/20 uppercase font-black">a product by</p>
@@ -467,7 +461,6 @@ const App: React.FC = () => {
       <div className="shield-watermark text-indigo-600/5 dark:text-indigo-500/10 no-print">
         <ShieldIcon className="w-full h-full" />
       </div>
-
       <ConfirmationModal 
         isOpen={deleteModal.isOpen}
         title="Dissolve Category"
@@ -478,10 +471,7 @@ const App: React.FC = () => {
         onCancel={() => setDeleteModal({ isOpen: false, category: '' })}
         language={profile.language}
       />
-
       {showContactPopup && <ContactPopup onClose={() => setShowContactPopup(false)} language={profile.language} />}
-
-      {/* Global Controls: Theme and Language */}
       <div className="fixed top-6 right-6 z-[100] flex items-center gap-4 no-print">
         <button 
           onClick={toggleLanguage}
@@ -492,7 +482,6 @@ const App: React.FC = () => {
             {profile.language === 'en' ? 'த' : 'EN'}
           </span>
         </button>
-
         <button 
           onClick={toggleTheme}
           className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group overflow-hidden"
@@ -521,13 +510,11 @@ const App: React.FC = () => {
           </div>
         </button>
       </div>
-
       <aside className="hidden md:flex w-64 h-screen flex-col border-r border-slate-300 dark:border-white/5 p-10 sticky top-0 bg-white/50 dark:bg-[#020617]/50 backdrop-blur-xl z-20 no-print">
         <div className="mb-16">
           <h1 className="brand-text text-4xl">Custos</h1>
           <p className="text-[9px] tracking-[0.4em] font-bold text-indigo-600 mt-2 uppercase font-noto">{t.theKeeper}</p>
         </div>
-
         <nav className="flex-1 space-y-8">
           {navItems.map(item => (
             <button
@@ -548,7 +535,6 @@ const App: React.FC = () => {
           )}
         </nav>
       </aside>
-
       <nav className="md:hidden fixed bottom-4 left-4 right-4 h-14 glass z-50 flex items-center justify-around rounded-none border border-slate-300 dark:border-white/10 no-print">
          {navItems.map(item => (
             <button
@@ -560,8 +546,6 @@ const App: React.FC = () => {
             </button>
           ))}
       </nav>
-
-      {/* Snackbar Portal */}
       {snackbar.isVisible && (
         <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-6 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-950 border border-white/10 shadow-2xl animate-in slide-in-from-bottom-4">
           <p className="text-[10px] font-black tracking-widest uppercase">{snackbar.message}</p>
@@ -576,7 +560,6 @@ const App: React.FC = () => {
           </button>
         </div>
       )}
-
       <main className="flex-1 p-6 md:p-12 pb-24 md:pb-12 relative z-10 overflow-y-auto">
         <header className="md:hidden mb-12 flex justify-between items-center">
           <h1 className="brand-text text-3xl">Custos</h1>

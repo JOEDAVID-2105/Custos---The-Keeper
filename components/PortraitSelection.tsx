@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { translations } from '../translations';
 import { InitialShield } from './InitialShield';
@@ -47,8 +47,8 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
 
   /**
    * PHOTO ARCHIVE PROTOCOL:
-   * Updated logic: Both folders now expect pfp_01.png through pfp_10.png
-   * This is more intuitive for separate archives.
+   * Men folder: pfp_01.png - pfp_10.png
+   * Women folder: pfp_11.png - pfp_20.png (as per project README)
    */
   const menPortraits = Array.from({ length: 10 }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
@@ -56,7 +56,7 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   });
 
   const womenPortraits = Array.from({ length: 10 }, (_, i) => {
-    const num = (i + 1).toString().padStart(2, '0');
+    const num = (i + 11).toString().padStart(2, '0');
     return `/assets/women/pfp_${num}.png`;
   });
 
@@ -66,7 +66,6 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   };
 
   const handleImageError = (url: string) => {
-    console.warn(`[Custos Asset Protocol] Failed to locate: ${url}`);
     setBrokenImages(prev => ({ ...prev, [url]: true }));
     setLoadingImages(prev => ({ ...prev, [url]: false }));
   };
