@@ -11,6 +11,7 @@ import { FiltersPage } from './components/FiltersPage';
 import { About } from './components/About';
 import { Feedback } from './components/Feedback';
 import { InitialShield } from './components/InitialShield';
+import { ConfirmationModal } from './components/ConfirmationModal';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
 import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
@@ -40,6 +41,12 @@ const App: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  // Confirmation Modal State
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; category: string }>({ 
+    isOpen: false, 
+    category: '' 
+  });
+
   // Filters State
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
@@ -51,7 +58,7 @@ const App: React.FC = () => {
   const t = translations[profile.language || 'en'];
 
   const allCategories = useMemo(() => {
-    return [...DEFAULT_CATEGORIES, ...(profile.customCategories || [])];
+    return [...new Set([...DEFAULT_CATEGORIES, 'Other', ...(profile.customCategories || [])])];
   }, [profile.customCategories]);
 
   useEffect(() => {
@@ -148,6 +155,12 @@ const App: React.FC = () => {
     };
   }, []);
 
+  const updateProfile = async (p: UserProfile) => {
+    setProfile(p);
+    StorageService.saveUserPrefs(p);
+    if (auth.currentUser) await StorageService.saveProfile(p);
+  };
+
   const addTransaction = async (tx: Transaction) => {
     const enrichedT = { ...tx, familyId: profile.familyId, userId: profile.uid };
     if (auth.currentUser) {
@@ -174,10 +187,40 @@ const App: React.FC = () => {
     }
   };
 
-  const updateProfile = async (p: UserProfile) => {
-    setProfile(p);
-    StorageService.saveUserPrefs(p);
-    if (auth.currentUser) await StorageService.saveProfile(p);
+  const deleteCategory = (catName: string) => {
+    if (DEFAULT_CATEGORIES.includes(catName)) return;
+    setDeleteModal({ isOpen: true, category: catName });
+  };
+
+  const confirmDeleteCategory = async () => {
+    const catName = deleteModal.category;
+    const newCustom = (profile.customCategories || []).filter(c => c !== catName);
+    const newLimits = { ...(profile.budgetLimits || {}) };
+    delete newLimits[catName];
+    
+    await updateProfile({ ...profile, customCategories: newCustom, budgetLimits: newLimits });
+    setDeleteModal({ isOpen: false, category: '' });
+  };
+
+  const renameCategory = async (oldName: string, newName: string) => {
+    if (DEFAULT_CATEGORIES.includes(oldName)) return;
+    const trimmedNew = newName.trim();
+    if (!trimmedNew || oldName === trimmedNew) return;
+
+    // 1. Update Profile State
+    const newCustom = (profile.customCategories || []).map(c => c === oldName ? trimmedNew : c);
+    const newLimits = { ...(profile.budgetLimits || {}) };
+    if (newLimits[oldName] !== undefined) {
+      newLimits[trimmedNew] = newLimits[oldName];
+      delete newLimits[oldName];
+    }
+    await updateProfile({ ...profile, customCategories: newCustom, budgetLimits: newLimits });
+
+    // 2. Deep Update Historical Records
+    const affected = transactions.filter(tx => tx.category === oldName);
+    for (const tx of affected) {
+      await updateTransaction({ ...tx, category: trimmedNew });
+    }
   };
 
   const toggleLanguage = () => {
@@ -253,6 +296,8 @@ const App: React.FC = () => {
         <BudgetEdit 
           profile={profile} 
           onUpdate={updateProfile} 
+          onDeleteCategory={deleteCategory}
+          onRenameCategory={renameCategory}
           onBack={() => setActiveTab('profile')} 
           language={profile.language} 
         />
@@ -336,7 +381,17 @@ const App: React.FC = () => {
         <ShieldIcon className="w-full h-full" />
       </div>
 
-      {/* Round Animated Radiating Sun Toggle - Top Right */}
+      <ConfirmationModal 
+        isOpen={deleteModal.isOpen}
+        title="Dissolve Asset Class"
+        message={`Are you sure you want to dissolve '${deleteModal.category}'? Transactions mapped to this class will persist but the class itself will be removed from your palette.`}
+        confirmLabel="DISSOLVE"
+        cancelLabel="PRESERVE"
+        onConfirm={confirmDeleteCategory}
+        onCancel={() => setDeleteModal({ isOpen: false, category: '' })}
+        language={profile.language}
+      />
+
       <button 
         onClick={toggleTheme}
         className="fixed top-6 right-6 z-[100] w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group overflow-hidden no-print"
@@ -404,11 +459,7 @@ const App: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 border border-slate-300 dark:border-white/10 p-1 flex-shrink-0 flex items-center justify-center">
-              {profile.photoURL ? (
-                <img src={profile.photoURL} className="w-full h-full object-cover" alt="Profile" />
-              ) : (
-                <InitialShield name={profile.displayName} size="sm" />
-              )}
+              <InitialShield name={profile.displayName} size="sm" />
             </div>
             <div className="truncate">
               <p className="text-[9px] font-black tracking-widest uppercase truncate font-noto">{profile.displayName}</p>
@@ -433,7 +484,7 @@ const App: React.FC = () => {
         <header className="md:hidden mb-12 flex justify-between items-center">
           <h1 className="brand-text text-3xl">Custos</h1>
           <button onClick={() => setActiveTab('profile')} className="w-10 h-10 border border-indigo-600/20 shadow-md flex items-center justify-center overflow-hidden">
-            {profile.photoURL ? <img src={profile.photoURL} className="w-full h-full object-cover" /> : <InitialShield name={profile.displayName} size="sm" />}
+            <InitialShield name={profile.displayName} size="sm" />
           </button>
         </header>
         {renderContent()}

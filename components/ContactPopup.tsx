@@ -14,8 +14,8 @@ export const ContactPopup: React.FC<ContactPopupProps> = ({ onClose, language })
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-md bg-white/40 dark:bg-black/40 animate-in">
       <div className="bg-white dark:bg-slate-950 w-full max-w-sm p-10 shadow-2xl border border-slate-300 dark:border-white/10 space-y-10">
         <div className="flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-4">
-          <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white">{t.contactUs}</h3>
-          <button onClick={onClose} className="text-rose-600 font-black text-[10px] tracking-widest uppercase">CLOSE</button>
+          <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white font-noto">{t.contactUs}</h3>
+          <button onClick={onClose} className="text-rose-600 font-black text-[10px] tracking-widest uppercase font-noto">CLOSE</button>
         </div>
 
         <div className="space-y-6">
@@ -25,20 +25,22 @@ export const ContactPopup: React.FC<ContactPopupProps> = ({ onClose, language })
             rel="noopener noreferrer"
             className="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 group hover:border-indigo-600 transition-all"
           >
-            <span className="text-xs font-black tracking-widest uppercase text-slate-700 dark:text-white/70">INSTAGRAM</span>
-            <span className="text-[10px] text-indigo-600 group-hover:translate-x-1 transition-transform">D__CODES →</span>
+            <span className="text-xs font-black tracking-widest uppercase text-slate-700 dark:text-white/70 font-noto">INSTAGRAM</span>
+            <span className="text-[10px] text-indigo-600 group-hover:translate-x-1 transition-transform font-noto">D__CODES →</span>
           </a>
 
           <a 
-            href="mailto:davidcodes2105@gmail.com" 
+            href="mailto:davidcodes2105@gmail.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 group hover:border-indigo-600 transition-all"
           >
-            <span className="text-xs font-black tracking-widest uppercase text-slate-700 dark:text-white/70">EMAIL</span>
-            <span className="text-[10px] text-indigo-600 group-hover:translate-x-1 transition-transform">DAVIDCODES... →</span>
+            <span className="text-xs font-black tracking-widest uppercase text-slate-700 dark:text-white/70 font-noto">EMAIL</span>
+            <span className="text-[10px] text-indigo-600 group-hover:translate-x-1 transition-transform font-noto">DAVIDCODES... →</span>
           </a>
         </div>
         
-        <p className="text-[8px] text-center tracking-[0.2em] font-black text-slate-400 dark:text-white/10 uppercase">
+        <p className="text-[8px] text-center tracking-[0.2em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
           Standard Response Protocol: 24-48 Hours
         </p>
       </div>
