@@ -8,9 +8,7 @@ import { Auth } from './components/Auth';
 import { BudgetEdit } from './components/BudgetEdit';
 import { ClassWiseOutflow } from './components/ClassWiseOutflow';
 import { FiltersPage } from './components/FiltersPage';
-import { Feedback } from './components/Feedback';
 import { ContactPopup } from './components/ContactPopup';
-import { InitialShield } from './components/InitialShield';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
 import { translations } from './translations';
@@ -19,11 +17,10 @@ import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters' | 'feedback';
+type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('vault');
-  const [feedbackType, setFeedbackType] = useState<'issue' | 'update'>('issue');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showSplash, setShowSplash] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -247,7 +244,16 @@ const App: React.FC = () => {
     if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => setActiveTab('profile')} />;
     
     switch (activeTab) {
-      case 'vault': return <Vault onAdd={addTransaction} currencySymbol={currencySymbol} transactions={transactions} language={profile.language} categories={allCategories} />;
+      case 'vault': return (
+        <Vault 
+          onAdd={addTransaction} 
+          currencySymbol={currencySymbol} 
+          transactions={transactions} 
+          language={profile.language} 
+          categories={allCategories}
+          onNavigateToEditLimits={() => setActiveTab('budget-edit')}
+        />
+      );
       case 'history': return (
         <Records 
           transactions={transactions} 
@@ -295,16 +301,8 @@ const App: React.FC = () => {
           onUpdate={updateProfile} 
           onDeleteCategory={deleteCategory}
           onRenameCategory={renameCategory}
-          onBack={() => setActiveTab('profile')} 
+          onBack={() => setActiveTab('vault')} 
           language={profile.language} 
-        />
-      );
-      case 'feedback': return (
-        <Feedback 
-          type={feedbackType} 
-          profile={profile} 
-          language={profile.language} 
-          onBack={() => setActiveTab('profile')} 
         />
       );
       case 'ai': return <div className="max-w-3xl mx-auto"><AIAdvisor transactions={transactions} currency={profile.currency} language={profile.language} /></div>;
@@ -316,10 +314,6 @@ const App: React.FC = () => {
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => setActiveTab('auth')}
             onNavigateToEditLimits={() => setActiveTab('budget-edit')}
-            onNavigateToFeedback={(type) => {
-              setFeedbackType(type);
-              setActiveTab('feedback');
-            }}
             onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
           />
@@ -449,15 +443,6 @@ const App: React.FC = () => {
             <span className="opacity-20">/</span>
             <span className={profile.language === 'ta' ? 'text-indigo-600' : ''}>தமிழ்</span>
           </button>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 border border-slate-300 dark:border-white/10 p-1 flex-shrink-0 flex items-center justify-center">
-              <InitialShield name={profile.displayName} size="sm" />
-            </div>
-            <div className="truncate">
-              <p className="text-[9px] font-black tracking-widest uppercase truncate font-noto">{profile.displayName}</p>
-            </div>
-          </div>
         </div>
       </aside>
 
@@ -476,9 +461,6 @@ const App: React.FC = () => {
       <main className="flex-1 p-6 md:p-12 pb-24 md:pb-12 relative z-10 overflow-y-auto">
         <header className="md:hidden mb-12 flex justify-between items-center">
           <h1 className="brand-text text-3xl">Custos</h1>
-          <button onClick={() => setActiveTab('profile')} className="w-10 h-10 border border-indigo-600/20 shadow-md flex items-center justify-center overflow-hidden">
-            <InitialShield name={profile.displayName} size="sm" />
-          </button>
         </header>
         {renderContent()}
       </main>

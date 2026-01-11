@@ -62,46 +62,46 @@ export const BudgetEdit: React.FC<BudgetEditProps> = ({
   const allCategories = [...new Set([...coreList, ...(profile.customCategories || [])])];
 
   return (
-    <div className="animate-in w-full max-w-4xl mx-auto space-y-12 pb-20">
+    <div className="animate-in w-full max-w-4xl mx-auto space-y-12 pb-20 px-4 md:px-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white uppercase font-noto">{t.classAmountEdit}</h2>
-          <p className="text-slate-800 dark:text-white/30 tracking-[0.4em] text-[10px] mt-1 uppercase font-black">{t.guardianConfig} / REFINEMENT</p>
+          <p className="text-slate-800 dark:text-white/30 tracking-[0.4em] text-[10px] mt-1 uppercase font-black font-noto">{t.guardianConfig} / REFINEMENT</p>
         </div>
         <button 
           onClick={onBack}
           className="px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-lg font-noto"
         >
-          {t.backToProfile}
+          {t.backToLedger}
         </button>
       </div>
 
-      <div className="p-8 bg-indigo-600/[0.03] border border-indigo-600/20 relative overflow-hidden">
+      <div className="p-6 md:p-8 bg-indigo-600/[0.03] border border-indigo-600/20 relative overflow-hidden">
         {showConfirmAdd && (
           <div className="absolute inset-0 bg-emerald-600 flex items-center justify-center animate-in z-10">
-            <span className="text-white text-[10px] font-black tracking-widest uppercase">CLASS ESTABLISHED</span>
+            <span className="text-white text-[10px] font-black tracking-widest uppercase font-noto">CLASS ESTABLISHED</span>
           </div>
         )}
-        <label className="text-[10px] tracking-[0.4em] font-black text-slate-800 dark:text-white/40 uppercase block mb-4">Establish New Asset Class</label>
-        <div className="flex gap-4">
+        <label className="text-[10px] tracking-[0.4em] font-black text-slate-800 dark:text-white/40 uppercase block mb-6 font-noto">Establish New Asset Class</label>
+        <div className="flex flex-col md:flex-row gap-6 w-full">
           <input 
             type="text" 
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-            className="flex-1 bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white font-noto"
+            className="w-full md:flex-1 bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 text-lg md:text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white font-noto"
             placeholder="Class Name..."
           />
           <button 
             onClick={addCategory}
-            className="px-10 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg font-noto"
+            className="w-full md:w-auto px-12 py-4 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg font-noto"
           >
             Add Class
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8 border-t border-slate-300 dark:border-white/5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pt-8 border-t border-slate-300 dark:border-white/5">
         {allCategories.filter(c => c !== 'Income').map(cat => {
           const isCore = coreList.includes(cat);
           const isEditing = editingCat === cat;
@@ -144,7 +144,7 @@ export const BudgetEdit: React.FC<BudgetEditProps> = ({
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xl font-light text-slate-400 dark:text-white/10">{currencySymbol}</span>
+                <span className="text-xl font-light text-slate-400 dark:text-white/10 font-noto">{currencySymbol}</span>
                 <input 
                   type="number" 
                   value={profile.budgetLimits?.[cat] || 0}

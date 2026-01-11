@@ -13,7 +13,6 @@ interface ProfileProps {
   onToggleLanguage: () => void;
   onGoCloud: () => void;
   onNavigateToEditLimits: () => void;
-  onNavigateToFeedback: (type: 'issue' | 'update') => void;
   onOpenContact: () => void;
   deferredPrompt?: any;
 }
@@ -24,7 +23,6 @@ export const Profile: React.FC<ProfileProps> = ({
   onToggleLanguage, 
   onGoCloud,
   onNavigateToEditLimits,
-  onNavigateToFeedback,
   onOpenContact
 }) => {
   const [joinId, setJoinId] = useState('');
@@ -113,7 +111,7 @@ export const Profile: React.FC<ProfileProps> = ({
           {!auth.currentUser && (
             <button 
               onClick={onGoCloud}
-              className="w-full max-w-sm py-4 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-900 transition-all rounded-sm shadow-xl font-noto"
+              className="w-full max-sm py-4 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-900 transition-all rounded-sm shadow-xl font-noto"
             >
               {t.profile.goCloud}
             </button>
@@ -273,25 +271,18 @@ export const Profile: React.FC<ProfileProps> = ({
         </div>
 
         <div className="pt-20 border-t border-slate-300 dark:border-white/5 flex flex-col items-center gap-12">
-          <button 
-            onClick={onNavigateToEditLimits}
-            className="w-full max-w-sm py-5 border border-indigo-600/30 bg-indigo-600/[0.02] text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-indigo-600 hover:text-white transition-all font-noto shadow-lg"
-          >
-            {t.classAmountEdit}
-          </button>
-          
           <div className="w-full max-w-sm flex flex-col items-center gap-6">
-            <div className="flex items-center gap-3 text-[10px] font-black tracking-widest uppercase text-slate-400 dark:text-white/20 font-noto">
+            <div className="flex items-center gap-6 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
                <button 
-                  onClick={() => onNavigateToFeedback('issue')}
-                  className="hover:text-rose-500 transition-colors"
+                  onClick={onOpenContact}
+                  className="text-indigo-400 hover:text-indigo-300 transition-all border-b border-indigo-400 pb-1"
                >
                  issue?
                </button>
-               <span className="opacity-20">/</span>
+               <span className="opacity-10 text-slate-400">|</span>
                <button 
-                  onClick={() => onNavigateToFeedback('update')}
-                  className="hover:text-indigo-500 transition-colors"
+                  onClick={onOpenContact}
+                  className="text-amber-400 hover:text-amber-300 transition-all border-b border-amber-400 pb-1"
                >
                  suggest update?
                </button>
@@ -307,10 +298,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
           <div className="w-full border-t border-slate-200 dark:border-white/5 pt-12 space-y-2 text-center">
              <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
-                VERSION: 3.1.0-SOVEREIGN
-             </p>
-             <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
-                NAME: CUSTOS
+                VERSION: 4.0.0 ALPHA
              </p>
              <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/10 uppercase font-noto">
                 PROPRIETOR: D'CODES / DAVID CODES
