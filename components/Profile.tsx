@@ -187,7 +187,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 <img 
                   src={profile.photoURL} 
                   alt="Identity" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" 
                   onError={() => handleImageError(profile.photoURL!)}
                 />
               ) : (
@@ -197,8 +197,8 @@ export const Profile: React.FC<ProfileProps> = ({
             {profile.photoURL && !brokenImages[profile.photoURL] && (
               <div className="absolute -inset-1 border border-indigo-600/20 animate-pulse pointer-events-none"></div>
             )}
-            <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-colors flex items-center justify-center">
-               <span className="opacity-0 group-hover:opacity-100 text-[8px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 transition-opacity translate-y-2 group-hover:translate-y-0 duration-500">
+            <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors flex items-center justify-center">
+               <span className="opacity-0 group-hover:opacity-100 text-[8px] font-black uppercase tracking-widest text-white transition-all translate-y-2 group-hover:translate-y-0 duration-500">
                  {t.profile.portraitArchive}
                </span>
             </div>
