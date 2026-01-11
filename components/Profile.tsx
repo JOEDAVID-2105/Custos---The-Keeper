@@ -13,6 +13,7 @@ interface ProfileProps {
   onToggleLanguage: () => void;
   onGoCloud: () => void;
   onNavigateToEditLimits: () => void;
+  onNavigateToPortraitSelection: () => void;
   onOpenContact: () => void;
   deferredPrompt?: any;
   fontSize: number;
@@ -23,6 +24,7 @@ export const Profile: React.FC<ProfileProps> = ({
   profile, 
   onUpdate, 
   onGoCloud,
+  onNavigateToPortraitSelection,
   onOpenContact,
   deferredPrompt,
   fontSize,
@@ -34,18 +36,13 @@ export const Profile: React.FC<ProfileProps> = ({
   const [isNamingFamily, setIsNamingFamily] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
   const [showCopied, setShowCopied] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
   
   // Font States
   const [previewFontSize, setPreviewFontSize] = useState(fontSize);
   const [isLocked, setIsLocked] = useState(true);
   const [unlockProgress, setUnlockProgress] = useState(0);
   const unlockTimerRef = useRef<any>(null);
-
-  // Archive Portraits
-  const portraits = Array.from({ length: 20 }, (_, i) => {
-    const num = (i + 1).toString().padStart(2, '0');
-    return `./assets/pfp_${num}.png`;
-  });
 
   const familyId = profile.familyId;
   const language = profile.language || 'en';
@@ -91,7 +88,7 @@ export const Profile: React.FC<ProfileProps> = ({
   const startUnlock = () => {
     let progress = 0;
     unlockTimerRef.current = setInterval(() => {
-      progress += 10; // 10% every 100ms = 100% in 1s
+      progress += 10; 
       setUnlockProgress(progress);
       if (progress >= 100) {
         setIsLocked(false);
@@ -149,8 +146,8 @@ export const Profile: React.FC<ProfileProps> = ({
     }
   };
 
-  const selectPortrait = (url: string) => {
-    onUpdate({ ...profile, photoURL: url });
+  const handleImageError = (url: string) => {
+    setBrokenImages(prev => ({ ...prev, [url]: true }));
   };
 
   const handleInstallClick = () => {
@@ -184,17 +181,27 @@ export const Profile: React.FC<ProfileProps> = ({
             </button>
           )}
 
-          <div className="relative group">
-            <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center overflow-hidden">
-              {profile.photoURL ? (
-                <img src={profile.photoURL} alt="Identity" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <div className="relative group cursor-pointer" onClick={onNavigateToPortraitSelection}>
+            <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center overflow-hidden transition-all group-hover:border-indigo-600/50">
+              {profile.photoURL && !brokenImages[profile.photoURL] ? (
+                <img 
+                  src={profile.photoURL} 
+                  alt="Identity" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  onError={() => handleImageError(profile.photoURL!)}
+                />
               ) : (
                 <InitialShield name={profile.displayName} size="lg" />
               )}
             </div>
-            {profile.photoURL && (
+            {profile.photoURL && !brokenImages[profile.photoURL] && (
               <div className="absolute -inset-1 border border-indigo-600/20 animate-pulse pointer-events-none"></div>
             )}
+            <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-colors flex items-center justify-center">
+               <span className="opacity-0 group-hover:opacity-100 text-[8px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 transition-opacity translate-y-2 group-hover:translate-y-0 duration-500">
+                 {t.profile.portraitArchive}
+               </span>
+            </div>
           </div>
 
           <div className="text-center space-y-2">
@@ -206,32 +213,6 @@ export const Profile: React.FC<ProfileProps> = ({
                 </p>
              </div>
           </div>
-        </div>
-
-        {/* Portrait Archive Gallery */}
-        <div className="pt-16 border-t border-slate-300 dark:border-white/5">
-           <div className="mb-8">
-             <p className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.portraitArchive}</p>
-             <p className="text-[8px] tracking-widest text-slate-500 dark:text-white/20 uppercase mt-1">{t.profile.selectIdentity}</p>
-           </div>
-           
-           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2 md:gap-3">
-              {portraits.map((url, idx) => {
-                const isSelected = profile.photoURL === url;
-                return (
-                  <button 
-                    key={idx}
-                    onClick={() => selectPortrait(url)}
-                    className={`aspect-square relative overflow-hidden border transition-all duration-300 ${isSelected ? 'border-indigo-600 scale-105 shadow-lg z-10' : 'border-slate-200 dark:border-white/5 opacity-40 hover:opacity-100 hover:border-indigo-600/50'}`}
-                  >
-                    <img src={url} alt={`Archive ${idx+1}`} className="w-full h-full object-cover" />
-                    {isSelected && (
-                      <div className="absolute inset-0 border-2 border-indigo-600/50"></div>
-                    )}
-                  </button>
-                );
-              })}
-           </div>
         </div>
 
         {deferredPrompt && (
@@ -337,9 +318,14 @@ export const Profile: React.FC<ProfileProps> = ({
                     {familyMembers.map(member => (
                        <div key={member.uid} className="flex items-center justify-between p-4 border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
                           <div className="flex items-center gap-4">
-                             <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-white/10">
-                                {member.photoURL ? (
-                                  <img src={member.photoURL} alt={member.displayName} className="w-full h-full object-cover" />
+                             <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-white/10 flex items-center justify-center">
+                                {member.photoURL && !brokenImages[member.photoURL] ? (
+                                  <img 
+                                    src={member.photoURL} 
+                                    alt={member.displayName} 
+                                    className="w-full h-full object-cover" 
+                                    onError={() => handleImageError(member.photoURL!)}
+                                  />
                                 ) : (
                                   <div className="w-full h-full bg-slate-200 dark:bg-white/5 flex items-center justify-center text-[10px] font-black text-indigo-600 uppercase">
                                     {member.displayName.charAt(0)}
@@ -458,7 +444,7 @@ export const Profile: React.FC<ProfileProps> = ({
         </div>
 
         <div className="pt-20 border-t border-slate-300 dark:border-white/5 flex flex-col items-center gap-12">
-          <div className="w-full max-w-sm flex flex-col items-center gap-6">
+          <div className="w-full max-sm flex flex-col items-center gap-6">
             <div className="flex items-center gap-6 text-[11px] font-black tracking-[0.2em] uppercase font-noto">
                <span className="text-indigo-400/80 pb-1 cursor-default">{t.profile.issueLabel}</span>
                <span className="opacity-10 text-slate-400">|</span>

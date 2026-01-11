@@ -186,7 +186,11 @@ export const translations = {
       issueLabel: "issue?",
       suggestUpdateLabel: "suggest update?",
       portraitArchive: "PORTRAIT ARCHIVE",
-      selectIdentity: "SELECT YOUR IDENTITY"
+      selectIdentity: "SELECT YOUR IDENTITY",
+      masculineArchive: "MASCULINE ARCHIVE",
+      feminineArchive: "FEMININE ARCHIVE",
+      dissolvePortrait: "REMOVE PORTRAIT",
+      dissolvePortraitDesc: "REVERT TO INITIAL SHIELD"
     },
     ledgerHeaders: {
       timeAndAlias: "TIME & ALIAS",
@@ -285,7 +289,7 @@ export const translations = {
     categories: {
       Housing: "வீடு",
       Food: "உணவு",
-      Transport: "போக்குவரத்து",
+      Transport: "போக்குευத்து",
       Luxury: "ஆடம்பரம்",
       Wellness: "நலம்",
       Investment: "முதலீடு",
@@ -329,7 +333,7 @@ export const translations = {
       title: "கிளவுட் பயனர்",
       subtitle: "உங்கள் நிதி சுதந்திரத்தை மேம்படுத்துங்கள்",
       fullName: "முழு பெயர்",
-      email: "மின்னஞ்சல்",
+      email: "முின்னஞ்சல்",
       password: "பாதுகாப்பு குறியீடு",
       authenticate: "அடையாளம் காணவும்",
       establish: "கணக்கை உருவாக்கு",
@@ -391,7 +395,11 @@ export const translations = {
       issueLabel: "பிரச்சனை?",
       suggestUpdateLabel: "மாற்றம் பரிந்துரைக்கவா?",
       portraitArchive: "அடையாள படம் சேகரிப்பு",
-      selectIdentity: "உங்கள் அடையாளத்தைத் தேர்ந்தெடுக்கவும்"
+      selectIdentity: "உங்கள் அடையாளத்தைத் தேர்ந்தெடுக்கவும்",
+      masculineArchive: "ஆண் அடையாள சேகரிப்பு",
+      feminineArchive: "பெண் அடையாள சேகரிப்பு",
+      dissolvePortrait: "படத்தை நீக்கு",
+      dissolvePortraitDesc: "ஆரம்ப அடையாளத்திற்கு மாற்றவும்"
     },
     ledgerHeaders: {
       timeAndAlias: "நேரம் / பெயர்",
