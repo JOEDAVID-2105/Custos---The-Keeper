@@ -3,8 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Transaction, Category } from '../types';
 import { SummaryDashboard } from './SummaryDashboard';
 import { translations } from '../translations';
-import { TrashIcon } from '../constants';
-import { InitialShield } from './InitialShield';
+import { TrashIcon, PAYMENT_METHODS } from '../constants';
 
 interface RecordsProps {
   transactions: Transaction[];
@@ -22,10 +21,16 @@ interface RecordsProps {
   currentUserId: string;
   language: 'en' | 'ta';
   categories: string[];
+  familyId?: string;
 }
 
-const LocationIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+const LocationPinIcon = ({ className, onClick }: { className?: string, onClick?: () => void }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={`${className} cursor-pointer hover:text-indigo-600 transition-all active:scale-90`}
+    onClick={onClick}
+  >
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
   </svg>
 );
@@ -33,15 +38,22 @@ const LocationIcon = ({ className }: { className?: string }) => (
 export const Records: React.FC<RecordsProps> = ({ 
   transactions, onDelete, onUpdate, onNavigateToOutflow, onNavigateToFilters,
   search, typeFilter, startDate, endDate, sortBy, sortOrder,
-  currencySymbol, currentUserId, language, categories
+  currencySymbol, currentUserId, language, categories, familyId
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
+  const [viewMode, setViewMode] = useState<'private' | 'family'>(familyId ? 'family' : 'private');
 
   const t = translations[language];
 
   const filteredTransactions = useMemo(() => {
     let list = [...transactions];
+
+    if (viewMode === 'family') {
+       list = list.filter(tx => tx.familyId === familyId && tx.familyId !== undefined && tx.familyId !== null);
+    } else {
+       list = list.filter(tx => !tx.familyId || tx.familyId === null);
+    }
 
     if (search) {
       const term = search.toLowerCase();
@@ -73,7 +85,7 @@ export const Records: React.FC<RecordsProps> = ({
       
       return sortOrder === 'desc' ? -comparison : comparison;
     });
-  }, [transactions, search, typeFilter, startDate, endDate, sortBy, sortOrder]);
+  }, [transactions, search, typeFilter, startDate, endDate, sortBy, sortOrder, viewMode, familyId]);
 
   const groupedTransactions = useMemo(() => {
     return filteredTransactions.reduce((acc, tx) => {
@@ -105,6 +117,13 @@ export const Records: React.FC<RecordsProps> = ({
     }
   };
 
+  const handleOpenMap = (tx: Transaction) => {
+    if (tx.location) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${tx.location.lat},${tx.location.lng}`;
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <div className="animate-in w-full pb-20 max-w-full overflow-hidden">
       <div className="flex flex-col mb-8 md:mb-16 gap-4 md:gap-8 no-print">
@@ -122,14 +141,28 @@ export const Records: React.FC<RecordsProps> = ({
             </button>
             <button 
               onClick={onNavigateToFilters}
-              className="flex-1 md:flex-none px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10 font-noto"
+              className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10 font-noto flex-1 md:flex-none"
             >
               {t.filtersLabel}
             </button>
           </div>
         </div>
 
-        <SummaryDashboard transactions={transactions} currencySymbol={currencySymbol} language={language} />
+        <div className="flex flex-col gap-4">
+           <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.modeLabel}</label>
+           <select 
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value as any)}
+              className="w-full max-w-sm bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-[10px] font-black text-slate-900 dark:text-white font-noto"
+           >
+              <option value="private" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.private}</option>
+              {familyId && (
+                <option value="family" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.family}</option>
+              )}
+           </select>
+        </div>
+
+        <SummaryDashboard transactions={filteredTransactions} currencySymbol={currencySymbol} language={language} />
       </div>
 
       <div className="flex flex-col w-full max-w-full overflow-hidden">
@@ -140,6 +173,7 @@ export const Records: React.FC<RecordsProps> = ({
                 <th className="pb-4 px-2 md:px-6 font-normal">{t.ledgerHeaders.timeAndAlias}</th>
                 <th className="pb-4 font-normal">{t.ledgerHeaders.category}</th>
                 <th className="pb-4 font-normal">{t.ledgerHeaders.desc}</th>
+                <th className="pb-4 font-normal">{t.ledgerHeaders.modeOfPay}</th>
                 <th className="pb-4 font-normal text-right">{t.ledgerHeaders.val}</th>
                 <th className="pb-4 px-2 md:px-6 font-normal text-right no-print">{t.ledgerHeaders.act}</th>
               </tr>
@@ -148,7 +182,7 @@ export const Records: React.FC<RecordsProps> = ({
               {(Object.entries(groupedTransactions) as [string, Transaction[]][]).map(([date, txs]) => (
                 <React.Fragment key={date}>
                   <tr className="bg-slate-200/50 dark:bg-white/[0.03] print:bg-slate-50 border-y border-slate-200 dark:border-white/5">
-                    <td colSpan={5} className="py-2 px-2 md:px-6 border-l-4 border-indigo-600">
+                    <td colSpan={6} className="py-2 px-2 md:px-6 border-l-4 border-indigo-600">
                       <h3 className="text-[10px] md:text-sm font-black tracking-widest uppercase text-slate-900 dark:text-white/90 print:text-black">{date}</h3>
                     </td>
                   </tr>
@@ -160,18 +194,25 @@ export const Records: React.FC<RecordsProps> = ({
                       <tr key={tx.id} className="border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.01]">
                         <td className="py-3 px-2 md:px-6">
                            <div className="flex flex-col">
-                             <div className="flex items-center gap-1.5">
+                             <div className="flex items-center gap-2">
                                 <span className="text-[9px] md:text-[11px] font-black text-slate-900 dark:text-white/80 font-mono tracking-tighter md:tracking-widest print:text-black">
                                   {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                 </span>
-                                {tx.location && <LocationIcon className="w-2 h-2 text-indigo-500 opacity-60" />}
+                                {tx.location && (
+                                  <div className="group/loc relative flex items-center">
+                                    <LocationPinIcon 
+                                      className="w-3.5 h-3.5 text-indigo-500 drop-shadow-[0_0_8px_rgba(79,70,229,0.4)]" 
+                                      onClick={() => handleOpenMap(tx)} 
+                                    />
+                                    <span className="absolute left-full ml-2 px-2 py-0.5 bg-indigo-600 text-white text-[6px] font-black uppercase rounded-none opacity-0 group-hover/loc:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
+                                      VIEW ON MAP
+                                    </span>
+                                  </div>
+                                )}
                              </div>
                              <div className="flex items-center gap-2 mt-1">
-                                <div className="w-4 h-4 border border-indigo-500/10">
-                                  <InitialShield name={tx.userName || 'LOCAL'} size="sm" />
-                                </div>
-                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest truncate max-w-[80px]">
-                                  {tx.userName || 'LOCAL'}
+                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest truncate max-w-[120px]">
+                                  {tx.userName || 'LOCAL USER'}
                                 </span>
                              </div>
                            </div>
@@ -193,6 +234,17 @@ export const Records: React.FC<RecordsProps> = ({
                           ) : (
                             <span className="text-[9px] md:text-sm font-medium tracking-tight text-slate-900 dark:text-white/70 print:text-black font-noto truncate block">
                               {tx.note || '...'}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3">
+                          {isEditing ? (
+                            <select value={editValues.paymentMethod} onChange={e => setEditValues({...editValues, paymentMethod: e.target.value})} className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 text-[8px] p-1 uppercase font-black outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
+                              {PAYMENT_METHODS.map(m => <option key={m} value={m}>{(t.methods as any)[m] || m}</option>)}
+                            </select>
+                          ) : (
+                            <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40">
+                              {(t.methods as any)[tx.paymentMethod] || tx.paymentMethod}
                             </span>
                           )}
                         </td>

@@ -14,7 +14,8 @@ import {
   updateDoc,
   writeBatch,
   addDoc,
-  increment
+  increment,
+  or
 } from "firebase/firestore";
 
 const LOCAL_STORAGE_KEY = 'custos_transactions';
@@ -85,17 +86,33 @@ export class StorageService {
   static async syncTransaction(transaction: Transaction) {
     if (!auth.currentUser) return;
     const ref = doc(db, 'transactions', transaction.id);
-    await setDoc(ref, {
+    
+    // Explicit null handling to fix indexing and disappearances on reload
+    // We strictly use null for Private records to ensure they aren't orphaned from the 'or' query.
+    const payload = {
       ...transaction,
       userId: transaction.userId || auth.currentUser.uid,
-      familyId: transaction.familyId || null
-    });
+      familyId: (transaction.familyId && typeof transaction.familyId === 'string' && transaction.familyId.trim().length > 0) 
+                ? transaction.familyId 
+                : null 
+    };
+    
+    try {
+      await setDoc(ref, payload);
+      console.debug("Archive sync established:", transaction.id);
+    } catch (err) {
+      console.error("Firestore sync protocol failure:", err);
+      throw err;
+    }
   }
 
   static async updateTransaction(transaction: Transaction) {
     if (!auth.currentUser) return;
     const ref = doc(db, 'transactions', transaction.id);
-    await updateDoc(ref, { ...transaction });
+    await updateDoc(ref, { 
+      ...transaction,
+      familyId: transaction.familyId || null
+    });
   }
 
   static async removeTransaction(id: string) {
@@ -167,39 +184,37 @@ export class StorageService {
 
   static subscribeToTransactions(uid: string, familyId: string | null | undefined, callback: (txs: Transaction[]) => void) {
     if (!auth.currentUser) return () => {};
-
+    // Heartbeat subscription: Fetches both private (familyId == null) and shared household records (familyId == currentFamilyId)
     const q = (familyId && familyId !== null)
-      ? query(collection(db, 'transactions'), where('familyId', '==', familyId))
+      ? query(collection(db, 'transactions'), or(where('familyId', '==', familyId), where('userId', '==', uid)))
       : query(collection(db, 'transactions'), where('userId', '==', uid));
 
     return onSnapshot(q, (snapshot) => {
       const txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
       callback(txs);
+    }, (error) => {
+      console.error("Subscription heartbeat failure:", error);
     });
   }
 
   static async saveFeedback(type: 'issue' | 'update', message: string, userProfile?: UserProfile): Promise<number> {
     const feedbackRef = collection(db, 'feedback');
     const statsRef = doc(db, 'metadata', 'feedback_stats');
-
-    // Record the actual feedback
     await addDoc(feedbackRef, {
       type,
       message,
       userId: auth.currentUser?.uid || 'local-user',
       userName: userProfile?.displayName || 'Unknown',
-      userEmail: userProfile?.email || 'N/A',
+      userEmail: userProfile?.email || 'No email provided',
       timestamp: Date.now(),
       version: 'v3.1.0-sovereign'
     });
-
-    // Handle counter for 10+ alerts
     try {
       await setDoc(statsRef, { count: increment(1) }, { merge: true });
       const snap = await getDoc(statsRef);
       return snap.data()?.count || 0;
     } catch (e) {
-      console.error("Counter increment failed, rules may need updating", e);
+      console.error("Counter increment failed", e);
       return 0;
     }
   }

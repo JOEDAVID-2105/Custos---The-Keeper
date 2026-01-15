@@ -15,7 +15,7 @@ import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
 import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters';
 
@@ -25,28 +25,33 @@ interface SnackbarState {
   onUndo: () => void;
 }
 
+const DEFAULT_PROFILE: UserProfile = {
+  uid: 'local-user',
+  displayName: 'The Local User',
+  email: '',
+  currency: 'INR',
+  country: '',
+  state: '',
+  city: '',
+  isCloudGuardian: false,
+  theme: 'dark',
+  language: 'en',
+  budgetLimits: {},
+  customCategories: []
+};
+
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<AppTab>('vault');
+  const [activeTab, setActiveTab] = useState<AppTab>(() => {
+    const saved = localStorage.getItem('custos_active_tab');
+    return (saved as AppTab) || 'vault';
+  });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showSplash, setShowSplash] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [fontSize, setFontSize] = useState(16);
-  const [profile, setProfile] = useState<UserProfile>({
-    uid: 'local-user',
-    displayName: 'The Local User',
-    email: '',
-    currency: 'INR',
-    country: '',
-    state: '',
-    city: '',
-    isCloudGuardian: false,
-    theme: 'dark',
-    language: 'en',
-    budgetLimits: {},
-    customCategories: []
-  });
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
+  const [authResolved, setAuthResolved] = useState(false);
   
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     isVisible: false,
@@ -79,13 +84,17 @@ const App: React.FC = () => {
   }, [fontSize]);
 
   useEffect(() => {
+    localStorage.setItem('custos_active_tab', activeTab);
+    window.history.replaceState({ tab: activeTab }, '');
+  }, [activeTab]);
+
+  useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (event.state && event.state.tab) {
         setActiveTab(event.state.tab);
       }
     };
     window.addEventListener('popstate', handlePopState);
-    window.history.replaceState({ tab: 'vault' }, '');
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
@@ -98,7 +107,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 4500);
+    }, 4000);
 
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -148,78 +157,56 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
-      if (user) {
-        await StorageService.syncLocalToCloud(user.uid, user.displayName || 'User');
-        let cloudProfile = await StorageService.getProfile(user.uid);
-        
-        if (!cloudProfile) {
-          const loc = await detectLocationInfo();
-          const newProfile: UserProfile = {
-            uid: user.uid,
-            displayName: user.displayName || 'The User',
-            email: user.email || '',
-            currency: 'INR',
-            country: loc.country,
-            state: loc.state,
-            city: loc.city,
-            isCloudGuardian: true,
-            theme: 'dark',
-            language: 'en',
-            budgetLimits: {},
-            customCategories: []
-          };
-          await StorageService.saveProfile(newProfile);
-          setProfile(newProfile);
-        } else {
-          if (!cloudProfile.country && !cloudProfile.state) {
+    setPersistence(auth, browserLocalPersistence).then(() => {
+      const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          await StorageService.syncLocalToCloud(user.uid, user.displayName || 'User');
+          let cloudProfile = await StorageService.getProfile(user.uid);
+          
+          if (!cloudProfile) {
             const loc = await detectLocationInfo();
-            cloudProfile = { ...cloudProfile, ...loc };
-            await StorageService.saveProfile(cloudProfile);
+            const newProfile: UserProfile = {
+              uid: user.uid,
+              displayName: user.displayName || 'The User',
+              email: user.email || '',
+              currency: 'INR',
+              country: loc.country,
+              state: loc.state,
+              city: loc.city,
+              isCloudGuardian: true,
+              theme: 'dark',
+              language: 'en',
+              budgetLimits: {},
+              customCategories: []
+            };
+            await StorageService.saveProfile(newProfile);
+            setProfile(newProfile);
+          } else {
+            setProfile({ ...cloudProfile, language: cloudProfile.language || 'en' });
           }
-          setProfile({ ...cloudProfile, language: cloudProfile.language || 'en' });
+        } else {
+          const localPrefs = StorageService.getUserPrefs();
+          setProfile(localPrefs || DEFAULT_PROFILE);
+          setTransactions(StorageService.getLocalTransactions());
         }
-      } else {
-        const localPrefs = StorageService.getUserPrefs();
-        setProfile(localPrefs || {
-          uid: 'local-user',
-          displayName: 'The Local User',
-          email: '',
-          currency: 'INR',
-          country: '',
-          state: '',
-          city: '',
-          isCloudGuardian: false,
-          theme: 'dark',
-          language: 'en',
-          budgetLimits: {},
-          customCategories: []
-        });
-      }
-      setLoading(false);
+        setAuthResolved(true);
+      });
+      return () => unsubscribeAuth();
     });
-
-    return () => unsubscribeAuth();
   }, []);
 
   useEffect(() => {
+    if (!authResolved) return;
     let unsubscribeTxs: (() => void) | undefined;
     if (auth.currentUser) {
-      unsubscribeTxs = StorageService.subscribeToTransactions(
-        auth.currentUser.uid, 
-        profile.familyId, 
-        (txs) => {
-          setTransactions(txs);
-        }
-      );
+      unsubscribeTxs = StorageService.subscribeToTransactions(profile.uid, profile.familyId, setTransactions);
     } else {
       setTransactions(StorageService.getLocalTransactions());
     }
     return () => {
       if (unsubscribeTxs) unsubscribeTxs();
     };
-  }, [profile.uid, profile.familyId]);
+  }, [authResolved, profile.uid, profile.familyId]);
 
   const triggerSnackbar = (message: string, onUndo: () => void) => {
     if (snackbarTimeoutRef.current) clearTimeout(snackbarTimeoutRef.current);
@@ -236,39 +223,31 @@ const App: React.FC = () => {
   };
 
   const addTransaction = async (tx: Transaction) => {
-    const enrichedT = { ...tx, familyId: profile.familyId, userId: profile.uid };
+    setTransactions(prev => [...prev, tx]);
     if (auth.currentUser) {
-       await StorageService.syncTransaction(enrichedT);
+       try {
+         await StorageService.syncTransaction(tx);
+       } catch (err) {
+         console.error("Cloud sync heartbeat failure:", err);
+       }
     } else {
-       StorageService.saveLocalTransaction(enrichedT);
-       setTransactions(prev => [...prev, enrichedT]);
+       StorageService.saveLocalTransaction(tx);
     }
   };
 
   const updateTransaction = async (tx: Transaction) => {
+    setTransactions(prev => prev.map(item => item.id === tx.id ? tx : item));
     if (auth.currentUser) await StorageService.updateTransaction(tx);
-    else {
-      StorageService.updateLocalTransaction(tx);
-      setTransactions(prev => prev.map(item => item.id === tx.id ? tx : item));
-    }
+    else StorageService.updateLocalTransaction(tx);
   };
 
   const deleteTransaction = async (id: string) => {
     const txToDelete = transactions.find(t => t.id === id);
     if (!txToDelete) return;
+    setTransactions(prev => prev.filter(tx => tx.id !== id));
     if (auth.currentUser) await StorageService.removeTransaction(id);
-    else {
-      StorageService.deleteLocalTransaction(id);
-      setTransactions(prev => prev.filter(tx => tx.id !== id));
-    }
-    triggerSnackbar(t.itemDeleted, () => {
-      addTransaction(txToDelete);
-    });
-  };
-
-  const deleteCategory = (catName: string) => {
-    if (DEFAULT_CATEGORIES.includes(catName)) return;
-    setDeleteModal({ isOpen: true, category: catName });
+    else StorageService.deleteLocalTransaction(id);
+    triggerSnackbar(t.itemDeleted, () => addTransaction(txToDelete));
   };
 
   const confirmDeleteCategory = async () => {
@@ -280,9 +259,7 @@ const App: React.FC = () => {
     delete newLimits[catName];
     await updateProfile({ ...profile, customCategories: newCustom, budgetLimits: newLimits });
     setDeleteModal({ isOpen: false, category: '' });
-    triggerSnackbar(t.categoryDeleted, () => {
-      updateProfile({ ...profile, customCategories: oldCustom, budgetLimits: oldLimits });
-    });
+    triggerSnackbar(t.categoryDeleted, () => updateProfile({ ...profile, customCategories: oldCustom, budgetLimits: oldLimits }));
   };
 
   const renameCategory = async (oldName: string, newName: string) => {
@@ -312,20 +289,25 @@ const App: React.FC = () => {
     updateProfile({ ...profile, theme: newTheme });
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Manually trigger reset for immediate responsiveness
+      setProfile(DEFAULT_PROFILE);
+      setTransactions(StorageService.getLocalTransactions());
+      setActiveTab('vault');
+      localStorage.setItem('custos_active_tab', 'vault');
+    } catch (error) {
+      console.error("Sovereign session termination failed:", error);
+    }
+  };
+
   const currencySymbol = useMemo(() => {
     return CURRENCIES.find(c => c.code === profile.currency)?.symbol || '₹';
   }, [profile.currency]);
 
-  const clearFilters = () => {
-    setSearch('');
-    setTypeFilter('all');
-    setStartDate('');
-    setEndDate('');
-    setSortBy('date');
-    setSortOrder('desc');
-  };
-
   const renderContent = () => {
+    if (!authResolved) return null;
     if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => navigateTo('profile')} />;
     
     switch (activeTab) {
@@ -337,6 +319,8 @@ const App: React.FC = () => {
           language={profile.language} 
           categories={allCategories}
           onNavigateToEditLimits={() => navigateTo('budget-edit')}
+          familyId={profile.familyId}
+          userAlias={profile.displayName}
         />
       );
       case 'history': return (
@@ -356,6 +340,7 @@ const App: React.FC = () => {
           currentUserId={profile.uid}
           language={profile.language}
           categories={allCategories}
+          familyId={profile.familyId}
         />
       );
       case 'filters': return (
@@ -367,7 +352,7 @@ const App: React.FC = () => {
           sortBy={sortBy} setSortBy={setSortBy}
           sortOrder={sortOrder} setSortOrder={setSortOrder}
           onBack={() => navigateTo('history')}
-          onClear={clearFilters}
+          onClear={() => { setSearch(''); setTypeFilter('all'); setStartDate(''); setEndDate(''); setSortBy('date'); setSortOrder('desc'); }}
           language={profile.language}
         />
       );
@@ -384,7 +369,7 @@ const App: React.FC = () => {
         <BudgetEdit 
           profile={profile} 
           onUpdate={updateProfile} 
-          onDeleteCategory={deleteCategory}
+          onDeleteCategory={(cat) => setDeleteModal({ isOpen: true, category: cat })}
           onRenameCategory={renameCategory}
           onBack={() => navigateTo('vault')} 
           language={profile.language} 
@@ -399,7 +384,7 @@ const App: React.FC = () => {
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => navigateTo('auth')}
             onNavigateToEditLimits={() => navigateTo('budget-edit')}
-            onNavigateToPortraitSelection={() => {}} // Disabled for now
+            onNavigateToPortraitSelection={() => {}} 
             onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
             fontSize={fontSize}
@@ -408,7 +393,7 @@ const App: React.FC = () => {
           {auth.currentUser && (
             <div className="pt-12 border-t border-slate-300 dark:border-white/5 flex justify-center">
               <button 
-                onClick={() => signOut(auth)}
+                onClick={handleLogout}
                 className="text-[10px] tracking-[0.3em] font-black uppercase text-rose-600 hover:text-rose-400 transition-colors font-noto"
               >
                 {t.terminateSession}
@@ -417,6 +402,7 @@ const App: React.FC = () => {
           )}
         </div>
       );
+      default: return null;
     }
   };
 
@@ -429,7 +415,7 @@ const App: React.FC = () => {
 
   if (showSplash) {
     return (
-      <div className="fixed inset-0 bg-[#020617] flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[4000ms]">
+      <div className="fixed inset-0 bg-[#020617] flex flex-col items-center justify-center z-[100] animate-out fade-out fill-mode-forwards duration-1000 delay-[3000ms]">
         <div className="flex flex-col items-center gap-4 text-center">
           <h1 className="text-8xl font-black tracking-[-0.15em] text-white animate-in slide-in-from-bottom-10 duration-1000 delay-500 uppercase">Custos</h1>
           <p className="text-[11px] tracking-[0.9em] text-indigo-400 font-bold uppercase animate-in fade-in duration-1000 delay-900">{t.theKeeper}</p>
@@ -464,34 +450,16 @@ const App: React.FC = () => {
       />
       {showContactPopup && <ContactPopup onClose={() => setShowContactPopup(false)} language={profile.language} />}
       <div className="fixed top-6 right-6 z-[100] flex items-center gap-4 no-print">
-        <button 
-          onClick={toggleLanguage}
-          className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden"
-          aria-label="Toggle Language"
-        >
+        <button onClick={toggleLanguage} className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden">
           <span className={`text-[16px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto flex items-center justify-center w-full h-full transition-transform duration-300 ${profile.language === 'en' ? 'translate-x-[0px] -translate-y-[2.5px]' : ''}`}>
             {profile.language === 'en' ? 'த' : 'EN'}
           </span>
         </button>
-        <button 
-          onClick={toggleTheme}
-          className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group overflow-hidden"
-          aria-label="Toggle Theme"
-        >
+        <button onClick={toggleTheme} className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 group overflow-hidden">
           <div className={`relative w-full h-full flex items-center justify-center transition-transform duration-700 ${profile.theme === 'dark' ? 'rotate-0' : 'rotate-[360deg]'}`}>
             {profile.theme === 'dark' ? (
               <svg className="w-8 h-8 text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="5" />
-                {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => (
-                  <line 
-                    key={deg} 
-                    x1="12" y1="1" x2="12" y2="4" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round"
-                    transform={`rotate(${deg}, 12, 12)`}
-                  />
-                ))}
+                <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(0, 12, 12)" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(45, 12, 12)" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(90, 12, 12)" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(135, 12, 12)" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(180, 12, 12)" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(225, 12, 12)" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(270, 12, 12)" /><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" transform="rotate(315, 12, 12)" />
               </svg>
             ) : (
               <svg className="w-6 h-6 text-indigo-600 fill-indigo-600" viewBox="0 0 24 24">
@@ -502,59 +470,29 @@ const App: React.FC = () => {
         </button>
       </div>
       <aside className="hidden md:flex w-64 h-screen flex-col border-r border-slate-300 dark:border-white/5 p-10 sticky top-0 bg-white/50 dark:bg-[#020617]/50 backdrop-blur-xl z-20 no-print">
-        <div className="mb-16">
-          <h1 className="brand-text text-4xl">Custos</h1>
-          <p className="text-[9px] tracking-[0.4em] font-bold text-indigo-600 mt-2 uppercase font-noto">{t.theKeeper}</p>
-        </div>
+        <div className="mb-16"><h1 className="brand-text text-4xl">Custos</h1><p className="text-[9px] tracking-[0.4em] font-bold text-indigo-600 mt-2 uppercase font-noto">{t.theKeeper}</p></div>
         <nav className="flex-1 space-y-8">
           {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => navigateTo(item.id as any)}
-              className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600 translate-x-1' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}
-            >
-              {item.label}
-            </button>
+            <button key={item.id} onClick={() => navigateTo(item.id as any)} className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600 translate-x-1' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}>{item.label}</button>
           ))}
           {!auth.currentUser && (
-            <button
-              onClick={() => navigateTo('auth')}
-              className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all pt-8 mt-8 border-t border-slate-300 dark:border-white/5 font-noto ${activeTab === 'auth' ? 'text-indigo-600' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}
-            >
-              {t.authAction}
-            </button>
+            <button onClick={() => navigateTo('auth')} className={`block w-full text-left text-[10px] tracking-[0.3em] font-black uppercase transition-all pt-8 mt-8 border-t border-slate-300 dark:border-white/5 font-noto ${activeTab === 'auth' ? 'text-indigo-600' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}>{t.authAction}</button>
           )}
         </nav>
       </aside>
       <nav className="md:hidden fixed bottom-4 left-4 right-4 h-14 glass z-50 flex items-center justify-around rounded-none border border-slate-300 dark:border-white/10 no-print">
          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => navigateTo(item.id as any)}
-              className={`text-[8px] tracking-[0.2em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600' : 'text-slate-500 dark:text-white/50'}`}
-            >
-              {item.label}
-            </button>
+            <button key={item.id} onClick={() => navigateTo(item.id as any)} className={`text-[8px] tracking-[0.2em] font-black uppercase transition-all font-noto ${activeTab === item.id ? 'text-indigo-600' : 'text-slate-500 dark:text-white/50'}`}>{item.label}</button>
           ))}
       </nav>
       {snackbar.isVisible && (
         <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-6 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-950 border border-white/10 shadow-2xl animate-in slide-in-from-bottom-4">
           <p className="text-[10px] font-black tracking-widest uppercase">{snackbar.message}</p>
-          <button 
-            onClick={() => {
-              snackbar.onUndo();
-              setSnackbar(prev => ({ ...prev, isVisible: false }));
-            }}
-            className="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline"
-          >
-            {t.undo}
-          </button>
+          <button onClick={() => { snackbar.onUndo(); setSnackbar(prev => ({ ...prev, isVisible: false })); }} className="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline">{t.undo}</button>
         </div>
       )}
       <main className="flex-1 p-6 md:p-12 pb-24 md:pb-12 relative z-10 overflow-y-auto">
-        <header className="md:hidden mb-12 flex justify-between items-center">
-          <h1 className="brand-text text-3xl">Custos</h1>
-        </header>
+        <header className="md:hidden mb-12 flex justify-between items-center"><h1 className="brand-text text-3xl">Custos</h1></header>
         {renderContent()}
       </main>
     </div>

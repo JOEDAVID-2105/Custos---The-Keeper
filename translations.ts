@@ -55,6 +55,9 @@ export const translations = {
     undo: "UNDO",
     itemDeleted: "RECORD PURGED",
     categoryDeleted: "CATEGORY DISSOLVED",
+    modeLabel: "JURISDICTION",
+    private: "PRIVATE",
+    family: "FAMILY",
     common: {
       localGuardian: "THE LOCAL USER",
       syncing: "SYNCING",
@@ -196,6 +199,7 @@ export const translations = {
       timeAndAlias: "TIME & ALIAS",
       category: "CATEGORY",
       desc: "DESC",
+      modeOfPay: "PAY MODE",
       val: "VAL",
       act: "ACT"
     },
@@ -264,6 +268,9 @@ export const translations = {
     undo: "மீட்டெடு",
     itemDeleted: "பதிவு நீக்கப்பட்டது",
     categoryDeleted: "வகை நீக்கப்பட்டது",
+    modeLabel: "அதிகார வரம்பு",
+    private: "தனிப்பட்ட",
+    family: "குடும்பம்",
     common: {
       localGuardian: "உள்ளூர் பயனர்",
       syncing: "இணைக்கப்படுகிறது",
@@ -343,10 +350,10 @@ export const translations = {
       denied: "Access denied.",
       forgotPassword: "கடவுச்சொல்லை மறந்தீர்களா?",
       resetTitle: "கடவுச்சொல் மீட்பு",
-      resetSubtitle: "மின்னஞ்சல் மூலம் அணுகலை மீட்டெடுக்கவும்",
-      sendReset: "மீட்பு இணைப்பை அனுப்பு",
-      resetSent: "கடவுச்சொல் மீட்பு இணைப்பு உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டது.",
-      googleSignIn: "கூகிள் மூலம் தொடரவும்",
+      resetSubtitle: "மின்னஞ்சல் ద్వారా అడుగును పునరుద్ధరించండి",
+      sendReset: "మీటూపు లింక్ పంపండి",
+      resetSent: "పాస్‌వర్డ్ పునరుద్ధరణ లింక్ మీ ఇమెయిల్‌కు పంపబడింది.",
+      googleSignIn: "కూగుల్ ద్వారా కొనసాగండి",
       show: "காட்டு",
       hide: "மறை"
     },
@@ -405,6 +412,7 @@ export const translations = {
       timeAndAlias: "நேரம் / பெயர்",
       category: "வகை",
       desc: "விவரம்",
+      modeOfPay: "முறை",
       val: "மதிப்பு",
       act: "செயல்"
     },
