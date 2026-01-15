@@ -10,6 +10,7 @@ import { ClassWiseOutflow } from './components/ClassWiseOutflow';
 import { FiltersPage } from './components/FiltersPage';
 import { ContactPopup } from './components/ContactPopup';
 import { ConfirmationModal } from './components/ConfirmationModal';
+import { UpdatePrompt } from './components/UpdatePrompt';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
 import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
@@ -46,9 +47,11 @@ const App: React.FC = () => {
     return (saved as AppTab) || 'vault';
   });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<UserProfile[]>([]);
   const [showSplash, setShowSplash] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showContactPopup, setShowContactPopup] = useState(false);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
   const [fontSize, setFontSize] = useState(16);
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [authResolved, setAuthResolved] = useState(false);
@@ -114,10 +117,17 @@ const App: React.FC = () => {
       setDeferredPrompt(e);
     };
 
+    const handleUpdateAvailable = () => {
+      setShowUpdatePrompt(true);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('custos-update-available', handleUpdateAvailable);
+    
     return () => {
       clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('custos-update-available', handleUpdateAvailable);
     };
   }, []);
 
@@ -198,13 +208,23 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!authResolved) return;
     let unsubscribeTxs: (() => void) | undefined;
+    let unsubscribeMembers: (() => void) | undefined;
+
     if (auth.currentUser) {
       unsubscribeTxs = StorageService.subscribeToTransactions(profile.uid, profile.familyId, setTransactions);
+      if (profile.familyId) {
+        unsubscribeMembers = StorageService.subscribeToFamilyMembers(profile.familyId, setFamilyMembers);
+      } else {
+        setFamilyMembers([]);
+      }
     } else {
       setTransactions(StorageService.getLocalTransactions());
+      setFamilyMembers([]);
     }
+
     return () => {
       if (unsubscribeTxs) unsubscribeTxs();
+      if (unsubscribeMembers) unsubscribeMembers();
     };
   }, [authResolved, profile.uid, profile.familyId]);
 
@@ -292,13 +312,26 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // Manually trigger reset for immediate responsiveness
       setProfile(DEFAULT_PROFILE);
       setTransactions(StorageService.getLocalTransactions());
+      setFamilyMembers([]);
       setActiveTab('vault');
       localStorage.setItem('custos_active_tab', 'vault');
     } catch (error) {
       console.error("Sovereign session termination failed:", error);
+    }
+  };
+
+  const handleApplyUpdate = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.waiting) {
+          reg.waiting.postMessage('skipWaiting');
+        }
+        window.location.reload();
+      });
+    } else {
+      window.location.reload();
     }
   };
 
@@ -320,6 +353,7 @@ const App: React.FC = () => {
           categories={allCategories}
           onNavigateToEditLimits={() => navigateTo('budget-edit')}
           familyId={profile.familyId}
+          familyMembers={familyMembers}
           userAlias={profile.displayName}
         />
       );
@@ -341,6 +375,7 @@ const App: React.FC = () => {
           language={profile.language}
           categories={allCategories}
           familyId={profile.familyId}
+          familyMembers={familyMembers}
         />
       );
       case 'filters': return (
@@ -449,6 +484,8 @@ const App: React.FC = () => {
         language={profile.language}
       />
       {showContactPopup && <ContactPopup onClose={() => setShowContactPopup(false)} language={profile.language} />}
+      {showUpdatePrompt && <UpdatePrompt onUpdate={handleApplyUpdate} onLater={() => setShowUpdatePrompt(false)} language={profile.language} />}
+      
       <div className="fixed top-6 right-6 z-[100] flex items-center gap-4 no-print">
         <button onClick={toggleLanguage} className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-500 overflow-hidden">
           <span className={`text-[16px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 font-noto flex items-center justify-center w-full h-full transition-transform duration-300 ${profile.language === 'en' ? 'translate-x-[0px] -translate-y-[2.5px]' : ''}`}>

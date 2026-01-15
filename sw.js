@@ -7,7 +7,7 @@ const PRE_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
+  // We no longer skipWaiting automatically to allow the UI to handle the update prompt
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(PRE_CACHE);
@@ -34,4 +34,11 @@ self.addEventListener('fetch', (event) => {
       return caches.match(event.request);
     })
   );
+});
+
+// Listener for skipWaiting message from UI
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });

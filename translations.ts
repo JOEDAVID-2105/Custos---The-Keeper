@@ -58,6 +58,11 @@ export const translations = {
     modeLabel: "JURISDICTION",
     private: "PRIVATE",
     family: "FAMILY",
+    systemUpdate: {
+      available: "NEW SYSTEM VERSION AVAILABLE",
+      action: "REFRESH SYSTEM",
+      later: "LATER"
+    },
     common: {
       localGuardian: "THE LOCAL USER",
       syncing: "SYNCING",
@@ -231,7 +236,7 @@ export const translations = {
     identity: "அடையாளம்",
     guardianConfig: "பயனர் அமைப்பு",
     requestConsultation: "ஆலோசனை பெறு",
-    exportCSV: "CSV கோப்பு",
+    exportCSV: "EXPORT CSV",
     printReport: "அச்சிடுக",
     seeLocation: "இடத்தைக் காண்க",
     purge: "நீக்கு",
@@ -271,6 +276,11 @@ export const translations = {
     modeLabel: "அதிகார வரம்பு",
     private: "தனிப்பட்ட",
     family: "குடும்பம்",
+    systemUpdate: {
+      available: "புதிய முறைமை பதிப்பு உள்ளது",
+      action: "முறைமையை புதுப்பி",
+      later: "பின்னர்"
+    },
     common: {
       localGuardian: "உள்ளூர் பயனர்",
       syncing: "இணைக்கப்படுகிறது",

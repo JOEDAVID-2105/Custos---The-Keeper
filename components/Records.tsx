@@ -1,9 +1,10 @@
 
 import React, { useState, useMemo } from 'react';
-import { Transaction, Category } from '../types';
+import { Transaction, Category, UserProfile } from '../types';
 import { SummaryDashboard } from './SummaryDashboard';
 import { translations } from '../translations';
 import { TrashIcon, PAYMENT_METHODS } from '../constants';
+import { InitialShield } from './InitialShield';
 
 interface RecordsProps {
   transactions: Transaction[];
@@ -22,6 +23,7 @@ interface RecordsProps {
   language: 'en' | 'ta';
   categories: string[];
   familyId?: string;
+  familyMembers?: UserProfile[];
 }
 
 const LocationPinIcon = ({ className, onClick }: { className?: string, onClick?: () => void }) => (
@@ -38,7 +40,7 @@ const LocationPinIcon = ({ className, onClick }: { className?: string, onClick?:
 export const Records: React.FC<RecordsProps> = ({ 
   transactions, onDelete, onUpdate, onNavigateToOutflow, onNavigateToFilters,
   search, typeFilter, startDate, endDate, sortBy, sortOrder,
-  currencySymbol, currentUserId, language, categories, familyId
+  currencySymbol, currentUserId, language, categories, familyId, familyMembers = []
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
@@ -130,7 +132,23 @@ export const Records: React.FC<RecordsProps> = ({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="flex-1">
             <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{t.ledger}</h2>
-            <p className="text-slate-800 dark:text-white/50 tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] mt-1 uppercase font-black">Archive of Sovereignty</p>
+            <div className="flex items-center gap-4 mt-1">
+               <p className="text-slate-800 dark:text-white/50 tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] uppercase font-black">Archive of Sovereignty</p>
+               {familyId && familyMembers.length > 0 && (
+                 <div className="flex -space-x-2 animate-in fade-in slide-in-from-left-2">
+                    {familyMembers.map((member) => (
+                      <div key={member.uid} className="relative group/member">
+                        <div className="w-6 h-6 rounded-full border border-slate-50 dark:border-slate-950 bg-white dark:bg-slate-900 shadow-lg flex items-center justify-center overflow-hidden transition-transform hover:scale-110 hover:z-20">
+                           <InitialShield name={member.displayName} size="sm" />
+                        </div>
+                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[6px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/member:opacity-100 transition-opacity pointer-events-none z-[100]">
+                          {member.displayName}
+                        </span>
+                      </div>
+                    ))}
+                 </div>
+               )}
+            </div>
           </div>
           <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <button 

@@ -15,11 +15,27 @@ root.render(
   </React.StrictMode>
 );
 
-// Register Service Worker for proper PWA installation (WebAPK)
+// Register Service Worker with update detection
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(registration => {
       console.log('SW registered: ', registration);
+      
+      // Listen for updates
+      registration.onupdatefound = () => {
+        const installingWorker = registration.installing;
+        if (installingWorker) {
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                // New content is available, notify the app
+                console.log('New update available.');
+                window.dispatchEvent(new CustomEvent('custos-update-available'));
+              }
+            }
+          };
+        }
+      };
     }).catch(registrationError => {
       console.log('SW registration failed: ', registrationError);
     });

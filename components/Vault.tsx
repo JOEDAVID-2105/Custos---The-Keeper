@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { PAYMENT_METHODS } from '../constants';
-import { Category, Transaction } from '../types';
+import { Category, Transaction, UserProfile } from '../types';
 import { SummaryDashboard } from './SummaryDashboard';
 import { translations } from '../translations';
 import { auth } from '../services/firebase';
+import { InitialShield } from './InitialShield';
 
 interface VaultProps {
   onAdd: (tx: Transaction) => void;
@@ -14,10 +15,11 @@ interface VaultProps {
   categories: string[];
   onNavigateToEditLimits: () => void;
   familyId?: string;
+  familyMembers?: UserProfile[];
   userAlias?: string;
 }
 
-export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transactions, language, categories, onNavigateToEditLimits, familyId, userAlias }) => {
+export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transactions, language, categories, onNavigateToEditLimits, familyId, familyMembers = [], userAlias }) => {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [note, setNote] = useState('');
@@ -88,21 +90,42 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
 
   return (
     <div className="animate-in w-full max-w-3xl mx-auto pb-20 flex flex-col min-h-full">
-      <form onSubmit={handleSeal} className="space-y-10 flex-grow">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-black tracking-tighter uppercase text-slate-900 dark:text-white font-noto">{t.vault}</h2>
-          <div className="flex items-center justify-center gap-3 mt-2">
-            <p className="text-slate-800 dark:text-white/50 tracking-[0.4em] text-[9px] uppercase font-noto">{t.establishRecord}</p>
-            <div className="h-px w-8 bg-slate-300 dark:bg-white/10"></div>
-            <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${geoStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : geoStatus === 'tracking' ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'}`}></div>
-              <p className="text-[8px] tracking-[0.2em] font-black uppercase text-slate-800 dark:text-white/50 font-noto">
-                {geoStatus === 'ready' ? t.locLocked : geoStatus === 'tracking' ? t.trackingSignal : t.signalLost}
-              </p>
-            </div>
+      <div className="flex flex-col items-center mb-12">
+        <h2 className="text-4xl font-black tracking-tighter uppercase text-slate-900 dark:text-white font-noto">{t.vault}</h2>
+        
+        {/* Household Presence Stack */}
+        {familyId && familyMembers.length > 0 && (
+          <div className="flex items-center gap-2 mt-4 animate-in">
+             <div className="flex -space-x-2">
+                {familyMembers.map((member) => (
+                  <div key={member.uid} className="relative group/member">
+                    <div className="w-8 h-8 rounded-full border-2 border-slate-50 dark:border-slate-950 bg-white dark:bg-slate-900 shadow-lg flex items-center justify-center overflow-hidden transition-transform hover:scale-110 hover:z-20">
+                       <InitialShield name={member.displayName} size="sm" />
+                    </div>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[7px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/member:opacity-100 transition-opacity pointer-events-none z-[100]">
+                      {member.displayName}
+                    </span>
+                  </div>
+                ))}
+             </div>
+             <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1"></div>
+             <p className="text-[7px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">HOUSEHOLD ACTIVE</p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center gap-3 mt-4">
+          <p className="text-slate-800 dark:text-white/50 tracking-[0.4em] text-[9px] uppercase font-noto">{t.establishRecord}</p>
+          <div className="h-px w-8 bg-slate-300 dark:bg-white/10"></div>
+          <div className="flex items-center gap-2">
+            <div className={`w-1.5 h-1.5 rounded-full ${geoStatus === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : geoStatus === 'tracking' ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'}`}></div>
+            <p className="text-[8px] tracking-[0.2em] font-black uppercase text-slate-800 dark:text-white/50 font-noto">
+              {geoStatus === 'ready' ? t.locLocked : geoStatus === 'tracking' ? t.trackingSignal : t.signalLost}
+            </p>
           </div>
         </div>
+      </div>
 
+      <form onSubmit={handleSeal} className="space-y-10 flex-grow">
         <div className="flex gap-1 bg-slate-200 dark:bg-white/5 p-1 rounded-sm">
           <button type="button" onClick={() => setType('expense')} className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'expense' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}>{t.expenditure}</button>
           <button type="button" onClick={() => setType('income')} className={`flex-1 py-4 text-[9px] tracking-[0.4em] font-black uppercase transition-all font-noto ${type === 'income' ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-white/50 hover:text-indigo-600'}`}>{t.income}</button>
