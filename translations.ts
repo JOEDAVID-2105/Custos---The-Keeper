@@ -64,6 +64,8 @@ export const translations = {
     originator: "ORIGINATOR",
     timestamp: "TIMESTAMP",
     close: "CLOSE",
+    chronologicalFilter: "CHRONOLOGICAL FILTER",
+    allArchives: "ALL ARCHIVES",
     systemUpdate: {
       available: "NEW SYSTEM VERSION AVAILABLE",
       action: "REFRESH SYSTEM",
@@ -288,6 +290,8 @@ export const translations = {
     originator: "உருவாக்கியவர்",
     timestamp: "நேரம்",
     close: "மூடு",
+    chronologicalFilter: "காலவரிசை வடிகட்டி",
+    allArchives: "அனைத்து காப்பகங்கள்",
     systemUpdate: {
       available: "புதிய முறைமை பதிப்பு உள்ளது",
       action: "முறைமையை புதுப்பி",

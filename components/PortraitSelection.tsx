@@ -11,7 +11,7 @@ interface PortraitSelectionProps {
   language: 'en' | 'ta';
 }
 
-const SilhouetteIcon = ({ type, seed }: { type: 'men' | 'women', seed: number }) => {
+const SilhouetteIcon = ({ type, seed }: { type: 'men' | 'women' | 'mixed', seed: number }) => {
   return (
     <svg viewBox="0 0 100 100" className="w-full h-full p-6 opacity-20">
       <defs>
@@ -22,9 +22,9 @@ const SilhouetteIcon = ({ type, seed }: { type: 'men' | 'women', seed: number })
       </defs>
       <circle cx="50" cy="35" r="15" fill="currentColor" />
       <path 
-        d={type === 'men' 
-          ? "M20 90 Q20 60 50 60 Q80 60 80 90" 
-          : "M25 90 Q25 65 50 65 Q75 65 75 90"} 
+        d={type === 'women' 
+          ? "M25 90 Q25 65 50 65 Q75 65 75 90" 
+          : "M20 90 Q20 60 50 60 Q80 60 80 90"} 
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -47,18 +47,21 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
 
   /**
    * PHOTO ARCHIVE PROTOCOL:
-   * Men folder: pfp_01.png - pfp_10.png
-   * Women folder: pfp_11.png - pfp_20.png
+   * Supporting up to 202 portraits as requested.
+   * Path format: /assets/pfp_XX.png
    */
-  const menPortraits = Array.from({ length: 10 }, (_, i) => {
+  const portraits = Array.from({ length: 202 }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
-    return `/assets/men/pfp_${num}.png`;
+    return `/assets/pfp_${num}.png`;
   });
 
-  const womenPortraits = Array.from({ length: 10 }, (_, i) => {
-    const num = (i + 11).toString().padStart(2, '0');
-    return `/assets/women/pfp_${num}.png`;
-  });
+  // Batching the 202 images for cleaner display
+  const batches = [
+    { name: "ARCHIVE ALPHA", start: 0, end: 50 },
+    { name: "ARCHIVE BETA", start: 50, end: 100 },
+    { name: "ARCHIVE GAMMA", start: 100, end: 150 },
+    { name: "ARCHIVE DELTA", start: 150, end: 202 }
+  ];
 
   const selectPortrait = (url: string | undefined) => {
     onUpdate({ ...profile, photoURL: url });
@@ -74,13 +77,13 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
     setLoadingImages(prev => ({ ...prev, [url]: false }));
   };
 
-  const PortraitGrid = ({ title, items, type, subtitle }: { title: string, subtitle: string, items: string[], type: 'men' | 'women' }) => (
+  const PortraitGrid = ({ title, items, type, subtitle }: { title: string, subtitle: string, items: string[], type: 'men' | 'women' | 'mixed' }) => (
     <div className="space-y-8 animate-in">
        <div className="border-l-2 border-indigo-600 pl-4 py-1">
          <h3 className="text-sm font-black tracking-[0.4em] text-slate-900 dark:text-white uppercase font-noto">{title}</h3>
          <p className="text-[8px] tracking-[0.3em] text-slate-500 dark:text-white/30 uppercase mt-1 font-noto">{subtitle}</p>
        </div>
-       <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+       <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
           {items.map((url, idx) => {
             const isSelected = profile.photoURL === url;
             const isBroken = brokenImages[url];
@@ -137,19 +140,15 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 pt-12 border-t border-slate-300 dark:border-white/5">
          <div className="lg:col-span-8 space-y-20">
-            <PortraitGrid 
-              title={t.profile.masculineArchive} 
-              subtitle="PATRIARCH COLLECTION"
-              type="men"
-              items={menPortraits} 
-            />
-            
-            <PortraitGrid 
-              title={t.profile.feminineArchive} 
-              subtitle="MATRIARCH COLLECTION"
-              type="women"
-              items={womenPortraits} 
-            />
+            {batches.map((batch, i) => (
+              <PortraitGrid 
+                key={batch.name}
+                title={batch.name} 
+                subtitle={`COLLECTION INDEX ${i + 1}`}
+                type="mixed"
+                items={portraits.slice(batch.start, batch.end)} 
+              />
+            ))}
          </div>
 
          <div className="lg:col-span-4">

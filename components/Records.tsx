@@ -113,8 +113,9 @@ export const Records: React.FC<RecordsProps> = ({
   const groupedData = useMemo(() => {
     return filteredTransactions.reduce((acc, tx) => {
       const d = new Date(tx.timestamp);
-      const monthKey = d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }).toUpperCase();
-      const dateKey = d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+      const locale = language === 'ta' ? 'ta-IN' : 'en-US';
+      const monthKey = d.toLocaleDateString(locale, { month: 'long', year: 'numeric' }).toUpperCase();
+      const dateKey = d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
       
       if (!acc[monthKey]) acc[monthKey] = {};
       if (!acc[monthKey][dateKey]) acc[monthKey][dateKey] = [];
@@ -122,7 +123,7 @@ export const Records: React.FC<RecordsProps> = ({
       acc[monthKey][dateKey].push(tx);
       return acc;
     }, {} as Record<string, Record<string, Transaction[]>>);
-  }, [filteredTransactions]);
+  }, [filteredTransactions, language]);
 
   const startEdit = (tx: Transaction) => {
     setEditingId(tx.id);
@@ -198,10 +199,11 @@ export const Records: React.FC<RecordsProps> = ({
   };
 
   const getMonthName = (monthYear: string) => {
-    if (monthYear === 'ALL') return 'ALL ARCHIVES';
+    if (monthYear === 'ALL') return t.allArchives;
     const [year, month] = monthYear.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }).toUpperCase();
+    const locale = language === 'ta' ? 'ta-IN' : 'en-US';
+    return date.toLocaleDateString(locale, { month: 'short', year: 'numeric' }).toUpperCase();
   };
 
   return (
@@ -268,13 +270,13 @@ export const Records: React.FC<RecordsProps> = ({
 
              {/* Month Switcher Tabs */}
              <div className="flex flex-col gap-4">
-                <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">CHRONOLOGICAL FILTER</label>
+                <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.chronologicalFilter}</label>
                 <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide no-print">
                    <button 
                       onClick={() => setSelectedMonth('ALL')}
                       className={`shrink-0 px-4 py-2 text-[9px] font-black tracking-widest uppercase transition-all border-b-2 ${selectedMonth === 'ALL' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-white'}`}
                    >
-                      ALL ARCHIVES
+                      {t.allArchives}
                    </button>
                    {availableMonths.map(m => (
                       <button 
