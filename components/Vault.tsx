@@ -176,41 +176,6 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
         </button>
       </form>
 
-      {/* Household Council Section */}
-      {familyId && familyMembers.length > 0 && (
-        <div className="mt-20 animate-in">
-           <div className="flex flex-col mb-8">
-              <h3 className="text-sm font-black tracking-[0.4em] uppercase text-slate-900 dark:text-white font-noto">{t.householdCouncil}</h3>
-              <p className="text-[7px] tracking-[0.4em] text-indigo-600 dark:text-indigo-400 uppercase font-black mt-1">THE {familyMetadata?.name || 'SOVEREIGN'} CABINET</p>
-           </div>
-           
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {familyMembers.map((member) => (
-                <div key={member.uid} className="flex items-center gap-4 p-4 border border-slate-300 dark:border-white/5 bg-white dark:bg-white/[0.02] transition-all hover:border-indigo-600">
-                   <div className="shrink-0 w-10 h-10 rounded-full border border-indigo-500/20 bg-indigo-500/5 flex items-center justify-center overflow-hidden">
-                      <InitialShield name={member.displayName} size="sm" />
-                   </div>
-                   <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-[10px] font-black uppercase text-slate-900 dark:text-white truncate">{member.displayName}</p>
-                        {member.uid === auth.currentUser?.uid && (
-                          <span className="px-1 py-0.5 bg-indigo-600 text-white text-[5px] font-black uppercase tracking-widest">YOU</span>
-                        )}
-                      </div>
-                      <p className="text-[7px] font-black uppercase tracking-widest text-slate-500 dark:text-white/30 mt-0.5">
-                        {member.uid === familyMetadata?.creatorId ? 'SYSTEM HEAD' : t.verifiedGuardian}
-                      </p>
-                   </div>
-                   <div className="flex flex-col items-end gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]"></div>
-                      <span className="text-[6px] font-black text-emerald-500 uppercase tracking-tighter">SECURE</span>
-                   </div>
-                </div>
-              ))}
-           </div>
-        </div>
-      )}
-
       <div className="mt-20"><SummaryDashboard transactions={jurisdictionTransactions} currencySymbol={currencySymbol} language={language} /></div>
       
       <div className="mt-12 pt-12 border-t border-slate-300 dark:border-white/5 flex flex-col items-center">

@@ -46,8 +46,20 @@ export const Records: React.FC<RecordsProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
   const [viewMode, setViewMode] = useState<'private' | 'family'>(familyId ? 'family' : 'private');
+  const [selectedMonth, setSelectedMonth] = useState<string>('ALL'); // Format: "YYYY-MM"
 
   const t = translations[language];
+
+  // Derive available months for the switcher
+  const availableMonths = useMemo(() => {
+    const monthsSet = new Set<string>();
+    transactions.forEach(tx => {
+      const d = new Date(tx.timestamp);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      monthsSet.add(key);
+    });
+    return Array.from(monthsSet).sort((a, b) => b.localeCompare(a));
+  }, [transactions]);
 
   const filteredTransactions = useMemo(() => {
     let list = [...transactions];
@@ -81,6 +93,13 @@ export const Records: React.FC<RecordsProps> = ({
       list = list.filter(tx => tx.timestamp <= end);
     }
 
+    if (selectedMonth !== 'ALL') {
+      list = list.filter(tx => {
+        const d = new Date(tx.timestamp);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === selectedMonth;
+      });
+    }
+
     return list.sort((a, b) => {
       let comparison = 0;
       if (sortBy === 'date') comparison = a.timestamp - b.timestamp;
@@ -88,19 +107,21 @@ export const Records: React.FC<RecordsProps> = ({
       
       return sortOrder === 'desc' ? -comparison : comparison;
     });
-  }, [transactions, search, typeFilter, startDate, endDate, sortBy, sortOrder, viewMode, familyId]);
+  }, [transactions, search, typeFilter, startDate, endDate, sortBy, sortOrder, viewMode, familyId, selectedMonth]);
 
-  const groupedTransactions = useMemo(() => {
+  // Group by Month -> then Group by Day
+  const groupedData = useMemo(() => {
     return filteredTransactions.reduce((acc, tx) => {
-      const dateKey = new Date(tx.timestamp).toLocaleDateString(undefined, {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(tx);
+      const d = new Date(tx.timestamp);
+      const monthKey = d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }).toUpperCase();
+      const dateKey = d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+      
+      if (!acc[monthKey]) acc[monthKey] = {};
+      if (!acc[monthKey][dateKey]) acc[monthKey][dateKey] = [];
+      
+      acc[monthKey][dateKey].push(tx);
       return acc;
-    }, {} as Record<string, Transaction[]>);
+    }, {} as Record<string, Record<string, Transaction[]>>);
   }, [filteredTransactions]);
 
   const startEdit = (tx: Transaction) => {
@@ -147,139 +168,224 @@ export const Records: React.FC<RecordsProps> = ({
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
+  const handleExportCSV = () => {
+    if (filteredTransactions.length === 0) return;
+    
+    const headers = ["Date", "Time", "Alias", "Category", "Description", "Method", "Amount", "Type"];
+    const rows = filteredTransactions.map(tx => {
+      const d = new Date(tx.timestamp);
+      return [
+        d.toLocaleDateString(),
+        d.toLocaleTimeString([], { hour12: false }),
+        tx.userName || "Local",
+        tx.category,
+        `"${tx.note?.replace(/"/g, '""') || ""}"`,
+        tx.paymentMethod,
+        tx.amount,
+        tx.type
+      ];
+    });
+
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `custos_ledger_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getMonthName = (monthYear: string) => {
+    if (monthYear === 'ALL') return 'ALL ARCHIVES';
+    const [year, month] = monthYear.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }).toUpperCase();
+  };
+
   return (
-    <div className="animate-in w-full pb-20 max-w-full overflow-hidden">
-      <div className="flex flex-col mb-8 md:mb-16 gap-4 md:gap-8 no-print">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div className="flex-1">
-            <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{t.ledger}</h2>
-            <div className="flex items-center gap-4 mt-1">
-               <p className="text-slate-800 dark:text-white/50 tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] uppercase font-black">Archive of Sovereignty</p>
-               {familyId && familyMembers.length > 0 && (
-                 <div className="flex -space-x-2 animate-in fade-in slide-in-from-left-2">
-                    {familyMembers.map((member) => (
-                      <div key={member.uid} className="relative group/member">
-                        <div className="w-6 h-6 rounded-full border border-slate-50 dark:border-slate-950 bg-white dark:bg-slate-900 shadow-lg flex items-center justify-center overflow-hidden transition-transform hover:scale-110 hover:z-20">
-                           <InitialShield name={member.displayName} size="sm" />
+    <div className="w-full pb-20 max-w-full">
+      <div className="animate-in w-full overflow-hidden">
+        <div className="flex flex-col mb-8 md:mb-16 gap-4 md:gap-8 no-print">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div className="flex-1">
+              <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{t.ledger}</h2>
+              <div className="flex items-center gap-4 mt-1">
+                 <p className="text-slate-800 dark:text-white/50 tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] uppercase font-black">Archive of Sovereignty</p>
+                 {familyId && familyMembers.length > 0 && (
+                   <div className="flex -space-x-2">
+                      {familyMembers.map((member) => (
+                        <div key={member.uid} className="relative group/member">
+                          <div className="w-6 h-6 rounded-full border border-slate-50 dark:border-slate-950 bg-white dark:bg-slate-900 shadow-lg flex items-center justify-center overflow-hidden transition-transform hover:scale-110 hover:z-20">
+                             <InitialShield name={member.displayName} size="sm" />
+                          </div>
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[6px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/member:opacity-100 transition-opacity pointer-events-none z-[100]">
+                            {member.displayName}
+                          </span>
                         </div>
-                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[6px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/member:opacity-100 transition-opacity pointer-events-none z-[100]">
-                          {member.displayName}
-                        </span>
-                      </div>
-                    ))}
-                 </div>
-               )}
+                      ))}
+                   </div>
+                 )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3 w-full md:w-auto">
+              <button 
+                onClick={handleExportCSV}
+                className="px-6 py-3 bg-white dark:bg-transparent border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-[9px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-md font-noto flex-1 md:flex-none"
+              >
+                {t.exportCSV}
+              </button>
+              <button 
+                onClick={onNavigateToOutflow}
+                className="flex-1 md:flex-none px-6 py-3 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg font-noto"
+              >
+                {t.categoryWiseExpenditure}
+              </button>
+              <button 
+                onClick={onNavigateToFilters}
+                className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10 font-noto flex-1 md:flex-none"
+              >
+                {t.filtersLabel}
+              </button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3 w-full md:w-auto">
-            <button 
-              onClick={onNavigateToOutflow}
-              className="flex-1 md:flex-none px-6 py-3 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg font-noto"
-            >
-              {t.categoryWiseExpenditure}
-            </button>
-            <button 
-              onClick={onNavigateToFilters}
-              className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10 font-noto flex-1 md:flex-none"
-            >
-              {t.filtersLabel}
-            </button>
-          </div>
-        </div>
 
-        <div className="flex flex-col gap-4">
-           <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.modeLabel}</label>
-           <select 
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value as any)}
-              className="w-full max-w-sm bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-[10px] font-black text-slate-900 dark:text-white font-noto"
-           >
-              <option value="private" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.private}</option>
-              {familyId && (
-                <option value="family" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.family}</option>
-              )}
-           </select>
-        </div>
+          <div className="flex flex-col gap-8">
+             <div className="flex flex-col gap-4">
+                <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.modeLabel}</label>
+                <select 
+                   value={viewMode}
+                   onChange={(e) => setViewMode(e.target.value as any)}
+                   className="w-full max-w-sm bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-[10px] font-black text-slate-900 dark:text-white font-noto"
+                >
+                   <option value="private" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.private}</option>
+                   {familyId && (
+                     <option value="family" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.family}</option>
+                   )}
+                </select>
+             </div>
 
-        <SummaryDashboard transactions={filteredTransactions} currencySymbol={currencySymbol} language={language} />
-      </div>
-
-      <div className="flex flex-col w-full max-w-full overflow-hidden">
-        <div className="overflow-x-auto w-full -mx-4 md:mx-0 px-4 md:px-0 scrollbar-hide">
-          <table className="w-full text-left border-collapse print:text-black min-w-full">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/50 uppercase font-black">
-                <th className="pb-4 px-2 md:px-6 font-normal">{t.ledgerHeaders.timeAndAlias}</th>
-                <th className="pb-4 font-normal">{t.ledgerHeaders.category}</th>
-                <th className="pb-4 font-normal">{t.ledgerHeaders.desc}</th>
-                <th className="pb-4 font-normal">{t.ledgerHeaders.modeOfPay}</th>
-                <th className="pb-4 px-2 md:px-6 font-normal text-right">{t.ledgerHeaders.val}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(Object.entries(groupedTransactions) as [string, Transaction[]][]).map(([date, txs]) => (
-                <React.Fragment key={date}>
-                  <tr className="bg-slate-200/50 dark:bg-white/[0.03] print:bg-slate-50 border-y border-slate-200 dark:border-white/5">
-                    <td colSpan={5} className="py-2 px-2 md:px-6 border-l-4 border-indigo-600">
-                      <h3 className="text-[10px] md:text-sm font-black tracking-widest uppercase text-slate-900 dark:text-white/90 print:text-black">{date}</h3>
-                    </td>
-                  </tr>
-                  {txs.map(tx => {
-                    return (
-                      <tr 
-                        key={tx.id} 
-                        onClick={() => handleRowClick(tx)}
-                        className="border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer group"
+             {/* Month Switcher Tabs */}
+             <div className="flex flex-col gap-4">
+                <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">CHRONOLOGICAL FILTER</label>
+                <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide no-print">
+                   <button 
+                      onClick={() => setSelectedMonth('ALL')}
+                      className={`shrink-0 px-4 py-2 text-[9px] font-black tracking-widest uppercase transition-all border-b-2 ${selectedMonth === 'ALL' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-white'}`}
+                   >
+                      ALL ARCHIVES
+                   </button>
+                   {availableMonths.map(m => (
+                      <button 
+                        key={m}
+                        onClick={() => setSelectedMonth(m)}
+                        className={`shrink-0 px-4 py-2 text-[9px] font-black tracking-widest uppercase transition-all border-b-2 ${selectedMonth === m ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-white'}`}
                       >
-                        <td className="py-4 px-2 md:px-6">
-                           <div className="flex flex-col">
-                             <div className="flex items-center gap-2">
-                                <span className="text-[9px] md:text-[11px] font-black text-slate-900 dark:text-white/80 font-mono tracking-tighter md:tracking-widest print:text-black group-hover:text-indigo-600">
-                                  {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
-                                </span>
-                                {tx.location && (
-                                  <LocationPinIcon className="w-3 h-3 text-indigo-500/40" />
-                                )}
-                             </div>
-                             <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest truncate max-w-[80px]">
-                                {tx.userName || 'LOCAL'}
-                             </span>
-                           </div>
-                        </td>
-                        <td className="py-4">
-                           <span className={`text-[6px] md:text-[8px] tracking-[0.1em] px-1.5 md:px-2 py-0.5 border uppercase font-black ${tx.type === 'income' ? 'border-emerald-600/50 text-emerald-900 dark:text-emerald-400 bg-emerald-500/10' : 'border-slate-500 dark:border-white/10 text-slate-900 dark:text-white/60 bg-slate-200 dark:bg-white/5'}`}>
-                              {(t.categories as any)[tx.category] || tx.category}
-                            </span>
-                        </td>
-                        <td className="py-4">
-                           <span className="text-[9px] md:text-sm font-medium tracking-tight text-slate-900 dark:text-white/70 print:text-black font-noto truncate block max-w-[100px] md:max-w-none">
-                              {tx.note || '...'}
-                            </span>
-                        </td>
-                        <td className="py-4">
-                           <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40">
-                              {(t.methods as any)[tx.paymentMethod] || tx.paymentMethod}
-                            </span>
-                        </td>
-                        <td className={`py-4 px-2 md:px-6 text-right font-black text-xs md:text-xl tracking-tighter ${tx.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white print:text-black'}`}>
-                           {tx.type === 'income' ? '+' : '-'}{currencySymbol}{tx.amount.toLocaleString()}
-                        </td>
+                        {getMonthName(m)}
+                      </button>
+                   ))}
+                </div>
+             </div>
+          </div>
+
+          <SummaryDashboard transactions={filteredTransactions} currencySymbol={currencySymbol} language={language} />
+        </div>
+
+        {/* Partitioned Monthly Tables */}
+        <div className="space-y-12">
+          {Object.keys(groupedData).length === 0 ? (
+            <div className="py-20 text-center border-2 border-dashed border-slate-200 dark:border-white/5">
+               <p className="text-xs font-black uppercase tracking-[0.5em] text-slate-400">NO RECORDS FOUND IN CURRENT ARCHIVE</p>
+            </div>
+          ) : (
+            Object.entries(groupedData).map(([monthYear, dates]) => (
+              <div key={monthYear} className="space-y-6 animate-in">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-xl md:text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white/90">{monthYear}</h3>
+                  <div className="flex-1 h-px bg-slate-200 dark:bg-white/10"></div>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{Object.values(dates).flat().length} ENTRIES</span>
+                </div>
+                
+                <div className="overflow-x-auto w-full -mx-4 md:mx-0 px-4 md:px-0 scrollbar-hide">
+                  <table className="w-full text-left border-collapse print:text-black min-w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/50 uppercase font-black">
+                        <th className="pb-4 px-2 md:px-6 font-normal">{t.ledgerHeaders.timeAndAlias}</th>
+                        <th className="pb-4 font-normal">{t.ledgerHeaders.category}</th>
+                        <th className="pb-4 font-normal">{t.ledgerHeaders.desc}</th>
+                        <th className="pb-4 font-normal">{t.ledgerHeaders.modeOfPay}</th>
+                        <th className="pb-4 px-2 md:px-6 font-normal text-right">{t.ledgerHeaders.val}</th>
                       </tr>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+                    </thead>
+                    <tbody>
+                      {Object.entries(dates).map(([date, txs]) => (
+                        <React.Fragment key={date}>
+                          <tr className="bg-slate-200/50 dark:bg-white/[0.03] print:bg-slate-50 border-y border-slate-200 dark:border-white/5">
+                            <td colSpan={5} className="py-2 px-2 md:px-6 border-l-4 border-indigo-600">
+                              <h3 className="text-[10px] md:text-sm font-black tracking-widest uppercase text-slate-900 dark:text-white/90 print:text-black">{date}</h3>
+                            </td>
+                          </tr>
+                          {txs.map(tx => {
+                            const isEditable = tx.userId === currentUserId || tx.userId === 'local-user';
+                            return (
+                              <tr 
+                                key={tx.id} 
+                                onClick={() => handleRowClick(tx)}
+                                className={`border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer group ${isEditable ? 'border-l-2 border-l-indigo-500' : ''}`}
+                              >
+                                <td className="py-4 px-2 md:px-6">
+                                   <div className="flex flex-col">
+                                     <div className="flex items-center gap-2">
+                                        <span className="text-[9px] md:text-[11px] font-black text-slate-900 dark:text-white/80 font-mono tracking-tighter md:tracking-widest print:text-black group-hover:text-indigo-600">
+                                          {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                        </span>
+                                        {tx.location && (
+                                          <LocationPinIcon className="w-3 h-3 text-indigo-500/40" />
+                                        )}
+                                     </div>
+                                     <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest truncate max-w-[80px]">
+                                        {tx.userName || 'LOCAL'}
+                                     </span>
+                                   </div>
+                                </td>
+                                <td className="py-4">
+                                   <span className={`text-[6px] md:text-[8px] tracking-[0.1em] px-1.5 md:px-2 py-0.5 border uppercase font-black ${tx.type === 'income' ? 'border-emerald-600/50 text-emerald-900 dark:text-emerald-400 bg-emerald-500/10' : 'border-slate-500 dark:border-white/10 text-slate-900 dark:text-white/60 bg-slate-200 dark:bg-white/5'}`}>
+                                      {(t.categories as any)[tx.category] || tx.category}
+                                    </span>
+                                </td>
+                                <td className="py-4">
+                                   <span className="text-[9px] md:text-sm font-medium tracking-tight text-slate-900 dark:text-white/70 print:text-black font-noto truncate block max-w-[100px] md:max-w-none">
+                                      {tx.note || '...'}
+                                    </span>
+                                </td>
+                                <td className="py-4">
+                                   <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40">
+                                      {(t.methods as any)[tx.paymentMethod] || tx.paymentMethod}
+                                    </span>
+                                </td>
+                                <td className={`py-4 px-2 md:px-6 text-right font-black text-xs md:text-xl tracking-tighter ${tx.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white print:text-black'}`}>
+                                   {tx.type === 'income' ? '+' : '-'}{currencySymbol}{tx.amount.toLocaleString()}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Entry Detail Popup */}
+      {/* Entry Detail Popup - Optimized for any scroll position */}
       {viewingTx && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-lg border border-slate-200 dark:border-white/10 shadow-3xl overflow-hidden relative">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-xl animate-in fade-in duration-300 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg border border-slate-200 dark:border-white/10 shadow-3xl overflow-hidden relative my-auto">
             
-            {/* Header / Amount */}
             <div className="p-8 md:p-12 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/[0.01]">
               <div className="flex justify-between items-start mb-6">
                 <h3 className="text-[10px] font-black tracking-[0.4em] uppercase text-indigo-600 font-noto">{t.entryDetails}</h3>
@@ -307,7 +413,6 @@ export const Records: React.FC<RecordsProps> = ({
               </div>
             </div>
 
-            {/* Details Grid */}
             <div className="p-8 md:p-12 grid grid-cols-2 gap-y-8 gap-x-12">
                <div className="space-y-1">
                   <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t.category}</label>
@@ -376,7 +481,6 @@ export const Records: React.FC<RecordsProps> = ({
                )}
             </div>
 
-            {/* Actions Footer */}
             <div className="p-8 md:p-12 bg-slate-50 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/5">
                {viewingTx.userId === currentUserId || viewingTx.userId === 'local-user' ? (
                   <div className="flex flex-col gap-4">

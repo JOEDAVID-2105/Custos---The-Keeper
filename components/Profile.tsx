@@ -300,36 +300,46 @@ export const Profile: React.FC<ProfileProps> = ({
           
           {familyId ? (
             <div className="space-y-12 animate-in">
-              <div className="space-y-6">
-                 <h3 className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.householdMembers}</h3>
+              <div className="space-y-8">
+                 <div className="flex flex-col">
+                    <h3 className="text-sm font-black tracking-[0.4em] uppercase text-slate-900 dark:text-white font-noto">{t.householdCouncil}</h3>
+                    <p className="text-[7px] tracking-[0.4em] text-indigo-600 dark:text-indigo-400 uppercase font-black mt-1">THE {familyMetadata?.name || 'SOVEREIGN'} CABINET</p>
+                 </div>
+                 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {familyMembers.map(member => (
-                       <div key={member.uid} className={`flex items-center justify-between p-4 border transition-all ${member.uid === profile.uid ? 'border-indigo-600 bg-indigo-600/[0.03]' : 'border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]'}`}>
+                       <div key={member.uid} className={`flex items-center justify-between p-4 border transition-all ${member.uid === profile.uid ? 'border-indigo-600 bg-indigo-600/[0.03]' : 'border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] hover:border-indigo-600/40'}`}>
                           <div className="flex items-center gap-4">
-                             <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-white/10 flex items-center justify-center bg-white dark:bg-slate-900">
+                             <div className="shrink-0 w-10 h-10 rounded-full border border-indigo-500/20 bg-indigo-500/5 flex items-center justify-center overflow-hidden">
                                 <InitialShield name={member.displayName} size="sm" />
                              </div>
-                             <div>
+                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <p className="text-xs font-black uppercase text-slate-900 dark:text-white truncate max-w-[120px]">{member.displayName}</p>
+                                  <p className="text-[10px] font-black uppercase text-slate-900 dark:text-white truncate">{member.displayName}</p>
                                   {member.uid === profile.uid && (
-                                    <span className="px-1.5 py-0.5 bg-indigo-600 text-white text-[6px] font-black uppercase tracking-widest rounded-none">YOU</span>
+                                    <span className="px-1.5 py-0.5 bg-indigo-600 text-white text-[5px] font-black uppercase tracking-widest rounded-none">YOU</span>
                                   )}
                                 </div>
-                                <p className="text-[7px] font-black text-indigo-600 uppercase tracking-widest">
-                                   {member.uid === familyMetadata?.creatorId ? t.profile.headOfHousehold : t.profile.member}
+                                <p className="text-[7px] font-black uppercase tracking-widest text-indigo-600 mt-0.5">
+                                   {member.uid === familyMetadata?.creatorId ? 'SYSTEM HEAD' : t.verifiedGuardian}
                                 </p>
                              </div>
                           </div>
-                          {isFamilyCreator && member.uid !== auth.currentUser?.uid && (
-                             <button 
-                                onClick={() => removeMember(member.uid)}
-                                className="text-rose-500 hover:text-rose-400 transition-colors p-2"
-                                title="Remove Member"
-                             >
-                                <TrashIcon className="w-4 h-4" />
-                             </button>
-                          )}
+                          
+                          <div className="flex items-center gap-4">
+                             <div className="flex flex-col items-end gap-0.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]"></div>
+                                <span className="text-[5px] font-black text-emerald-500 uppercase tracking-tighter">SECURE</span>
+                             </div>
+                             {isFamilyCreator && member.uid !== auth.currentUser?.uid && (
+                               <button 
+                                  onClick={() => removeMember(member.uid)}
+                                  className="text-rose-500 hover:text-rose-400 transition-colors p-2"
+                               >
+                                  <TrashIcon className="w-4 h-4" />
+                               </button>
+                             )}
+                          </div>
                        </div>
                     ))}
                  </div>
