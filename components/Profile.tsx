@@ -18,6 +18,7 @@ interface ProfileProps {
   deferredPrompt?: any;
   fontSize: number;
   setFontSize: (s: number) => void;
+  familyMembers: UserProfile[];
 }
 
 export const Profile: React.FC<ProfileProps> = ({ 
@@ -28,11 +29,11 @@ export const Profile: React.FC<ProfileProps> = ({
   onOpenContact,
   deferredPrompt,
   fontSize,
-  setFontSize
+  setFontSize,
+  familyMembers
 }) => {
   const [joinId, setJoinId] = useState('');
   const [familyMetadata, setFamilyMetadata] = useState<{ name: string; creatorId: string } | null>(null);
-  const [familyMembers, setFamilyMembers] = useState<UserProfile[]>([]);
   const [isNamingFamily, setIsNamingFamily] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
   const [showCopied, setShowCopied] = useState(false);
@@ -62,16 +63,11 @@ export const Profile: React.FC<ProfileProps> = ({
       const unsubMeta = StorageService.subscribeToFamilyMetadata(familyId, (data) => {
         setFamilyMetadata(data);
       });
-      const unsubMembers = StorageService.subscribeToFamilyMembers(familyId, (users) => {
-        setFamilyMembers(users);
-      });
       return () => {
         unsubMeta();
-        unsubMembers();
       };
     } else {
       setFamilyMetadata(null);
-      setFamilyMembers([]);
     }
   }, [familyId]);
 
@@ -308,13 +304,18 @@ export const Profile: React.FC<ProfileProps> = ({
                  <h3 className="text-[9px] tracking-[0.5em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.profile.householdMembers}</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {familyMembers.map(member => (
-                       <div key={member.uid} className="flex items-center justify-between p-4 border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
+                       <div key={member.uid} className={`flex items-center justify-between p-4 border transition-all ${member.uid === profile.uid ? 'border-indigo-600 bg-indigo-600/[0.03]' : 'border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]'}`}>
                           <div className="flex items-center gap-4">
-                             <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-white/10 flex items-center justify-center">
+                             <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-white/10 flex items-center justify-center bg-white dark:bg-slate-900">
                                 <InitialShield name={member.displayName} size="sm" />
                              </div>
                              <div>
-                                <p className="text-xs font-black uppercase text-slate-900 dark:text-white truncate">{member.displayName}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-xs font-black uppercase text-slate-900 dark:text-white truncate max-w-[120px]">{member.displayName}</p>
+                                  {member.uid === profile.uid && (
+                                    <span className="px-1.5 py-0.5 bg-indigo-600 text-white text-[6px] font-black uppercase tracking-widest rounded-none">YOU</span>
+                                  )}
+                                </div>
                                 <p className="text-[7px] font-black text-indigo-600 uppercase tracking-widest">
                                    {member.uid === familyMetadata?.creatorId ? t.profile.headOfHousehold : t.profile.member}
                                 </p>
@@ -442,7 +443,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
           <div className="w-full border-t border-slate-200 dark:border-white/5 pt-12 space-y-2 text-center">
              <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/30 uppercase font-noto">
-                VERSION: 1.1.0 ALPHA
+                VERSION: 1.2.0 [CONFIDO]
              </p>
              <p className="text-[8px] tracking-[0.3em] font-black text-slate-400 dark:text-white/30 uppercase font-noto">
                 PROPRIETOR: D'CODES / DAVID CODES

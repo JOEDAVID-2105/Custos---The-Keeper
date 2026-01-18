@@ -70,7 +70,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onNavigateToFeedback, lang
           </div>
 
           <div className="pt-8 border-t border-slate-300 dark:border-white/5 space-y-2">
-             <p className="text-[8px] tracking-[0.2em] font-black text-slate-500 dark:text-white/20 uppercase">{t.about.version}: 3.1.0-SOVEREIGN</p>
+             <p className="text-[8px] tracking-[0.2em] font-black text-slate-500 dark:text-white/20 uppercase">{t.about.version}: 1.2.0 [CONFIDO]</p>
              <p className="text-[8px] tracking-[0.2em] font-black text-slate-500 dark:text-white/20 uppercase">{t.about.proprietor}: D'CODES / DAVID CODES</p>
           </div>
         </div>

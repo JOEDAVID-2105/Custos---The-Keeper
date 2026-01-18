@@ -424,6 +424,7 @@ const App: React.FC = () => {
             deferredPrompt={deferredPrompt}
             fontSize={fontSize}
             setFontSize={setFontSize}
+            familyMembers={familyMembers}
           />
           {auth.currentUser && (
             <div className="pt-12 border-t border-slate-300 dark:border-white/5 flex justify-center">
