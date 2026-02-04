@@ -5,6 +5,7 @@ import { SummaryDashboard } from './SummaryDashboard';
 import { translations } from '../translations';
 import { TrashIcon, PAYMENT_METHODS } from '../constants';
 import { InitialShield } from './InitialShield';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface RecordsProps {
   transactions: Transaction[];
@@ -47,6 +48,7 @@ export const Records: React.FC<RecordsProps> = ({
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
   const [viewMode, setViewMode] = useState<'private' | 'family'>(familyId ? 'family' : 'private');
   const [selectedMonth, setSelectedMonth] = useState<string>('ALL'); // Format: "YYYY-MM"
+  const [isExportConfirmOpen, setIsExportConfirmOpen] = useState(false);
 
   const t = translations[language];
 
@@ -196,6 +198,7 @@ export const Records: React.FC<RecordsProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setIsExportConfirmOpen(false);
   };
 
   const getMonthName = (monthYear: string) => {
@@ -208,6 +211,19 @@ export const Records: React.FC<RecordsProps> = ({
 
   return (
     <div className="w-full pb-20 max-w-full">
+      <ConfirmationModal 
+        isOpen={isExportConfirmOpen}
+        title={language === 'ta' ? 'தரவு ஏற்றுமதி' : 'Extract Archives'}
+        message={language === 'ta' 
+          ? `தற்போது வடிகட்டப்பட்ட ${filteredTransactions.length} பதிவுகளை CSV கோப்பாக பதிவிறக்கம் செய்ய விரும்புகிறீர்களா?` 
+          : `Do you wish to extract the currently filtered ${filteredTransactions.length} records into a portable CSV archive?`}
+        confirmLabel={language === 'ta' ? 'ஏற்றுமதி செய்க' : 'DISPATCH CSV'}
+        cancelLabel={language === 'ta' ? 'ரத்து' : 'PRESERVE'}
+        onConfirm={handleExportCSV}
+        onCancel={() => setIsExportConfirmOpen(false)}
+        language={language}
+      />
+
       <div className="animate-in w-full overflow-hidden">
         <div className="flex flex-col mb-8 md:mb-16 gap-4 md:gap-8 no-print">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -220,7 +236,11 @@ export const Records: React.FC<RecordsProps> = ({
                       {familyMembers.map((member) => (
                         <div key={member.uid} className="relative group/member">
                           <div className="w-6 h-6 rounded-full border border-slate-50 dark:border-slate-950 bg-white dark:bg-slate-900 shadow-lg flex items-center justify-center overflow-hidden transition-transform hover:scale-110 hover:z-20">
-                             <InitialShield name={member.displayName} size="sm" />
+                             {member.photoURL ? (
+                               <img src={member.photoURL} alt={member.displayName} className="w-full h-full object-cover" />
+                             ) : (
+                               <InitialShield name={member.displayName} size="sm" />
+                             )}
                           </div>
                           <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[6px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/member:opacity-100 transition-opacity pointer-events-none z-[100]">
                             {member.displayName}
@@ -233,7 +253,7 @@ export const Records: React.FC<RecordsProps> = ({
             </div>
             <div className="flex flex-wrap gap-3 w-full md:w-auto">
               <button 
-                onClick={handleExportCSV}
+                onClick={() => setIsExportConfirmOpen(true)}
                 className="px-6 py-3 bg-white dark:bg-transparent border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-[9px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-md font-noto flex-1 md:flex-none"
               >
                 {t.exportCSV}

@@ -45,23 +45,13 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
   const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
   const [activeBroken, setActiveBroken] = useState(false);
 
-  /**
-   * PHOTO ARCHIVE PROTOCOL:
-   * Supporting up to 202 portraits as requested.
-   * Path format: /assets/pfp_XX.png
-   */
-  const portraits = Array.from({ length: 202 }, (_, i) => {
-    const num = (i + 1).toString().padStart(2, '0');
-    return `/assets/pfp_${num}.png`;
-  });
-
-  // Batching the 202 images for cleaner display
-  const batches = [
-    { name: "ARCHIVE ALPHA", start: 0, end: 50 },
-    { name: "ARCHIVE BETA", start: 50, end: 100 },
-    { name: "ARCHIVE GAMMA", start: 100, end: 150 },
-    { name: "ARCHIVE DELTA", start: 150, end: 202 }
-  ];
+  // SUPABASE ARCHIVE PROTOCOL:
+  // pfp_01 to pfp_10: Men (Masculine Archive)
+  // pfp_11 to pfp_20: Women (Feminine Archive)
+  const baseUrl = "https://ybjcohweyeyasokqnlnv.supabase.co/storage/v1/object/public/pfps/pfp_";
+  
+  const masculineArchive = Array.from({ length: 10 }, (_, i) => `${baseUrl}${String(i + 1).padStart(2, '0')}.png`);
+  const feminineArchive = Array.from({ length: 10 }, (_, i) => `${baseUrl}${String(i + 11).padStart(2, '0')}.png`);
 
   const selectPortrait = (url: string | undefined) => {
     onUpdate({ ...profile, photoURL: url });
@@ -83,7 +73,7 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
          <h3 className="text-sm font-black tracking-[0.4em] text-slate-900 dark:text-white uppercase font-noto">{title}</h3>
          <p className="text-[8px] tracking-[0.3em] text-slate-500 dark:text-white/30 uppercase mt-1 font-noto">{subtitle}</p>
        </div>
-       <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
+       <div className="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 lg:grid-cols-5 gap-3">
           {items.map((url, idx) => {
             const isSelected = profile.photoURL === url;
             const isBroken = brokenImages[url];
@@ -139,16 +129,19 @@ export const PortraitSelection: React.FC<PortraitSelectionProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 pt-12 border-t border-slate-300 dark:border-white/5">
-         <div className="lg:col-span-8 space-y-20">
-            {batches.map((batch, i) => (
-              <PortraitGrid 
-                key={batch.name}
-                title={batch.name} 
-                subtitle={`COLLECTION INDEX ${i + 1}`}
-                type="mixed"
-                items={portraits.slice(batch.start, batch.end)} 
-              />
-            ))}
+         <div className="lg:col-span-8 space-y-16">
+            <PortraitGrid 
+              title={t.profile.masculineArchive} 
+              subtitle="COLLECTION ALPHA [01-10]"
+              type="men"
+              items={masculineArchive} 
+            />
+            <PortraitGrid 
+              title={t.profile.feminineArchive} 
+              subtitle="COLLECTION BETA [11-20]"
+              type="women"
+              items={feminineArchive} 
+            />
          </div>
 
          <div className="lg:col-span-4">
