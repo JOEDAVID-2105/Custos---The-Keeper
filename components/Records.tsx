@@ -43,19 +43,24 @@ export const Records: React.FC<RecordsProps> = ({
   search, typeFilter, startDate, endDate, sortBy, sortOrder,
   currencySymbol, currentUserId, language, categories, familyId, familyMembers = []
 }) => {
+  const t = translations[language];
+  const currentMonthStr = new Date().toISOString().slice(0, 7);
+
   const [viewingTx, setViewingTx] = useState<Transaction | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
   const [viewMode, setViewMode] = useState<'private' | 'family'>(familyId ? 'family' : 'private');
-  const [selectedMonth, setSelectedMonth] = useState<string>('ALL'); // Format: "YYYY-MM"
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthStr);
+  const [selectedArchiveYear, setSelectedArchiveYear] = useState<string>('LATEST_12_MONTHS');
   const [isExportConfirmOpen, setIsExportConfirmOpen] = useState(false);
 
-  const t = translations[language];
-
-  // Derive available months for the switcher
+  // Derive available months for the switcher, but cap to 10 years
   const availableMonths = useMemo(() => {
     const monthsSet = new Set<string>();
+    const tenYearsAgo = Date.now() - (10 * 365 * 24 * 60 * 60 * 1000);
+    
     transactions.forEach(tx => {
+      if (tx.timestamp < tenYearsAgo) return;
       const d = new Date(tx.timestamp);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       monthsSet.add(key);
@@ -63,8 +68,21 @@ export const Records: React.FC<RecordsProps> = ({
     return Array.from(monthsSet).sort((a, b) => b.localeCompare(a));
   }, [transactions]);
 
+  // Derive available years for the archive dropdown
+  const availableYears = useMemo(() => {
+    const yearsSet = new Set<string>();
+    transactions.forEach(tx => {
+      yearsSet.add(new Date(tx.timestamp).getFullYear().toString());
+    });
+    return Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
+  }, [transactions]);
+
   const filteredTransactions = useMemo(() => {
     let list = [...transactions];
+    const tenYearsAgo = Date.now() - (10 * 365 * 24 * 60 * 60 * 1000);
+    
+    // Retention Protocol: Max 10 years
+    list = list.filter(tx => tx.timestamp >= tenYearsAgo);
 
     if (viewMode === 'family') {
        list = list.filter(tx => tx.familyId === familyId && tx.familyId !== undefined && tx.familyId !== null);
@@ -100,6 +118,15 @@ export const Records: React.FC<RecordsProps> = ({
         const d = new Date(tx.timestamp);
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === selectedMonth;
       });
+    } else {
+      // Archive View logic: Default to past 12 months, or filter by year
+      if (selectedArchiveYear === 'LATEST_12_MONTHS') {
+        const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
+        list = list.filter(tx => tx.timestamp >= oneYearAgo);
+      } else {
+        const yearInt = parseInt(selectedArchiveYear);
+        list = list.filter(tx => new Date(tx.timestamp).getFullYear() === yearInt);
+      }
     }
 
     return list.sort((a, b) => {
@@ -109,9 +136,8 @@ export const Records: React.FC<RecordsProps> = ({
       
       return sortOrder === 'desc' ? -comparison : comparison;
     });
-  }, [transactions, search, typeFilter, startDate, endDate, sortBy, sortOrder, viewMode, familyId, selectedMonth]);
+  }, [transactions, search, typeFilter, startDate, endDate, sortBy, sortOrder, viewMode, familyId, selectedMonth, selectedArchiveYear]);
 
-  // Group by Month -> then Group by Day
   const groupedData = useMemo(() => {
     return filteredTransactions.reduce((acc, tx) => {
       const d = new Date(tx.timestamp);
@@ -172,6 +198,7 @@ export const Records: React.FC<RecordsProps> = ({
   };
 
   const handleExportCSV = () => {
+    setIsExportConfirmOpen(false);
     if (filteredTransactions.length === 0) return;
     
     const headers = ["Date", "Time", "Alias", "Category", "Description", "Method", "Amount", "Type"];
@@ -198,7 +225,6 @@ export const Records: React.FC<RecordsProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setIsExportConfirmOpen(false);
   };
 
   const getMonthName = (monthYear: string) => {
@@ -213,12 +239,10 @@ export const Records: React.FC<RecordsProps> = ({
     <div className="w-full pb-20 max-w-full">
       <ConfirmationModal 
         isOpen={isExportConfirmOpen}
-        title={language === 'ta' ? 'தரவு ஏற்றுமதி' : 'Extract Archives'}
-        message={language === 'ta' 
-          ? `தற்போது வடிகட்டப்பட்ட ${filteredTransactions.length} பதிவுகளை CSV கோப்பாக பதிவிறக்கம் செய்ய விரும்புகிறீர்களா?` 
-          : `Do you wish to extract the currently filtered ${filteredTransactions.length} records into a portable CSV archive?`}
-        confirmLabel={language === 'ta' ? 'ஏற்றுமதி செய்க' : 'DISPATCH CSV'}
-        cancelLabel={language === 'ta' ? 'ரத்து' : 'PRESERVE'}
+        title={t.exportConfirmTitle}
+        message={t.exportConfirmMessage}
+        confirmLabel={t.exportAction}
+        cancelLabel={t.discard}
         onConfirm={handleExportCSV}
         onCancel={() => setIsExportConfirmOpen(false)}
         language={language}
@@ -236,11 +260,7 @@ export const Records: React.FC<RecordsProps> = ({
                       {familyMembers.map((member) => (
                         <div key={member.uid} className="relative group/member">
                           <div className="w-6 h-6 rounded-full border border-slate-50 dark:border-slate-950 bg-white dark:bg-slate-900 shadow-lg flex items-center justify-center overflow-hidden transition-transform hover:scale-110 hover:z-20">
-                             {member.photoURL ? (
-                               <img src={member.photoURL} alt={member.displayName} className="w-full h-full object-cover" />
-                             ) : (
-                               <InitialShield name={member.displayName} size="sm" />
-                             )}
+                             <InitialShield name={member.displayName} size="sm" />
                           </div>
                           <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[6px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/member:opacity-100 transition-opacity pointer-events-none z-[100]">
                             {member.displayName}
@@ -266,7 +286,7 @@ export const Records: React.FC<RecordsProps> = ({
               </button>
               <button 
                 onClick={onNavigateToFilters}
-                className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10 font-noto flex-1 md:flex-none"
+                className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all border border-transparent dark:border-white/10 font-noto flex-1 md:flex-none"
               >
                 {t.filtersLabel}
               </button>
@@ -292,12 +312,6 @@ export const Records: React.FC<RecordsProps> = ({
              <div className="flex flex-col gap-4">
                 <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.chronologicalFilter}</label>
                 <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide no-print">
-                   <button 
-                      onClick={() => setSelectedMonth('ALL')}
-                      className={`shrink-0 px-4 py-2 text-[9px] font-black tracking-widest uppercase transition-all border-b-2 ${selectedMonth === 'ALL' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-white'}`}
-                   >
-                      {t.allArchives}
-                   </button>
                    {availableMonths.map(m => (
                       <button 
                         key={m}
@@ -307,7 +321,32 @@ export const Records: React.FC<RecordsProps> = ({
                         {getMonthName(m)}
                       </button>
                    ))}
+                   <button 
+                      onClick={() => setSelectedMonth('ALL')}
+                      className={`shrink-0 px-4 py-2 text-[9px] font-black tracking-widest uppercase transition-all border-b-2 ${selectedMonth === 'ALL' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-white'}`}
+                   >
+                      {t.allArchives}
+                   </button>
                 </div>
+
+                {/* Archive Specific Sub-Filters */}
+                {selectedMonth === 'ALL' && (
+                  <div className="flex flex-col md:flex-row gap-4 animate-in">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[7px] tracking-[0.3em] font-black text-indigo-600/50 uppercase font-noto">{t.archiveScope}</label>
+                      <select 
+                         value={selectedArchiveYear}
+                         onChange={(e) => setSelectedArchiveYear(e.target.value)}
+                         className="bg-transparent border border-indigo-600/20 px-3 py-2 outline-none text-[9px] font-black uppercase text-indigo-600 font-noto"
+                      >
+                         <option value="LATEST_12_MONTHS">{t.pastTwelveMonths}</option>
+                         {availableYears.map(year => (
+                           <option key={year} value={year}>{year}</option>
+                         ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
              </div>
           </div>
 
@@ -494,7 +533,7 @@ export const Records: React.FC<RecordsProps> = ({
                   <div className="col-span-2 pt-4">
                      <button 
                         onClick={() => handleOpenMap(viewingTx)}
-                        className="flex items-center gap-3 text-indigo-600 hover:text-indigo-400 transition-colors"
+                        className="flex items-center gap-3 text-indigo-600 hover:text-indigo-400 transition-all"
                      >
                         <LocationPinIcon className="w-4 h-4" />
                         <span className="text-[10px] font-black uppercase tracking-widest">{t.seeLocation}</span>
