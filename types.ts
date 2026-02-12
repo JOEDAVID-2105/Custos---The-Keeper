@@ -8,6 +8,7 @@ export interface Transaction {
   note: string;
   category: Category;
   paymentMethod: string;
+  status: 'paid' | 'pending';
   timestamp: number;
   userId: string;
   userName?: string; 

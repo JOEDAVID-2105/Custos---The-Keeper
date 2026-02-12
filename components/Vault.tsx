@@ -26,6 +26,7 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
   const [note, setNote] = useState('');
   const [category, setCategory] = useState<Category>('Food');
   const [method, setMethod] = useState(PAYMENT_METHODS[0]);
+  const [status, setStatus] = useState<'paid' | 'pending'>('paid');
   const [ledgerMode, setLedgerMode] = useState<'private' | 'family'>('private');
   const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [geoStatus, setGeoStatus] = useState<'idle' | 'tracking' | 'denied' | 'ready'>('idle');
@@ -80,6 +81,7 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
       note,
       category,
       paymentMethod: method,
+      status,
       timestamp: Date.now(),
       userId: uid,
       userName: uName,
@@ -163,12 +165,21 @@ export const Vault: React.FC<VaultProps> = ({ onAdd, currencySymbol, transaction
           </div>
         </div>
 
-        <div className="space-y-4 pt-4">
-           <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.modeLabel}</label>
-           <select value={ledgerMode} onChange={(e) => setLedgerMode(e.target.value as any)} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white font-noto">
-              <option value="private" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.private}</option>
-              {familyId && <option value="family" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.family}</option>}
-           </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+                <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">Status</label>
+                <select value={status} onChange={(e) => setStatus(e.target.value as 'paid' | 'pending')} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white font-noto">
+                    <option value="paid" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Paid</option>
+                    <option value="pending" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Pending</option>
+                </select>
+            </div>
+            <div className="space-y-2">
+                <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.modeLabel}</label>
+                <select value={ledgerMode} onChange={(e) => setLedgerMode(e.target.value as any)} className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer uppercase tracking-widest text-xs font-bold text-slate-900 dark:text-white font-noto">
+                    <option value="private" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.private}</option>
+                    {familyId && <option value="family" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{t.family}</option>}
+                </select>
+            </div>
         </div>
 
         <button type="submit" className={`w-full py-6 font-black text-sm tracking-[0.4em] transition-all uppercase rounded-sm font-noto ${successMsg ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white hover:bg-slate-900 dark:hover:bg-white dark:hover:text-slate-950 shadow-xl'}`}>

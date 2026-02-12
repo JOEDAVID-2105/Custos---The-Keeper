@@ -72,6 +72,7 @@ const App: React.FC = () => {
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending'>('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
@@ -371,6 +372,7 @@ const App: React.FC = () => {
           onNavigateToFilters={() => navigateTo('filters')}
           search={search}
           typeFilter={typeFilter}
+          statusFilter={statusFilter}
           startDate={startDate}
           endDate={endDate}
           sortBy={sortBy}
@@ -387,12 +389,13 @@ const App: React.FC = () => {
         <FiltersPage 
           search={search} setSearch={setSearch}
           typeFilter={typeFilter} setTypeFilter={setTypeFilter}
+          statusFilter={statusFilter} setStatusFilter={setStatusFilter}
           startDate={startDate} setStartDate={setStartDate}
           endDate={endDate} setEndDate={setEndDate}
           sortBy={sortBy} setSortBy={setSortBy}
           sortOrder={sortOrder} setSortOrder={setSortOrder}
           onBack={() => navigateTo('history')}
-          onClear={() => { setSearch(''); setTypeFilter('all'); setStartDate(''); setEndDate(''); setSortBy('date'); setSortOrder('desc'); }}
+          onClear={() => { setSearch(''); setTypeFilter('all'); setStatusFilter('all'); setStartDate(''); setEndDate(''); setSortBy('date'); setSortOrder('desc'); }}
           language={profile.language}
         />
       );

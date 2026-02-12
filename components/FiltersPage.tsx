@@ -7,6 +7,8 @@ interface FiltersPageProps {
   setSearch: (v: string) => void;
   typeFilter: 'all' | 'income' | 'expense';
   setTypeFilter: (v: 'all' | 'income' | 'expense') => void;
+  statusFilter: 'all' | 'paid' | 'pending';
+  setStatusFilter: (v: 'all' | 'paid' | 'pending') => void;
   startDate: string;
   setStartDate: (v: string) => void;
   endDate: string;
@@ -23,6 +25,7 @@ interface FiltersPageProps {
 export const FiltersPage: React.FC<FiltersPageProps> = ({
   search, setSearch,
   typeFilter, setTypeFilter,
+  statusFilter, setStatusFilter,
   startDate, setStartDate,
   endDate, setEndDate,
   sortBy, setSortBy,
@@ -76,6 +79,18 @@ export const FiltersPage: React.FC<FiltersPageProps> = ({
             <option value="all">ALL</option>
             <option value="income">{t.income}</option>
             <option value="expense">{t.expenditure}</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className="text-[9px] tracking-[0.4em] font-black uppercase text-slate-800 dark:text-white/30">Status</label>
+          <select 
+            value={statusFilter} 
+            onChange={e => setStatusFilter(e.target.value as any)} 
+            className="w-full bg-transparent border-b border-slate-400 dark:border-white/10 py-3 outline-none text-sm md:text-base font-bold text-slate-900 dark:text-white uppercase"
+          >
+            <option value="all">All</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
           </select>
         </div>
         <div className="space-y-2">

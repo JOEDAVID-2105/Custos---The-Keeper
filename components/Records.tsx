@@ -15,6 +15,7 @@ interface RecordsProps {
   onNavigateToFilters: () => void;
   search: string;
   typeFilter: 'all' | 'income' | 'expense';
+  statusFilter: 'all' | 'paid' | 'pending';
   startDate: string;
   endDate: string;
   sortBy: 'date' | 'amount';
@@ -40,7 +41,7 @@ const LocationPinIcon = ({ className, onClick }: { className?: string, onClick?:
 
 export const Records: React.FC<RecordsProps> = ({ 
   transactions, onDelete, onUpdate, onNavigateToOutflow, onNavigateToFilters,
-  search, typeFilter, startDate, endDate, sortBy, sortOrder,
+  search, typeFilter, statusFilter, startDate, endDate, sortBy, sortOrder,
   currencySymbol, currentUserId, language, categories, familyId, familyMembers = []
 }) => {
   const t = translations[language];
@@ -54,7 +55,6 @@ export const Records: React.FC<RecordsProps> = ({
   const [selectedArchiveYear, setSelectedArchiveYear] = useState<string>('LATEST_12_MONTHS');
   const [isExportConfirmOpen, setIsExportConfirmOpen] = useState(false);
 
-  // Derive available months for the switcher, but cap to 10 years
   const availableMonths = useMemo(() => {
     const monthsSet = new Set<string>();
     const tenYearsAgo = Date.now() - (10 * 365 * 24 * 60 * 60 * 1000);
@@ -68,7 +68,6 @@ export const Records: React.FC<RecordsProps> = ({
     return Array.from(monthsSet).sort((a, b) => b.localeCompare(a));
   }, [transactions]);
 
-  // Derive available years for the archive dropdown
   const availableYears = useMemo(() => {
     const yearsSet = new Set<string>();
     transactions.forEach(tx => {
@@ -80,8 +79,6 @@ export const Records: React.FC<RecordsProps> = ({
   const filteredTransactions = useMemo(() => {
     let list = [...transactions];
     const tenYearsAgo = Date.now() - (10 * 365 * 24 * 60 * 60 * 1000);
-    
-    // Retention Protocol: Max 10 years
     list = list.filter(tx => tx.timestamp >= tenYearsAgo);
 
     if (viewMode === 'family') {
@@ -103,6 +100,10 @@ export const Records: React.FC<RecordsProps> = ({
       list = list.filter(tx => tx.type === typeFilter);
     }
 
+    if (statusFilter !== 'all') {
+      list = list.filter(tx => tx.status === statusFilter);
+    }
+
     if (startDate) {
       const start = new Date(startDate).getTime();
       list = list.filter(tx => tx.timestamp >= start);
@@ -119,7 +120,6 @@ export const Records: React.FC<RecordsProps> = ({
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === selectedMonth;
       });
     } else {
-      // Archive View logic: Default to past 12 months, or filter by year
       if (selectedArchiveYear === 'LATEST_12_MONTHS') {
         const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
         list = list.filter(tx => tx.timestamp >= oneYearAgo);
@@ -133,10 +133,9 @@ export const Records: React.FC<RecordsProps> = ({
       let comparison = 0;
       if (sortBy === 'date') comparison = a.timestamp - b.timestamp;
       else comparison = a.amount - b.amount;
-      
       return sortOrder === 'desc' ? -comparison : comparison;
     });
-  }, [transactions, search, typeFilter, startDate, endDate, sortBy, sortOrder, viewMode, familyId, selectedMonth, selectedArchiveYear]);
+  }, [transactions, search, typeFilter, statusFilter, startDate, endDate, sortBy, sortOrder, viewMode, familyId, selectedMonth, selectedArchiveYear]);
 
   const groupedData = useMemo(() => {
     return filteredTransactions.reduce((acc, tx) => {
@@ -201,7 +200,7 @@ export const Records: React.FC<RecordsProps> = ({
     setIsExportConfirmOpen(false);
     if (filteredTransactions.length === 0) return;
     
-    const headers = ["Date", "Time", "Alias", "Category", "Description", "Method", "Amount", "Type"];
+    const headers = ["Date", "Time", "Alias", "Category", "Description", "Method", "Status", "Amount", "Type"];
     const rows = filteredTransactions.map(tx => {
       const d = new Date(tx.timestamp);
       return [
@@ -211,6 +210,7 @@ export const Records: React.FC<RecordsProps> = ({
         tx.category,
         `"${tx.note?.replace(/"/g, '""') || ""}"`,
         tx.paymentMethod,
+        tx.status,
         tx.amount,
         tx.type
       ];
@@ -308,7 +308,6 @@ export const Records: React.FC<RecordsProps> = ({
                 </select>
              </div>
 
-             {/* Month Switcher Tabs */}
              <div className="flex flex-col gap-4">
                 <label className="text-[8px] tracking-[0.4em] font-black text-slate-800 dark:text-white/50 uppercase font-noto">{t.chronologicalFilter}</label>
                 <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide no-print">
@@ -329,7 +328,6 @@ export const Records: React.FC<RecordsProps> = ({
                    </button>
                 </div>
 
-                {/* Archive Specific Sub-Filters */}
                 {selectedMonth === 'ALL' && (
                   <div className="flex flex-col md:flex-row gap-4 animate-in">
                     <div className="flex flex-col gap-2">
@@ -353,7 +351,6 @@ export const Records: React.FC<RecordsProps> = ({
           <SummaryDashboard transactions={filteredTransactions} currencySymbol={currencySymbol} language={language} />
         </div>
 
-        {/* Partitioned Monthly Tables */}
         <div className="space-y-12">
           {Object.keys(groupedData).length === 0 ? (
             <div className="py-20 text-center border-2 border-dashed border-slate-200 dark:border-white/5">
@@ -368,35 +365,41 @@ export const Records: React.FC<RecordsProps> = ({
                   <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{Object.values(dates).flat().length} ENTRIES</span>
                 </div>
                 
-                <div className="overflow-x-auto w-full -mx-4 md:mx-0 px-4 md:px-0 scrollbar-hide">
-                  <table className="w-full text-left border-collapse print:text-black min-w-full">
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-left border-collapse print:text-black table-fixed">
                     <thead>
                       <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/50 uppercase font-black">
-                        <th className="pb-4 px-2 md:px-6 font-normal">{t.ledgerHeaders.timeAndAlias}</th>
-                        <th className="pb-4 font-normal">{t.ledgerHeaders.category}</th>
-                        <th className="pb-4 font-normal">{t.ledgerHeaders.desc}</th>
-                        <th className="pb-4 font-normal">{t.ledgerHeaders.modeOfPay}</th>
-                        <th className="pb-4 px-2 md:px-6 font-normal text-right">{t.ledgerHeaders.val}</th>
+                        <th className="pb-4 px-2 font-normal w-[20%]">{t.ledgerHeaders.timeAndAlias}</th>
+                        <th className="pb-4 px-2 font-normal w-[20%]">{t.ledgerHeaders.category}</th>
+                        <th className="pb-4 px-2 font-normal w-[25%]">{t.ledgerHeaders.desc}</th>
+                        <th className="pb-4 px-2 font-normal w-[15%]">{t.ledgerHeaders.modeOfPay}</th>
+                        <th className="pb-4 px-2 font-normal text-right w-[20%]">{t.ledgerHeaders.val}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Object.entries(dates).map(([date, txs]) => (
                         <React.Fragment key={date}>
                           <tr className="bg-slate-200/50 dark:bg-white/[0.03] print:bg-slate-50 border-y border-slate-200 dark:border-white/5">
-                            <td colSpan={5} className="py-2 px-2 md:px-6 border-l-4 border-indigo-600">
+                            <td colSpan={5} className="py-2 px-2 border-l-4 border-indigo-600">
                               <h3 className="text-[10px] md:text-sm font-black tracking-widest uppercase text-slate-900 dark:text-white/90 print:text-black">{date}</h3>
                             </td>
                           </tr>
                           {txs.map(tx => {
                             const isEditable = tx.userId === currentUserId || tx.userId === 'local-user';
+                            const isPending = tx.status === 'pending';
                             return (
                               <tr 
                                 key={tx.id} 
                                 onClick={() => handleRowClick(tx)}
-                                className={`border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer group ${isEditable ? 'border-l-2 border-l-indigo-500' : ''}`}
+                                className="border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer group"
                               >
-                                <td className="py-4 px-2 md:px-6">
-                                   <div className="flex flex-col">
+                                <td className="py-4 px-2 relative">
+                                  {isPending ? (
+                                    <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-red-400 dark:bg-red-500 rounded-full"></div>
+                                  ) : isEditable ? (
+                                    <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-indigo-500 rounded-full"></div>
+                                  ) : null}
+                                   <div className="flex flex-col pl-2">
                                      <div className="flex items-center gap-2">
                                         <span className="text-[9px] md:text-[11px] font-black text-slate-900 dark:text-white/80 font-mono tracking-tighter md:tracking-widest print:text-black group-hover:text-indigo-600">
                                           {new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
@@ -410,22 +413,22 @@ export const Records: React.FC<RecordsProps> = ({
                                      </span>
                                    </div>
                                 </td>
-                                <td className="py-4">
+                                <td className="py-4 px-2">
                                    <span className={`text-[6px] md:text-[8px] tracking-[0.1em] px-1.5 md:px-2 py-0.5 border uppercase font-black ${tx.type === 'income' ? 'border-emerald-600/50 text-emerald-900 dark:text-emerald-400 bg-emerald-500/10' : 'border-slate-500 dark:border-white/10 text-slate-900 dark:text-white/60 bg-slate-200 dark:bg-white/5'}`}>
                                       {(t.categories as any)[tx.category] || tx.category}
                                     </span>
                                 </td>
-                                <td className="py-4">
-                                   <span className="text-[9px] md:text-sm font-medium tracking-tight text-slate-900 dark:text-white/70 print:text-black font-noto truncate block max-w-[100px] md:max-w-none">
+                                <td className="py-4 px-2">
+                                   <span className="text-[9px] md:text-sm font-medium tracking-tight text-slate-900 dark:text-white/70 print:text-black font-noto truncate block max-w-full">
                                       {tx.note || '...'}
                                     </span>
                                 </td>
-                                <td className="py-4">
+                                <td className="py-4 px-2">
                                    <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40">
                                       {(t.methods as any)[tx.paymentMethod] || tx.paymentMethod}
                                     </span>
                                 </td>
-                                <td className={`py-4 px-2 md:px-6 text-right font-black text-xs md:text-xl tracking-tighter ${tx.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white print:text-black'}`}>
+                                <td className={`py-4 px-2 text-right font-black text-xs md:text-xl tracking-tighter ${tx.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white print:text-black'}`}>
                                    {tx.type === 'income' ? '+' : '-'}{currencySymbol}{tx.amount.toLocaleString()}
                                 </td>
                               </tr>
@@ -442,7 +445,6 @@ export const Records: React.FC<RecordsProps> = ({
         </div>
       </div>
 
-      {/* Entry Detail Popup - Optimized for any scroll position */}
       {viewingTx && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-xl animate-in fade-in duration-300 overflow-y-auto">
           <div className="bg-white dark:bg-slate-900 w-full max-w-lg border border-slate-200 dark:border-white/10 shadow-3xl overflow-hidden relative my-auto">
@@ -478,8 +480,8 @@ export const Records: React.FC<RecordsProps> = ({
                <div className="space-y-1">
                   <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t.category}</label>
                   {editingId === viewingTx.id ? (
-                     <select value={editValues.category} onChange={e => setEditValues({...editValues, category: e.target.value})} className="w-full bg-transparent border-b border-indigo-600 py-1 outline-none text-xs font-black uppercase text-slate-900 dark:text-white">
-                        {categories.map(cat => <option key={cat} value={cat}>{(t.categories as any)[cat] || cat}</option>)}
+                     <select value={editValues.category} onChange={e => setEditValues({...editValues, category: e.target.value})} className="w-full bg-transparent border-b border-indigo-600 py-1 outline-none text-xs font-black uppercase text-slate-900 dark:text-white font-noto appearance-none">
+                        {categories.map(cat => <option key={cat} value={cat} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{(t.categories as any)[cat] || cat}</option>)}
                      </select>
                   ) : (
                      <p className="text-xs font-black uppercase text-slate-900 dark:text-white">{(t.categories as any)[viewingTx.category] || viewingTx.category}</p>
@@ -489,8 +491,8 @@ export const Records: React.FC<RecordsProps> = ({
                <div className="space-y-1">
                   <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t.protocol}</label>
                   {editingId === viewingTx.id ? (
-                     <select value={editValues.paymentMethod} onChange={e => setEditValues({...editValues, paymentMethod: e.target.value})} className="w-full bg-transparent border-b border-indigo-600 py-1 outline-none text-xs font-black uppercase text-slate-900 dark:text-white">
-                        {PAYMENT_METHODS.map(m => <option key={m} value={m}>{(t.methods as any)[m] || m}</option>)}
+                     <select value={editValues.paymentMethod} onChange={e => setEditValues({...editValues, paymentMethod: e.target.value})} className="w-full bg-transparent border-b border-indigo-600 py-1 outline-none text-xs font-black uppercase text-slate-900 dark:text-white font-noto appearance-none">
+                        {PAYMENT_METHODS.map(m => <option key={m} value={m} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{(t.methods as any)[m] || m}</option>)}
                      </select>
                   ) : (
                      <p className="text-xs font-black uppercase text-slate-900 dark:text-white">{(t.methods as any)[viewingTx.paymentMethod] || viewingTx.paymentMethod}</p>
@@ -505,6 +507,18 @@ export const Records: React.FC<RecordsProps> = ({
                      <p className="text-sm font-light leading-relaxed text-slate-900 dark:text-white/80 font-noto">{viewingTx.note || '—'}</p>
                   )}
                </div>
+
+                <div className="space-y-1">
+                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Status</label>
+                    {editingId === viewingTx.id ? (
+                        <select value={editValues.status} onChange={e => setEditValues({...editValues, status: e.target.value as 'paid' | 'pending'})} className="w-full bg-transparent border-b border-indigo-600 py-1 outline-none text-xs font-black uppercase text-slate-900 dark:text-white font-noto appearance-none">
+                            <option value="paid" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Paid</option>
+                            <option value="pending" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Pending</option>
+                        </select>
+                    ) : (
+                        <p className={`text-xs font-black uppercase ${viewingTx.status === 'pending' ? 'text-amber-500' : 'text-slate-900 dark:text-white'}`}>{viewingTx.status}</p>
+                    )}
+                </div>
 
                <div className="space-y-1">
                   <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t.originator}</label>
