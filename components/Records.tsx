@@ -391,11 +391,13 @@ export const Records: React.FC<RecordsProps> = ({
                               <tr 
                                 key={tx.id} 
                                 onClick={() => handleRowClick(tx)}
-                                className="border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer group"
+                                className={`border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer group ${
+                                  isPending ? 'animate-pulse-red-glow' : ''
+                                }`}
                               >
                                 <td className="py-4 px-2 md:px-6 relative">
                                   {isPending ? (
-                                    <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-red-400 dark:bg-red-500 rounded-full"></div>
+                                    <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-red-400 dark:bg-red-500 rounded-full animate-pulse-red-line"></div>
                                   ) : isEditable ? (
                                     <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-indigo-500 rounded-full"></div>
                                   ) : null}
