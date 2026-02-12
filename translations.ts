@@ -231,7 +231,12 @@ export const translations = {
       analyzing: "Analyzing Ledger...",
       close: "Close Consultation",
       downloadTXT: "DOWNLOAD TXT"
-    }
+    },
+    selectYourGuardian: "SELECT YOUR GUARDIAN",
+    masculine: "MASCULINE",
+    feminine: "FEMININE",
+    removePFP: "REMOVE PORTRAIT",
+    removePFPDesc: "REVERT TO INITIAL SHIELD"
   },
   ta: {
     vault: "பதிவு",
@@ -464,6 +469,11 @@ export const translations = {
       analyzing: "கணக்கை ஆராய்கிறது...",
       close: "ஆலோசனையை முடி",
       downloadTXT: "TXT பதிவிறக்கு"
-    }
+    },
+    selectYourGuardian: "உங்கள் பாதுகாவலரைத் தேர்ந்தெடுக்கவும்",
+    masculine: "ஆண்",
+    feminine: "பெண்",
+    removePFP: "படத்தை நீக்கு",
+    removePFPDesc: "ஆரம்ப கவசத்திற்குத் திரும்பு"
   }
 };
