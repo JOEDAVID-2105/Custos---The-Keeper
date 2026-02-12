@@ -11,6 +11,7 @@ import { FiltersPage } from './components/FiltersPage';
 import { ContactPopup } from './components/ContactPopup';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { UpdatePrompt } from './components/UpdatePrompt';
+import { PortraitArchive } from './components/PortraitArchive';
 import { ShieldIcon, CURRENCIES, DEFAULT_CATEGORIES } from './constants';
 import { translations } from './translations';
 import { Transaction, UserProfile } from './types';
@@ -18,7 +19,7 @@ import { StorageService } from './services/storageService';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
 
-type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters';
+type AppTab = 'vault' | 'history' | 'ai' | 'profile' | 'auth' | 'outflow' | 'budget-edit' | 'filters' | 'portrait-archive';
 
 interface SnackbarState {
   isVisible: boolean;
@@ -64,9 +65,9 @@ const App: React.FC = () => {
   
   const snackbarTimeoutRef = useRef<any>(null);
 
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; category: string }>({ 
-    isOpen: false, 
-    category: '' 
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; category: string }>({
+    isOpen: false,
+    category: ''
   });
 
   const [search, setSearch] = useState('');
@@ -339,6 +340,10 @@ const App: React.FC = () => {
     return CURRENCIES.find(c => c.code === profile.currency)?.symbol || '₹';
   }, [profile.currency]);
 
+  const handlePhotoURLUpdate = (photoURL: string) => {
+    updateProfile({ ...profile, photoURL });
+  };
+
   const renderContent = () => {
     if (!authResolved) return null;
     if (activeTab === 'auth') return <Auth language={profile.language} onSuccess={() => navigateTo('profile')} />;
@@ -346,10 +351,10 @@ const App: React.FC = () => {
     switch (activeTab) {
       case 'vault': return (
         <Vault 
-          onAdd={addTransaction} 
-          currencySymbol={currencySymbol} 
-          transactions={transactions} 
-          language={profile.language} 
+          onAdd={addTransaction}
+          currencySymbol={currencySymbol}
+          transactions={transactions}
+          language={profile.language}
           categories={allCategories}
           onNavigateToEditLimits={() => navigateTo('budget-edit')}
           familyId={profile.familyId}
@@ -359,8 +364,8 @@ const App: React.FC = () => {
       );
       case 'history': return (
         <Records 
-          transactions={transactions} 
-          onDelete={deleteTransaction} 
+          transactions={transactions}
+          onDelete={deleteTransaction}
           onUpdate={updateTransaction}
           onNavigateToOutflow={() => navigateTo('outflow')}
           onNavigateToFilters={() => navigateTo('filters')}
@@ -370,7 +375,7 @@ const App: React.FC = () => {
           endDate={endDate}
           sortBy={sortBy}
           sortOrder={sortOrder}
-          currencySymbol={currencySymbol} 
+          currencySymbol={currencySymbol}
           currentUserId={profile.uid}
           language={profile.language}
           categories={allCategories}
@@ -393,33 +398,40 @@ const App: React.FC = () => {
       );
       case 'outflow': return (
         <ClassWiseOutflow 
-          transactions={transactions} 
-          profile={profile} 
-          onBack={() => navigateTo('history')} 
-          language={profile.language} 
+          transactions={transactions}
+          profile={profile}
+          onBack={() => navigateTo('history')}
+          language={profile.language}
           categories={allCategories}
         />
       );
       case 'budget-edit': return (
         <BudgetEdit 
-          profile={profile} 
-          onUpdate={updateProfile} 
+          profile={profile}
+          onUpdate={updateProfile}
           onDeleteCategory={(cat) => setDeleteModal({ isOpen: true, category: cat })}
           onRenameCategory={renameCategory}
-          onBack={() => navigateTo('vault')} 
-          language={profile.language} 
+          onBack={() => navigateTo('vault')}
+          language={profile.language}
         />
       );
       case 'ai': return <div className="max-w-3xl mx-auto"><AIAdvisor transactions={transactions} currency={profile.currency} language={profile.language} /></div>;
+      case 'portrait-archive': return (
+        <PortraitArchive 
+          onUpdateProfile={handlePhotoURLUpdate}
+          onBack={() => navigateTo('profile')}
+          language={profile.language || 'en'}
+        />
+      );
       case 'profile': return (
         <div className="space-y-12 max-w-3xl mx-auto">
           <Profile 
-            profile={profile} 
-            onUpdate={updateProfile} 
+            profile={profile}
+            onUpdate={updateProfile}
             onToggleLanguage={toggleLanguage}
             onGoCloud={() => navigateTo('auth')}
             onNavigateToEditLimits={() => navigateTo('budget-edit')}
-            onNavigateToPortraitSelection={() => {}} 
+            onNavigateToPortraitArchive={() => navigateTo('portrait-archive')}
             onOpenContact={() => setShowContactPopup(true)}
             deferredPrompt={deferredPrompt}
             fontSize={fontSize}

@@ -13,7 +13,7 @@ interface ProfileProps {
   onToggleLanguage: () => void;
   onGoCloud: () => void;
   onNavigateToEditLimits: () => void;
-  onNavigateToPortraitSelection: () => void;
+  onNavigateToPortraitArchive: () => void;
   onOpenContact: () => void;
   deferredPrompt?: any;
   fontSize: number;
@@ -25,7 +25,7 @@ export const Profile: React.FC<ProfileProps> = ({
   profile, 
   onUpdate, 
   onGoCloud,
-  onNavigateToPortraitSelection,
+  onNavigateToPortraitArchive,
   onOpenContact,
   deferredPrompt,
   fontSize,
@@ -178,19 +178,19 @@ export const Profile: React.FC<ProfileProps> = ({
           )}
 
           <div className="relative group">
-            <div className="w-32 h-32 border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center overflow-hidden">
+            <button onClick={onNavigateToPortraitArchive} className="w-32 h-32 rounded-full border border-slate-400 dark:border-white/10 p-3 bg-slate-50 dark:bg-white/[0.02] shadow-2xl flex items-center justify-center overflow-hidden">
                {profile.photoURL && !brokenImages[profile.photoURL] ? (
                  <img 
                     src={profile.photoURL} 
                     alt="PFP" 
-                    className="w-full h-full object-cover transition-transform duration-1000"
+                    className="w-full h-full object-cover rounded-full transition-transform duration-1000"
                     onError={() => handleImageError(profile.photoURL!)}
                  />
                ) : (
                  <InitialShield name={profile.displayName} size="lg" />
                )}
-            </div>
-            <div className="absolute -inset-1 border border-indigo-600/20 pointer-events-none"></div>
+            </button>
+            <div className="absolute -inset-1 border border-indigo-600/20 pointer-events-none rounded-full"></div>
           </div>
 
           <div className="text-center space-y-2">
