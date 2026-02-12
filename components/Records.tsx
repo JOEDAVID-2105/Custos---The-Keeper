@@ -365,22 +365,22 @@ export const Records: React.FC<RecordsProps> = ({
                   <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{Object.values(dates).flat().length} ENTRIES</span>
                 </div>
                 
-                <div className="overflow-x-auto w-full">
-                  <table className="w-full text-left border-collapse print:text-black table-fixed">
+                <div className="overflow-x-auto w-full -mx-4 md:mx-0 px-4 md:px-0 scrollbar-hide">
+                  <table className="w-full text-left border-collapse print:text-black min-w-full">
                     <thead>
                       <tr className="border-b border-slate-200 dark:border-white/5 text-[7px] md:text-[8px] tracking-[0.5em] text-slate-800 dark:text-white/50 uppercase font-black">
-                        <th className="pb-4 px-2 font-normal w-[20%]">{t.ledgerHeaders.timeAndAlias}</th>
-                        <th className="pb-4 px-2 font-normal w-[20%]">{t.ledgerHeaders.category}</th>
-                        <th className="pb-4 px-2 font-normal w-[25%]">{t.ledgerHeaders.desc}</th>
-                        <th className="pb-4 px-2 font-normal w-[15%]">{t.ledgerHeaders.modeOfPay}</th>
-                        <th className="pb-4 px-2 font-normal text-right w-[20%]">{t.ledgerHeaders.val}</th>
+                        <th className="pb-4 px-2 md:px-6 font-normal">{t.ledgerHeaders.timeAndAlias}</th>
+                        <th className="pb-4 font-normal">{t.ledgerHeaders.category}</th>
+                        <th className="pb-4 font-normal">{t.ledgerHeaders.desc}</th>
+                        <th className="pb-4 font-normal">{t.ledgerHeaders.modeOfPay}</th>
+                        <th className="pb-4 px-2 md:px-6 font-normal text-right">{t.ledgerHeaders.val}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Object.entries(dates).map(([date, txs]) => (
                         <React.Fragment key={date}>
                           <tr className="bg-slate-200/50 dark:bg-white/[0.03] print:bg-slate-50 border-y border-slate-200 dark:border-white/5">
-                            <td colSpan={5} className="py-2 px-2 border-l-4 border-indigo-600">
+                            <td colSpan={5} className="py-2 px-2 md:px-6 border-l-4 border-indigo-600">
                               <h3 className="text-[10px] md:text-sm font-black tracking-widest uppercase text-slate-900 dark:text-white/90 print:text-black">{date}</h3>
                             </td>
                           </tr>
@@ -393,7 +393,7 @@ export const Records: React.FC<RecordsProps> = ({
                                 onClick={() => handleRowClick(tx)}
                                 className="border-b border-slate-300 dark:border-white/[0.03] transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer group"
                               >
-                                <td className="py-4 px-2 relative">
+                                <td className="py-4 px-2 md:px-6 relative">
                                   {isPending ? (
                                     <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-red-400 dark:bg-red-500 rounded-full"></div>
                                   ) : isEditable ? (
@@ -413,22 +413,22 @@ export const Records: React.FC<RecordsProps> = ({
                                      </span>
                                    </div>
                                 </td>
-                                <td className="py-4 px-2">
+                                <td className="py-4">
                                    <span className={`text-[6px] md:text-[8px] tracking-[0.1em] px-1.5 md:px-2 py-0.5 border uppercase font-black ${tx.type === 'income' ? 'border-emerald-600/50 text-emerald-900 dark:text-emerald-400 bg-emerald-500/10' : 'border-slate-500 dark:border-white/10 text-slate-900 dark:text-white/60 bg-slate-200 dark:bg-white/5'}`}>
                                       {(t.categories as any)[tx.category] || tx.category}
                                     </span>
                                 </td>
-                                <td className="py-4 px-2">
-                                   <span className="text-[9px] md:text-sm font-medium tracking-tight text-slate-900 dark:text-white/70 print:text-black font-noto truncate block max-w-full">
+                                <td className="py-4">
+                                   <span className="text-[9px] md:text-sm font-medium tracking-tight text-slate-900 dark:text-white/70 print:text-black font-noto truncate block max-w-[100px] md:max-w-none">
                                       {tx.note || '...'}
                                     </span>
                                 </td>
-                                <td className="py-4 px-2">
+                                <td className="py-4">
                                    <span className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-white/40">
                                       {(t.methods as any)[tx.paymentMethod] || tx.paymentMethod}
                                     </span>
                                 </td>
-                                <td className={`py-4 px-2 text-right font-black text-xs md:text-xl tracking-tighter ${tx.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white print:text-black'}`}>
+                                <td className={`py-4 px-2 md:px-6 text-right font-black text-xs md:text-xl tracking-tighter ${tx.type === 'income' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white print:text-black'}`}>
                                    {tx.type === 'income' ? '+' : '-'}{currencySymbol}{tx.amount.toLocaleString()}
                                 </td>
                               </tr>
