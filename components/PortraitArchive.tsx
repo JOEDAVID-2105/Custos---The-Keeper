@@ -2,10 +2,13 @@
 import React from 'react';
 import { translations } from '../translations';
 
+// Define a more specific type for the language prop
+type Language = keyof typeof translations;
+
 interface PortraitArchiveProps {
   onUpdateProfile: (photoURL: string) => void;
   onBack: () => void;
-  language: string;
+  language: Language;
 }
 
 const base = 'https://ybjcohweyeyasokqnlnv.supabase.co/storage/v1/object/public/pfps/pfp_';
@@ -63,9 +66,9 @@ export const PortraitArchive: React.FC<PortraitArchiveProps> = ({ onUpdateProfil
           onClick={handleRemovePFP}
           className="text-sm tracking-[0.3em] font-black uppercase text-rose-600 hover:text-rose-400 transition-colors font-noto"
         >
-          {t.profile.dissolvePortrait}
+          {t.removePFP}
         </button>
-        <p className="text-slate-500 dark:text-white/30 tracking-widest text-[10px] uppercase font-noto">{t.profile.dissolvePortraitDesc}</p>
+        <p className="text-slate-500 dark:text-white/30 tracking-widest text-[10px] uppercase font-noto">{t.removePFPDesc}</p>
       </div>
     </div>
   );
